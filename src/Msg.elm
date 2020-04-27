@@ -1,9 +1,10 @@
 module Msg exposing (Msg(..))
 
-import Model exposing (Peer)
+import AddFile.Msg
+import Conn.Msg
 
 
 type Msg
     = NoOp
-    | SetRelay Peer
-    | ChoosingRelay Bool
+    | ConnMsg Conn.Msg.Msg
+    | AddFileMsg AddFile.Msg.Msg

@@ -1,6 +1,8 @@
 module View exposing (view)
 
+import AddFile.View
 import Browser exposing (Document)
+import Conn.View
 import Element exposing (Element, column, el, row)
 import Element.Events as Events
 import Element.Font as Font
@@ -22,7 +24,28 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header, connectivity model, addFiles model ]
+    layout <| List.concat [ header, connectivity model, addFile model ]
+
+
+liftView : (Model -> model) -> (msg -> Msg) -> (model -> List (Element msg)) -> (Model -> List (Element Msg))
+liftView getModel liftMsg subView =
+    \model ->
+        let
+            subModel =
+                getModel model
+
+            res =
+                subView subModel
+
+            liftInEl =
+                Element.map liftMsg
+        in
+        List.map liftInEl res
+
+
+connectivity : Model -> List (Element Msg)
+connectivity model =
+    liftView .connectivity ConnMsg Conn.View.view <| model
 
 
 header : List (Element Msg)
@@ -44,75 +67,6 @@ header =
     ]
 
 
-connectivity : Model -> List (Element Msg)
-connectivity model =
-    let
-        conn =
-            model.connectivity
-
-        peer =
-            conn.peer
-
-        relay =
-            conn.relay
-
-        discovered =
-            String.fromInt <| List.length conn.discovered
-
-        defn t =
-            el [ Element.width (Element.fillPortion 2), Font.bold ] <| Element.text t
-
-        valn t =
-            el [ Element.width (Element.fillPortion 3) ] <| Element.text t
-
-        relayId =
-            el [ Element.width (Element.fillPortion 2) ] <|
-                Element.text <|
-                    Maybe.withDefault "Not Connected" <|
-                        Maybe.map .id relay
-
-        relaysSelect =
-            if conn.choosing then
-                [ Element.below <|
-                    Element.column
-                        [ dropdownBg
-                        , Element.spacing 10
-                        , Element.paddingXY 0 10
-                        , fillWidth
-                        ]
-                        (List.map relaySelect conn.discovered)
-                , dropdownBg
-                ]
-
-            else
-                []
-
-        relaySelect r =
-            Element.el [ Events.onClick (SetRelay r) ] (Element.text r.id)
-
-        changeRelay =
-            el
-                ([ Element.width (Element.fillPortion 1)
-                 , linkColor
-                 , Events.onMouseEnter (ChoosingRelay True)
-                 , Events.onMouseLeave (ChoosingRelay False)
-                 ]
-                    ++ relaysSelect
-                )
-                (Element.text "Change")
-    in
-    [ column [ fillWidth, Element.spacing 10 ]
-        [ row [ fillWidth ] [ defn "Peer ID:", valn peer.id ]
-        , row [ fillWidth ] [ defn "Discovered peers:", valn discovered ]
-        , row [ fillWidth ]
-            [ defn "Relay ID:"
-            , relayId
-            , changeRelay
-            ]
-        ]
-    ]
-
-
-addFiles : Model -> List (Element Msg)
-addFiles model =
-    []
+addFile : Model -> List (Element Msg)
+addFile model =
+    liftView .addFile AddFileMsg AddFile.View.view <| model
