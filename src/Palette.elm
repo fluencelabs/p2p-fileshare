@@ -11,6 +11,10 @@ linkColor =
     Font.color <| rgb255 107 107 212
 
 
+buttonColor =
+    Background.color <| rgb255 163 184 236
+
+
 link : String -> String -> Element msg
 link url label =
     Element.link
