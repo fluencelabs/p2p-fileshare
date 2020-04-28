@@ -4,7 +4,7 @@ import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
 import Element exposing (Element, column, el, row, text)
 import Element.Input as Input
-import Palette exposing (buttonColor, fillWidth, )
+import Palette exposing (buttonColor, fillWidth)
 
 
 view : Model -> List (Element Msg)
