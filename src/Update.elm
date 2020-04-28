@@ -2,6 +2,7 @@ module Update exposing (update)
 
 import AddFile.Update
 import Conn.Update
+import FilesList.Update
 import Model exposing (Model)
 import Msg exposing (..)
 
@@ -30,6 +31,10 @@ updateAddFile =
     liftUpdate .addFile (\c -> \m -> { m | addFile = c }) AddFileMsg AddFile.Update.update
 
 
+updateFilesList =
+    liftUpdate .filesList (\c -> \m -> { m | filesList = c }) FilesListMsg FilesList.Update.update
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -38,6 +43,9 @@ update msg model =
 
         AddFileMsg m ->
             updateAddFile m model
+
+        FilesListMsg m ->
+            updateFilesList m model
 
         _ ->
             ( model, Cmd.none )

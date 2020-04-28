@@ -6,6 +6,7 @@ import Conn.View
 import Element exposing (Element, column, el, row)
 import Element.Events as Events
 import Element.Font as Font
+import FilesList.View
 import Html exposing (Html)
 import Model exposing (Model)
 import Msg exposing (..)
@@ -24,7 +25,7 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header, connectivity model, addFile model ]
+    layout <| List.concat [ header, connectivity model, addFile model, filesList model ]
 
 
 liftView : (Model -> model) -> (msg -> Msg) -> (model -> List (Element msg)) -> (Model -> List (Element Msg))
@@ -41,11 +42,6 @@ liftView getModel liftMsg subView =
                 Element.map liftMsg
         in
         List.map liftInEl res
-
-
-connectivity : Model -> List (Element Msg)
-connectivity model =
-    liftView .connectivity ConnMsg Conn.View.view <| model
 
 
 header : List (Element Msg)
@@ -67,6 +63,16 @@ header =
     ]
 
 
+connectivity : Model -> List (Element Msg)
+connectivity model =
+    liftView .connectivity ConnMsg Conn.View.view <| model
+
+
 addFile : Model -> List (Element Msg)
 addFile model =
     liftView .addFile AddFileMsg AddFile.View.view <| model
+
+
+filesList : Model -> List (Element Msg)
+filesList model =
+    liftView .filesList FilesListMsg FilesList.View.view <| model

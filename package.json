@@ -1,0 +1,31 @@
+{
+  "name": "p2p-fileshare",
+  "version": "1.0.0",
+  "description": "``` npm install create-elm-app -g",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "elm-app start",
+    "build": "elm-app build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fluencelabs/p2p-fileshare.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/fluencelabs/p2p-fileshare/issues"
+  },
+  "homepage": "https://github.com/fluencelabs/p2p-fileshare#readme",
+  "devDependencies": {
+    "create-elm-app": "^4.2.13"
+  },
+  "dependencies": {
+    "ipfs-only-hash": "^2.0.1",
+    "regenerator-runtime": "^0.13.5"
+  }
+}

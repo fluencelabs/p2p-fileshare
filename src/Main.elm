@@ -15,10 +15,14 @@ main =
         }
 
 
+
+-- Should be used to provide keys from some cache
+
+
 type alias Flags =
-    Maybe Model
+    Maybe String
 
 
 init : Flags -> ( Model, Cmd msg )
 init maybeModel =
-    ( Maybe.withDefault emptyModel maybeModel, Cmd.none )
+    ( emptyModel, Cmd.none )
