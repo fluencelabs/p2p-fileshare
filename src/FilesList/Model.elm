@@ -14,6 +14,7 @@ type alias FileEntry =
     , hash : String
     , status : Status
     , logs : List String
+    , logsVisible : Bool
     }
 
 
@@ -24,5 +25,5 @@ type alias Model =
 
 emptyFilesList : Model
 emptyFilesList =
-    { files = [ { file = Nothing, bytes = Nothing, hash = "long hash", status = Seeding 1, logs = [ "entry1", "entry2" ] } ]
+    { files = [ { file = Nothing, bytes = Nothing, hash = "long hash", status = Seeding 1, logs = [ "entry1", "entry2" ], logsVisible = False } ]
     }

@@ -57,14 +57,14 @@ showPreview { file, bytes } =
         p =
             file |> Maybe.map (showFilePreview bytes)
     in
-    Maybe.withDefault (text "no preview available") p
+    Maybe.withDefault (text "preview n/a") p
 
 
 showStatus : Status -> Element Msg
 showStatus s =
     case s of
         Seeding i ->
-            text ("Seeding " ++ String.fromInt i)
+            el [ Element.alignRight ] <| text ("Seeding " ++ String.fromInt i)
 
 
 showFile : FileEntry -> Element Msg
@@ -74,11 +74,21 @@ showFile fileEntry =
             text fileEntry.hash
 
         seeLogs =
-            Input.button [ buttonColor, Element.padding 10 ] { onPress = Nothing, label = text "See logs" }
+            Input.button [ buttonColor, Element.padding 10, Element.alignRight ] { onPress = Just <| SetLogsVisible fileEntry.hash (not fileEntry.logsVisible), label = text "See logs" }
+
+        logs =
+            if fileEntry.logsVisible then
+                column [ fillWidth, Element.paddingXY 10 5, Element.spacing 5 ] <| List.map (\l -> el [] <| text l) fileEntry.logs
+
+            else
+                Element.none
     in
-    row [ fillWidth, Element.spacing 10 ]
-        [ showPreview fileEntry
-        , hashView
-        , showStatus fileEntry.status
-        , seeLogs
+    column [ fillWidth ]
+        [ row [ fillWidth, Element.spacing 10 ]
+            [ showPreview fileEntry
+            , hashView
+            , showStatus fileEntry.status
+            , seeLogs
+            ]
+        , logs
         ]

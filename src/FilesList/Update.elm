@@ -15,10 +15,25 @@ update msg model =
                     , hash = hash
                     , status = Seeding 13
                     , logs = [ "added from upload" ]
+                    , logsVisible = False
                     }
 
                 files =
                     model.files ++ [ entry ]
+            in
+            ( { model | files = files }, Cmd.none )
+
+        SetLogsVisible hash flag ->
+            let
+                updateEntry entry =
+                    if entry.hash == hash then
+                        { entry | logsVisible = flag }
+
+                    else
+                        entry
+
+                files =
+                    List.map updateEntry model.files
             in
             ( { model | files = files }, Cmd.none )
 
