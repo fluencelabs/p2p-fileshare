@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Browser exposing (Document)
 import Model exposing (Model, emptyModel)
+import Subscriptions exposing (subscriptions)
 import Update exposing (update)
 import View exposing (view)
 
@@ -11,7 +12,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         }
 
 

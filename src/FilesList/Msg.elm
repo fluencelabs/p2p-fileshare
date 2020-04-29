@@ -5,3 +5,4 @@ import File exposing (File)
 
 type Msg
     = NoOp
+    | AddFile File String

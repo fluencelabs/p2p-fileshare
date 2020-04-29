@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "ipfs-only-hash": "^2.0.1",
+    "janus-beta": "^0.0.5",
     "regenerator-runtime": "^0.13.5"
   }
 }

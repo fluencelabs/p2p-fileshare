@@ -2,12 +2,21 @@ import './main.css';
 import { Elm } from './Main.elm';
 import * as serviceWorker from './serviceWorker';
 import "regenerator-runtime";
-import 'ipfs-only-hash';
+import Hash from 'ipfs-only-hash';
+import {JanusClient} from 'janus-beta';
 
-Elm.Main.init({
+
+var app = Elm.Main.init({
   node: document.getElementById('root'),
   flags: null
 });
+
+app.ports.calcHash.subscribe(async (fileBytesArray) => {
+  var h = await Hash.of(fileBytesArray)
+
+  app.ports.hashReceiver.send(h);
+})
+
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

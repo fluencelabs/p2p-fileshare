@@ -49,7 +49,7 @@ showFile : FileEntry -> Element Msg
 showFile fileEntry =
     let
         hashView =
-            text <| Maybe.withDefault "???" fileEntry.hash
+            text fileEntry.hash
 
         seeLogs =
             Input.button [ buttonColor, Element.padding 10 ] { onPress = Nothing, label = text "See logs" }

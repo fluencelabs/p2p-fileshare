@@ -1,5 +1,6 @@
 module AddFile.Msg exposing (Msg(..))
 
+import Bytes exposing (Bytes)
 import File exposing (File)
 
 
@@ -9,3 +10,6 @@ type Msg
     | DownloadIpfs
     | FileRequested
     | FileProvided File
+    | FileBytesRead File Bytes
+    | FileHashReceived String
+    | FileReady File String
