@@ -1,5 +1,7 @@
 module FilesList.View exposing (view)
 
+import Base64.Encode as Encode
+import Bytes exposing (Bytes)
 import Element exposing (Element, column, el, row, text)
 import Element.Input as Input
 import File exposing (File)
@@ -17,23 +19,43 @@ view { files } =
     filesList
 
 
-showFilePreview : File -> Element Msg
-showFilePreview file =
+showFilePreview : Maybe Bytes -> File -> Element Msg
+showFilePreview maybeBytes file =
     let
         mime =
             File.mime file
 
         name =
             File.name file
+
+        description =
+            mime ++ " " ++ name
+
+        imgPreviewSrc =
+            case maybeBytes of
+                Just bytes ->
+                    if String.startsWith "image/" mime then
+                        Just <| "data:" ++ mime ++ ";base64," ++ Encode.encode (Encode.bytes bytes)
+
+                    else
+                        Nothing
+
+                Nothing ->
+                    Nothing
     in
-    text <| (mime ++ name)
+    case imgPreviewSrc of
+        Just src ->
+            Element.image [ Element.width <| Element.px 30, Element.height <| Element.px 30 ] { description = description, src = src }
+
+        Nothing ->
+            text description
 
 
 showPreview : FileEntry -> Element Msg
-showPreview { file } =
+showPreview { file, bytes } =
     let
         p =
-            file |> Maybe.map showFilePreview
+            file |> Maybe.map (showFilePreview bytes)
     in
     Maybe.withDefault (text "no preview available") p
 

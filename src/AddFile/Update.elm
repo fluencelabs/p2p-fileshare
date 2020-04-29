@@ -33,12 +33,12 @@ update msg model =
             ( model, Task.perform (FileBytesRead file) (File.toBytes file) )
 
         FileBytesRead file bytes ->
-            ( { model | calculatingHashFor = Just file }, calcHashBytes bytes )
+            ( { model | calculatingHashFor = Just { file = file, bytes = bytes } }, calcHashBytes bytes )
 
         FileHashReceived hash ->
             let
                 fileReady f =
-                    run <| FileReady f hash
+                    run <| FileReady f.file f.bytes hash
 
                 cmd =
                     Maybe.withDefault Cmd.none <| Maybe.map fileReady model.calculatingHashFor

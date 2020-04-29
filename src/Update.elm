@@ -40,9 +40,9 @@ updateFilesList =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AddFileMsg (AddFile.Msg.FileReady file hash) ->
+        AddFileMsg (AddFile.Msg.FileReady file bytes hash) ->
             -- Move Ready event from AddFile to FilesList
-            update (FilesListMsg <| FilesList.Msg.AddFile file hash) model
+            update (FilesListMsg <| FilesList.Msg.AddFile file bytes hash) model
 
         ConnMsg m ->
             updateConn m model

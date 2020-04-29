@@ -7,10 +7,11 @@ import FilesList.Msg exposing (Msg(..))
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AddFile file hash ->
+        AddFile file bytes hash ->
             let
                 entry =
                     { file = Just file
+                    , bytes = Just bytes
                     , hash = hash
                     , status = Seeding 13
                     , logs = [ "added from upload" ]
