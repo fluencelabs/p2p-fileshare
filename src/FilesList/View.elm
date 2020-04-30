@@ -70,7 +70,7 @@ showFile : FileEntry -> Element Msg
 showFile fileEntry =
     let
         hashView =
-            shortHash fileEntry.hash
+            text fileEntry.hash
 
         seeLogs =
             Input.button [ buttonColor, Element.padding 10, Element.alignRight ] { onPress = Just <| SetLogsVisible fileEntry.hash (not fileEntry.logsVisible), label = text "See logs" }

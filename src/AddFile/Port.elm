@@ -22,7 +22,7 @@ calcHashBytes bytes =
         listDecode =
             bytesListDecode Bytes.Decode.unsignedInt8 (Bytes.width bytes)
     in
-    calcHash <| Maybe.withDefault [] (Bytes.Decode.decode listDecode bytes)
+    calcHash <| List.reverse <| Maybe.withDefault [] (Bytes.Decode.decode listDecode bytes)
 
 
 port calcHash : List Int -> Cmd msg
