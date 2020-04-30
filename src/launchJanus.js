@@ -15,11 +15,26 @@ export async function launchJanus(app) {
 
   relays.map(d => relayEvent("relay_discovered", d));
 
-  let relay = relays[0];
+  let connect = async (relay) => {
+    // connect to two different nodes
+    let conn = await JanusClient.connect(relay.peer.id, relay.host, relay.pport);
 
-  // connect to two different nodes
-  let conn = await JanusClient.connect(relay.peer.id, relay.host, relay.pport);
+    peerEvent("set_peer", {id: conn.selfPeerIdStr});
+    relayEvent("relay_connected", relay);
+  }
 
-  peerEvent("set_peer", {id: conn.selfPeerIdStr});
-  relayEvent("relay_connected", relay);
+  await connect( relays[0] );
+
+  app.ports.connRequest.subscribe(async ({command, id}) => {
+    switch (command) {
+      case "set_relay":
+        let relay = relays.find(r => r.peer.id === id)
+        relay && await connect(relay);
+
+        break;
+
+      case _:
+        console.error("Received unknown conRequest from Elm app", command);
+    }
+  })
 }

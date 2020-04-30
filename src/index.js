@@ -19,10 +19,9 @@ app.ports.calcHash.subscribe(async (fileBytesArray) => {
 });
 
 
-
 (async () => {
   await launchJanus(app).catch((e) => {
-    console.log(e)
+    console.error(e)
   });
 })();
 

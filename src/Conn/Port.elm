@@ -7,7 +7,7 @@ import Json.Encode
 
 
 type alias Command =
-    { command : String }
+    { command : String, id : Maybe String }
 
 
 type alias Event =

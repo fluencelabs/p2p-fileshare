@@ -10,7 +10,7 @@ update msg model =
     case msg of
         SetRelay relay ->
             -- TODO send to port
-            ( { model | relay = Nothing }, Conn.Port.connRequest { command = "set relay" ++ relay.peer.id } )
+            ( { model | relay = Nothing }, Conn.Port.connRequest { command = "set_relay", id = Just relay.peer.id } )
 
         ChoosingRelay choosing ->
             ( { model | choosing = choosing }, Cmd.none )
