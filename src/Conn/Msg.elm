@@ -1,8 +1,12 @@
 module Conn.Msg exposing (Msg(..))
 
-import Conn.Model exposing (Peer)
+import Conn.Model exposing (Peer, Relay)
 
 
 type Msg
-    = SetRelay Peer
+    = SetRelay Relay
     | ChoosingRelay Bool
+    | RelayDiscovered Relay
+    | RelayConnected Relay
+    | SetPeer Peer
+    | NoOp

@@ -4,8 +4,6 @@ import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
 import Bytes exposing (Bytes)
 import Bytes.Decode
-import Bytes.Encode exposing (..)
-import File exposing (File)
 
 
 calcHashBytes : Bytes -> Cmd msg

@@ -30,7 +30,7 @@ view conn =
             el [ Element.width (Element.fillPortion 2) ] <|
                 Element.text <|
                     Maybe.withDefault "Not Connected" <|
-                        Maybe.map .id relay
+                        Maybe.map (.peer >> .id) relay
 
         relaysSelect =
             if conn.choosing then
@@ -49,7 +49,7 @@ view conn =
                 []
 
         relaySelect r =
-            Element.el [ Events.onClick (SetRelay r) ] (Element.text r.id)
+            Element.el [ Events.onClick (SetRelay r) ] (Element.text r.peer.id)
 
         changeRelay =
             el

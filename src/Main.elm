@@ -20,10 +20,29 @@ main =
 -- Should be used to provide keys from some cache
 
 
+type alias Config =
+    { peerId : String }
+
+
 type alias Flags =
-    Maybe String
+    Maybe Config
 
 
 init : Flags -> ( Model, Cmd msg )
-init maybeModel =
-    ( emptyModel, Cmd.none )
+init maybeFlags =
+    let
+        em =
+            emptyModel
+
+        initConn =
+            em.connectivity
+
+        model =
+            case maybeFlags of
+                Just { peerId } ->
+                    { em | connectivity = { initConn | peer = { id = peerId } } }
+
+                Nothing ->
+                    em
+    in
+    ( model, Cmd.none )
