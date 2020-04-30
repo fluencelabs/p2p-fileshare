@@ -1,15 +1,18 @@
 module FilesList.Model exposing (FileEntry, Model, Status(..), emptyFilesList)
 
 import Bytes exposing (Bytes)
-import File exposing (File)
 
 
 type Status
-    = Seeding Int
+    = Prepared
+    | Advertised
+    | Seeding Int
+    | Requested
+    | Loaded
 
 
 type alias FileEntry =
-    { file : Maybe File
+    { imageType : Maybe String
     , bytes : Maybe Bytes
     , hash : String
     , status : Status
@@ -25,5 +28,5 @@ type alias Model =
 
 emptyFilesList : Model
 emptyFilesList =
-    { files = [ { file = Nothing, bytes = Nothing, hash = "long hash", status = Seeding 1, logs = [ "entry1", "entry2" ], logsVisible = False } ]
+    { files = []
     }

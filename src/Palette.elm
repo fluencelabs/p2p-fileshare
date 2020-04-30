@@ -34,6 +34,18 @@ dropdownBg =
     Background.color <| Element.rgb255 210 187 187
 
 
+shortHash hash =
+    let
+        sh =
+            String.concat
+                [ String.left 4 hash
+                , "..."
+                , String.right 3 hash
+                ]
+    in
+    Element.el [] <| Element.text sh
+
+
 layout : List (Element msg) -> Html msg
 layout elms =
     Element.layout [] <|

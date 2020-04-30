@@ -1,7 +1,8 @@
 module Subscriptions exposing (subscriptions)
 
-import AddFile.HashPort
+import AddFile.Port
 import Conn.Port
+import FilesList.Port
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 
@@ -9,6 +10,7 @@ import Msg exposing (Msg(..))
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ AddFile.HashPort.subscriptions model.addFile |> Sub.map AddFileMsg
+        [ AddFile.Port.subscriptions model.addFile |> Sub.map AddFileMsg
         , Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
+        , FilesList.Port.subscriptions model.filesList |> Sub.map FilesListMsg
         ]

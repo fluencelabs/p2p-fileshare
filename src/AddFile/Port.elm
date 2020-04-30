@@ -1,4 +1,4 @@
-port module AddFile.HashPort exposing (..)
+port module AddFile.Port exposing (..)
 
 import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
@@ -26,6 +26,9 @@ calcHashBytes bytes =
 
 
 port calcHash : List Int -> Cmd msg
+
+
+port addFileByHash : String -> Cmd msg
 
 
 port hashReceiver : (String -> msg) -> Sub msg

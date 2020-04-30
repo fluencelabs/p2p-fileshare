@@ -1,8 +1,8 @@
 module AddFile.Update exposing (update)
 
-import AddFile.HashPort exposing (calcHashBytes)
 import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
+import AddFile.Port exposing (calcHashBytes)
 import File exposing (File)
 import File.Select as Select
 import Platform.Cmd exposing (Cmd(..))
@@ -24,7 +24,7 @@ update msg model =
             ( { model | ipfsHash = hash }, Cmd.none )
 
         DownloadIpfs ->
-            ( { model | ipfsHash = "" }, Cmd.none )
+            ( { model | ipfsHash = "" }, AddFile.Port.addFileByHash model.ipfsHash )
 
         FileRequested ->
             ( model, Select.file [ "*/*" ] FileProvided )

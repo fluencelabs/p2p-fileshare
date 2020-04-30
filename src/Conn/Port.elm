@@ -2,8 +2,6 @@ port module Conn.Port exposing (..)
 
 import Conn.Model exposing (Model, Peer, Relay)
 import Conn.Msg exposing (Msg(..))
-import Json.Decode
-import Json.Encode
 
 
 type alias Command =
@@ -27,7 +25,7 @@ eventToMsg event =
             "relay_discovered" ->
                 Maybe.map RelayDiscovered event.relay
 
-            "set_relay" ->
+            "relay_connected" ->
                 Maybe.map RelayConnected event.relay
 
             "set_peer" ->

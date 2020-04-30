@@ -4,10 +4,9 @@ import Base64.Encode as Encode
 import Bytes exposing (Bytes)
 import Element exposing (Element, column, el, row, text)
 import Element.Input as Input
-import File exposing (File)
 import FilesList.Model exposing (FileEntry, Model, Status(..))
 import FilesList.Msg exposing (Msg(..))
-import Palette exposing (buttonColor, fillWidth)
+import Palette exposing (buttonColor, fillWidth, shortHash)
 
 
 view : Model -> List (Element Msg)
@@ -19,59 +18,59 @@ view { files } =
     filesList
 
 
-showFilePreview : Maybe Bytes -> File -> Element Msg
-showFilePreview maybeBytes file =
+showFilePreview : Maybe Bytes -> String -> Element Msg
+showFilePreview maybeBytes imageType =
     let
-        mime =
-            File.mime file
-
-        name =
-            File.name file
-
-        description =
-            mime ++ " " ++ name
-
         imgPreviewSrc =
             case maybeBytes of
                 Just bytes ->
-                    if String.startsWith "image/" mime then
-                        Just <| "data:" ++ mime ++ ";base64," ++ Encode.encode (Encode.bytes bytes)
-
-                    else
-                        Nothing
+                    Just <| "data:image/" ++ imageType ++ ";base64," ++ Encode.encode (Encode.bytes bytes)
 
                 Nothing ->
                     Nothing
     in
     case imgPreviewSrc of
         Just src ->
-            Element.image [ Element.width <| Element.px 30, Element.height <| Element.px 30 ] { description = description, src = src }
+            Element.image [ Element.width <| Element.px 30, Element.height <| Element.px 30 ] { description = "", src = src }
 
         Nothing ->
-            text description
+            text "preview n/a"
 
 
 showPreview : FileEntry -> Element Msg
-showPreview { file, bytes } =
+showPreview { imageType, bytes } =
     let
         p =
-            file |> Maybe.map (showFilePreview bytes)
+            imageType |> Maybe.map (showFilePreview bytes)
     in
     Maybe.withDefault (text "preview n/a") p
 
 
 showStatus : Status -> Element Msg
 showStatus s =
-    case s of
-        Seeding i ->
-            el [ Element.alignRight ] <| text ("Seeding " ++ String.fromInt i)
+    el [ Element.alignRight ] <|
+        case s of
+            Seeding i ->
+                text ("Seeding " ++ String.fromInt i)
+
+            Prepared ->
+                text "Prepared"
+
+            Advertised ->
+                text "Advertised"
+
+            Requested ->
+                text "Requested"
+
+            Loaded ->
+                text "Loaded"
 
 
 showFile : FileEntry -> Element Msg
 showFile fileEntry =
     let
         hashView =
-            text fileEntry.hash
+            shortHash fileEntry.hash
 
         seeLogs =
             Input.button [ buttonColor, Element.padding 10, Element.alignRight ] { onPress = Just <| SetLogsVisible fileEntry.hash (not fileEntry.logsVisible), label = text "See logs" }

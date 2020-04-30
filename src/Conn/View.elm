@@ -5,7 +5,7 @@ import Conn.Msg exposing (Msg(..))
 import Element exposing (Element, column, el, row)
 import Element.Events as Events
 import Element.Font as Font
-import Palette exposing (dropdownBg, fillWidth, h1, layout, link, linkColor)
+import Palette exposing (dropdownBg, fillWidth, h1, layout, link, linkColor, shortHash)
 
 
 view : Model -> List (Element Msg)
@@ -24,13 +24,12 @@ view conn =
             el [ Element.width (Element.fillPortion 2), Font.bold ] <| Element.text t
 
         valn t =
-            el [ Element.width (Element.fillPortion 3) ] <| Element.text t
+            el [ Element.width (Element.fillPortion 3) ] <| t
 
         relayId =
             el [ Element.width (Element.fillPortion 2) ] <|
-                Element.text <|
-                    Maybe.withDefault "Not Connected" <|
-                        Maybe.map (.peer >> .id) relay
+                Maybe.withDefault (Element.text "Not Connected") <|
+                    Maybe.map (.peer >> .id >> shortHash) relay
 
         relaysSelect =
             if conn.choosing then
@@ -49,7 +48,7 @@ view conn =
                 []
 
         relaySelect r =
-            Element.el [ Events.onClick (SetRelay r) ] (Element.text r.peer.id)
+            Element.el [ Events.onClick (SetRelay r) ] (shortHash r.peer.id)
 
         changeRelay =
             el
@@ -63,8 +62,8 @@ view conn =
                 (Element.text "Change")
     in
     [ column [ fillWidth, Element.spacing 10 ]
-        [ row [ fillWidth ] [ defn "Peer ID:", valn peer.id ]
-        , row [ fillWidth ] [ defn "Discovered peers:", valn discovered ]
+        [ row [ fillWidth ] [ defn "Peer ID:", valn <| shortHash peer.id ]
+        , row [ fillWidth ] [ defn "Discovered peers:", valn <| Element.text discovered ]
         , row [ fillWidth ]
             [ defn "Relay ID:"
             , relayId

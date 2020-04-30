@@ -1,23 +1,13 @@
 import './main.css';
 import { Elm } from './Main.elm';
 import * as serviceWorker from './serviceWorker';
-import "regenerator-runtime";
-import Hash from 'ipfs-only-hash';
 
 import {launchJanus} from './launchJanus';
-
 
 var app = Elm.Main.init({
   node: document.getElementById('root'),
   flags: null
 });
-
-app.ports.calcHash.subscribe(async (fileBytesArray) => {
-  var h = await Hash.of(fileBytesArray)
-
-  app.ports.hashReceiver.send(h);
-});
-
 
 (async () => {
   await launchJanus(app).catch((e) => {
