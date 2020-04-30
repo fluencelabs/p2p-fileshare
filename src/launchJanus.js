@@ -163,6 +163,10 @@ export async function launchJanus(app) {
       fileLog(hash, "File downloaded from " + multiaddr);
 
       fileLoaded(hash, Array.from(data), imageType(data));
+      knownFiles[hash] = {
+        bytes: data,
+        multiaddr: multiaddr
+      };
     }
 
   });
