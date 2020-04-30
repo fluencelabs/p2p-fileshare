@@ -145,7 +145,7 @@ export async function launchJanus(app) {
   app.ports.addFileByHash.subscribe(async (hash) => {
     fileRequested(hash);
 
-    if(!!knownFiles[hash] && knownFiles[hash].multiaddr && knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) {
+    if(!!knownFiles[hash] && knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) {
       fileLog(hash, "This file is already known");
 
     } else {
