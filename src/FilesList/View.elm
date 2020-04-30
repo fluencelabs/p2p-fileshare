@@ -32,7 +32,11 @@ showFilePreview maybeBytes imageType =
     in
     case imgPreviewSrc of
         Just src ->
-            Element.image [ Element.width <| Element.px 30, Element.height <| Element.px 30 ] { description = "", src = src }
+            Element.image
+                [ Element.width <| Element.px 30
+                , Element.height <| Element.px 30
+                ]
+                { description = "", src = src }
 
         Nothing ->
             text "preview n/a"
@@ -75,11 +79,24 @@ showFile fileEntry =
             text fileEntry.hash
 
         seeLogs =
-            Input.button [ buttonColor, Element.padding 10, Element.alignRight ] { onPress = Just <| SetLogsVisible fileEntry.hash (not fileEntry.logsVisible), label = text "See logs" }
+            Input.button
+                [ buttonColor
+                , Element.padding 10
+                , Element.alignRight
+                ]
+                { onPress = Just <| SetLogsVisible fileEntry.hash (not fileEntry.logsVisible)
+                , label = text "See logs"
+                }
 
         logs =
             if fileEntry.logsVisible then
-                column [ fillWidth, Element.paddingXY 10 5, Element.spacing 5 ] <| List.map (\l -> el [] <| text l) fileEntry.logs
+                column
+                    [ fillWidth
+                    , Element.paddingXY 10 5
+                    , Element.spacing 5
+                    ]
+                <|
+                    List.map (\l -> el [] <| text l) fileEntry.logs
 
             else
                 Element.none

@@ -3,10 +3,8 @@ import Hash from 'ipfs-only-hash';
 
 import {JanusClient} from 'janus-beta';
 import {genUUID, makeFunctionCall} from "janus-beta/dist/function_call";
-import IpfsClient from "ipfs-http-client";
-import isPng from "is-png";
-import isGif from "is-gif";
-import isJpg from "is-jpg";
+
+import {imageType, ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
 
 export async function launchJanus(app) {
 
@@ -66,16 +64,19 @@ export async function launchJanus(app) {
    * Handle file commands, sending events
    */
 
+  let emptyFileEvent = {log:null, data:[],imageType:null}
+  let sendToFileReceiver = ev => app.ports.fileReceiver.send(ev);
+
   let fileAdvertised = (hash) =>
-    app.ports.fileReceiver.send({event: "advertised", log:null, data:[],imageType:null, hash});
+    sendToFileReceiver({event: "advertised", hash, ...emptyFileEvent});
   let fileAsked = (hash) =>
-    app.ports.fileReceiver.send({event: "asked", log:null, data:[],imageType:null, hash});
+    sendToFileReceiver({event: "asked", hash, ...emptyFileEvent});
   let fileRequested = (hash) =>
-    app.ports.fileReceiver.send({event: "requested", log:null, data:[], imageType:null, hash});
+    sendToFileReceiver({event: "requested", hash, ...emptyFileEvent});
   let fileLoaded = (hash, data, imageType) =>
-    app.ports.fileReceiver.send({event: "loaded", log:null, data, hash, imageType});
+    sendToFileReceiver({event: "loaded", data, hash, imageType, ...emptyFileEvent});
   let fileLog = (hash, log) =>
-    app.ports.fileReceiver.send({event: "log", hash, log,imageType:null, data:[]});
+    sendToFileReceiver({event: "log", hash, log,...emptyFileEvent});
 
   let knownFiles = {};
 
@@ -139,64 +140,6 @@ export async function launchJanus(app) {
       }
   });
 
-  // Get a file from a node with $multiaddr address
-  async function ipfsGet(multiaddr, path) {
-    const ipfs = new IpfsClient(multiaddr);
-    const source = ipfs.cat(path);
-    let bytes = new Uint8Array();
-    try {
-      for await (const chunk of source) {
-        const newArray = new Uint8Array(bytes.length + chunk.length);
-        newArray.set(bytes, 0);
-        newArray.set(chunk, bytes.length);
-        bytes = newArray;
-      }
-    }
-    catch (err) {
-      console.error(err);
-    }
-    return Promise.resolve(bytes);
-  }
-
-  // Add a file to IPFS node with $multiaddr address
-  async function ipfsAdd(multiaddr, file) {
-    const ipfs = new IpfsClient(multiaddr);
-    const source = ipfs.add([file]);
-    try {
-      for await (const file of source) {
-        console.log(`file uploaded to '${multiaddr}'`);
-      }
-    }
-    catch (err) {
-      console.error(err);
-    }
-    return Promise.resolve();
-  }
-
-
-  function downloadBlob(data, fileName, mimeType) {
-    var blob, url;
-    blob = new Blob([data], {
-      type: mimeType
-    });
-    url = window.URL.createObjectURL(blob);
-
-    let downloadURL = (data, fileName) => {
-      let a;
-      a = document.createElement('a');
-      a.href = data;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.style = 'display: none';
-      a.click();
-      a.remove();
-    };
-
-    downloadURL(url, fileName);
-    setTimeout(function() {
-      return window.URL.revokeObjectURL(url);
-    }, 1000);
-  }
 
 
   app.ports.addFileByHash.subscribe(async (hash) => {
@@ -219,9 +162,7 @@ export async function launchJanus(app) {
       let data = await ipfsGet(multiaddr, hash);
       fileLog(hash, "File downloaded from " + multiaddr);
 
-      let imageType = isPng(data) ? "png" : (isGif(data) ? "gif" : (isJpg(data) ? "jpg" : null));
-
-      fileLoaded(hash, Array.from(data), imageType);
+      fileLoaded(hash, Array.from(data), imageType(data));
     }
 
   });
