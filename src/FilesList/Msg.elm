@@ -12,4 +12,5 @@ type Msg
     | FileAsked String
     | FileRequested String
     | FileLoaded String (List Int) (Maybe String)
+    | DownloadFile String
     | SetLogsVisible String Bool

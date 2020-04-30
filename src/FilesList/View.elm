@@ -3,6 +3,7 @@ module FilesList.View exposing (view)
 import Base64.Encode as Encode
 import Bytes exposing (Bytes)
 import Element exposing (Element, column, el, row, text)
+import Element.Events
 import Element.Input as Input
 import FilesList.Model exposing (FileEntry, Model, Status(..))
 import FilesList.Msg exposing (Msg(..))
@@ -38,12 +39,13 @@ showFilePreview maybeBytes imageType =
 
 
 showPreview : FileEntry -> Element Msg
-showPreview { imageType, bytes } =
+showPreview { hash, imageType, bytes } =
     let
         p =
             imageType |> Maybe.map (showFilePreview bytes)
     in
-    Maybe.withDefault (text "preview n/a") p
+    Element.el [ Element.Events.onClick <| DownloadFile hash ] <|
+        Maybe.withDefault (text "preview n/a") p
 
 
 showStatus : Status -> Element Msg

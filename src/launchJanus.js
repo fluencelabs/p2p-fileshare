@@ -83,6 +83,12 @@ export async function launchJanus(app) {
     if(!conn) console.error("Cannot handle fileRequest when not connected");
     else
       switch (command) {
+        case "download":
+          if(!!knownFiles[hash] && (knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0)) {
+            downloadBlob(knownFiles[hash].bytes, hash, 'application/octet-stream');
+          } else console.error("Cannot download as file is unknown for hash: "+hash);
+          break;
+
         case "advertise":
 
           if(!!knownFiles[hash] && (knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) || knownFiles[hash].multiaddr) {
@@ -166,6 +172,32 @@ export async function launchJanus(app) {
     }
     return Promise.resolve();
   }
+
+
+  function downloadBlob(data, fileName, mimeType) {
+    var blob, url;
+    blob = new Blob([data], {
+      type: mimeType
+    });
+    url = window.URL.createObjectURL(blob);
+
+    let downloadURL = (data, fileName) => {
+      let a;
+      a = document.createElement('a');
+      a.href = data;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.style = 'display: none';
+      a.click();
+      a.remove();
+    };
+
+    downloadURL(url, fileName);
+    setTimeout(function() {
+      return window.URL.revokeObjectURL(url);
+    }, 1000);
+  }
+
 
   app.ports.addFileByHash.subscribe(async (hash) => {
     fileRequested(hash);

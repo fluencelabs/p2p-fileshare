@@ -41,6 +41,9 @@ update msg model =
             in
             ( updatedModel, Cmd.none )
 
+        DownloadFile hash ->
+            ( model, FilesList.Port.fileRequest { command = "download", hash = Just hash } )
+
         AddFile file bytes hash ->
             let
                 mime =
