@@ -45,46 +45,54 @@ update msg model =
             ( model, FilesList.Port.fileRequest { command = "download", hash = Just hash } )
 
         AddFile file bytes hash ->
-            let
-                mime =
-                    File.mime file
+            if List.any (\f -> f.hash == hash) model.files then
+                ( model, Cmd.none )
 
-                imageType =
-                    if String.startsWith "image/" mime then
-                        Just (String.dropLeft 6 mime)
+            else
+                let
+                    mime =
+                        File.mime file
 
-                    else
-                        Nothing
+                    imageType =
+                        if String.startsWith "image/" mime then
+                            Just (String.dropLeft 6 mime)
 
-                entry =
-                    { imageType = imageType
-                    , bytes = Just bytes
-                    , hash = hash
-                    , status = Prepared
-                    , logs = [ "added from upload" ]
-                    , logsVisible = False
-                    }
+                        else
+                            Nothing
 
-                files =
-                    model.files ++ [ entry ]
-            in
-            ( { model | files = files }, FilesList.Port.fileRequest { command = "advertise", hash = Just hash } )
+                    entry =
+                        { imageType = imageType
+                        , bytes = Just bytes
+                        , hash = hash
+                        , status = Prepared
+                        , logs = [ "added from upload" ]
+                        , logsVisible = False
+                        }
+
+                    files =
+                        model.files ++ [ entry ]
+                in
+                ( { model | files = files }, FilesList.Port.fileRequest { command = "advertise", hash = Just hash } )
 
         FileRequested hash ->
-            let
-                entry =
-                    { imageType = Nothing
-                    , bytes = Nothing
-                    , hash = hash
-                    , status = Requested
-                    , logs = [ "just requested to download" ]
-                    , logsVisible = False
-                    }
+            if List.any (\f -> f.hash == hash) model.files then
+                ( model, Cmd.none )
 
-                files =
-                    model.files ++ [ entry ]
-            in
-            ( { model | files = files }, Cmd.none )
+            else
+                let
+                    entry =
+                        { imageType = Nothing
+                        , bytes = Nothing
+                        , hash = hash
+                        , status = Requested
+                        , logs = [ "just requested to download" ]
+                        , logsVisible = False
+                        }
+
+                    files =
+                        model.files ++ [ entry ]
+                in
+                ( { model | files = files }, Cmd.none )
 
         FileLoaded hash data imageType ->
             let

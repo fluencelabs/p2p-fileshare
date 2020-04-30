@@ -147,7 +147,7 @@ export async function launchJanus(app) {
 
     if(!!knownFiles[hash] && knownFiles[hash].multiaddr && knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) {
       fileLog(hash, "This file is already known");
-      fileLoaded(hash, knownFiles[hash].bytes);
+
     } else {
 
       let msgId = genUUID();
