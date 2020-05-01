@@ -9,7 +9,12 @@ import Model exposing (Model)
 import Msg exposing (..)
 
 
-liftUpdate : (Model -> model) -> (model -> Model -> Model) -> (msg -> Msg) -> (msg -> model -> ( model, Cmd msg )) -> (msg -> Model -> ( Model, Cmd Msg ))
+liftUpdate :
+    (Model -> model)
+    -> (model -> Model -> Model)
+    -> (msg -> Msg)
+    -> (msg -> model -> ( model, Cmd msg ))
+    -> (msg -> Model -> ( Model, Cmd Msg ))
 liftUpdate getModel setModel liftMsg up =
     \msg ->
         \model ->

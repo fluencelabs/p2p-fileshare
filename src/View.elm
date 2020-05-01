@@ -28,7 +28,11 @@ body model =
     layout <| List.concat [ header, connectivity model, addFile model, filesList model ]
 
 
-liftView : (Model -> model) -> (msg -> Msg) -> (model -> List (Element msg)) -> (Model -> List (Element Msg))
+liftView :
+    (Model -> model)
+    -> (msg -> Msg)
+    -> (model -> List (Element msg))
+    -> (Model -> List (Element Msg))
 liftView getModel liftMsg subView =
     \model ->
         let

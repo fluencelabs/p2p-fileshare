@@ -6,7 +6,10 @@ import FilesList.Model exposing (emptyFilesList)
 
 
 type alias Model =
-    { connectivity : Conn.Model.Model, addFile : AddFile.Model.Model, filesList : FilesList.Model.Model }
+    { connectivity : Conn.Model.Model
+    , addFile : AddFile.Model.Model
+    , filesList : FilesList.Model.Model
+    }
 
 
 emptyModel : Model

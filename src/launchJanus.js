@@ -64,23 +64,25 @@ export async function launchJanus(app) {
    * Handle file commands, sending events
    */
 
-  let emptyFileEvent = {log:null, data:[],imageType:null}
-  let sendToFileReceiver = ev => app.ports.fileReceiver.send(ev);
+  let emptyFileEvent = {log:null, data:[], imageType:null}
+  let sendToFileReceiver = ev =>
+    app.ports.fileReceiver.send({...ev, ...emptyFileEvent});
 
   let fileAdvertised = (hash) =>
-    sendToFileReceiver({event: "advertised", hash, ...emptyFileEvent});
+    sendToFileReceiver({event: "advertised", hash});
   let fileAsked = (hash) =>
-    sendToFileReceiver({event: "asked", hash, ...emptyFileEvent});
+    sendToFileReceiver({event: "asked", hash});
   let fileRequested = (hash) =>
-    sendToFileReceiver({event: "requested", hash, ...emptyFileEvent});
+    sendToFileReceiver({event: "requested", hash});
   let fileLoaded = (hash, data, imageType) =>
-    sendToFileReceiver({event: "loaded", data, hash, imageType, ...emptyFileEvent});
+    sendToFileReceiver({event: "loaded", data, hash, imageType});
   let fileLog = (hash, log) =>
-    sendToFileReceiver({event: "log", hash, log,...emptyFileEvent});
+    sendToFileReceiver({event: "log", hash, log});
 
   let knownFiles = {};
 
   app.ports.fileRequest.subscribe(async ({command, hash}) => {
+    // TODO Queue, and handle commands once (re)connected
     if(!conn) console.error("Cannot handle fileRequest when not connected");
     else
       switch (command) {
@@ -143,6 +145,7 @@ export async function launchJanus(app) {
 
 
   app.ports.addFileByHash.subscribe(async (hash) => {
+    // TODO verify that hash is a valid IPFS hash
     fileRequested(hash);
 
     if(!!knownFiles[hash] && knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) {
@@ -165,7 +168,7 @@ export async function launchJanus(app) {
       fileLoaded(hash, Array.from(data), imageType(data));
       knownFiles[hash] = {
         bytes: data,
-        multiaddr: multiaddr
+        multiaddr
       };
     }
 
