@@ -9,7 +9,8 @@
   "scripts": {
     "start": "elm-app start",
     "build": "elm-app build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fix-typical-require": "replace-in-file \"const typical = require('typical')\" \"const typical = require('typical/dist/index')\" ./node_modules/ipld/src/index.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,8 @@
   },
   "homepage": "https://github.com/fluencelabs/p2p-fileshare#readme",
   "devDependencies": {
-    "create-elm-app": "^4.2.13"
+    "create-elm-app": "^4.2.13",
+    "replace-in-file": "^6.0.0"
   },
   "dependencies": {
     "ipfs-http-client": "^44.0.1",
