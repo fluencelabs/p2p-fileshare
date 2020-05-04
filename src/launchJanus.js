@@ -11,6 +11,11 @@ export async function launchJanus(app) {
   let relays = [
     {peer: {id: "QmVL33cyaaGLWHkw5ZwC7WFiq1QATHrBsuJeZ2Zky7nDpz"}, host: "134.209.186.43", pport: 9001},
     {peer: {id: "QmVzDnaPYN12QAYLDbGzvMgso7gbRD9FQqRvGZBfeKDSqW"}, host: "134.209.186.43", pport: 9002},
+    {peer: {id: "QmSTTTbAu6fa5aT8MjWN922Y8As29KTqBwvvp7CyrC2S6D"}, host: "134.209.186.43", pport: 9003},
+    {peer: {id: "QmUGQ2ikgcbJUVyaxBPDSWLNUMDo2hDvE9TdRNJY21Eqde"}, host: "134.209.186.43", pport: 9004},
+    {peer: {id: "Qmdqrm4iHuHPzgeTkWxC8KRj1voWzKDq8MUG115uH2WVSs"}, host: "134.209.186.43", pport: 9005},
+    {peer: {id: "QmX6yYZd4iLW7YpmZz4waLrtb5Y9f5v3PPGEmNGh9k3iW2"}, host: "134.209.186.43", pport: 9990},
+    {peer: {id: "QmR76HURX8teLSpLgsWwy5jgemJukbE6VMLK5mMe7UGXez"}, host: "134.209.186.43", pport: 9100},
   ];
 
   let peerEvent = (name, peer) =>
@@ -31,7 +36,7 @@ export async function launchJanus(app) {
     relayEvent("relay_connected", relay);
   };
 
-  await connect( relays[0] );
+  await connect( relays[Math.floor(Math.random() * Math.floor(relays.length))] );
 
   /**
    * Handle connection commands
