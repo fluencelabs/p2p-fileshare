@@ -3,6 +3,7 @@ module FilesList.View exposing (view)
 import Base64.Encode as Encode
 import Bytes exposing (Bytes)
 import Element exposing (Element, alignRight, centerX, centerY, column, el, height, mouseOver, padding, paddingXY, paragraph, px, row, text, width)
+import Element.Border exposing (dashed)
 import Element.Events
 import Element.Font as Font
 import Element.Input as Input
@@ -130,6 +131,9 @@ showFile fileEntry =
                     , Element.paddingXY 45 20
                     , Element.spacing 5
                     , BG.whiteAlpha 850
+                    , B.width1 B.Left
+                    , B.gray
+                    , dashed
                     ]
                 <|
                     List.map (\l -> paragraph [ Font.family [ Font.monospace ] ] [ text <| "> " ++ l ]) fileEntry.logs
