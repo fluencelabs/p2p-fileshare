@@ -44,22 +44,12 @@ update msg model =
         DownloadFile hash ->
             ( model, FilesList.Port.fileRequest { command = "download", hash = Just hash } )
 
-        AddFile file bytes hash ->
+        AddFile imageType bytes hash ->
             if List.any (\f -> f.hash == hash) model.files then
                 ( model, Cmd.none )
 
             else
                 let
-                    mime =
-                        File.mime file
-
-                    imageType =
-                        if String.startsWith "image/" mime then
-                            Just (String.dropLeft 6 mime)
-
-                        else
-                            Nothing
-
                     entry =
                         { imageType = imageType
                         , bytes = Just bytes

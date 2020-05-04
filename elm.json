@@ -6,6 +6,7 @@
     "elm-version": "0.19.1",
     "dependencies": {
         "direct": {
+            "avh4/elm-color": "1.0.0",
             "elm/browser": "1.0.2",
             "elm/bytes": "1.0.8",
             "elm/core": "1.0.5",
@@ -21,12 +22,14 @@
             "elm-community/intdict": "3.0.0",
             "ivadzy/bbase64": "1.1.1",
             "mdgriffith/elm-ui": "1.1.5",
-            "mpizenberg/elm-pointer-events": "4.0.2"
+            "mpizenberg/elm-pointer-events": "4.0.2",
+            "noahzgordon/elm-color-extra": "1.0.2"
         },
         "indirect": {
             "avh4/elm-fifo": "1.0.4",
             "elm/regex": "1.0.0",
-            "elm/virtual-dom": "1.0.2"
+            "elm/virtual-dom": "1.0.2",
+            "fredcy/elm-parseint": "2.0.1"
         }
     },
     "test-dependencies": {

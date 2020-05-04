@@ -2,7 +2,7 @@ import './main.css';
 import { Elm } from './Main.elm';
 import * as serviceWorker from './serviceWorker';
 
-import {launchJanus} from './launchJanus';
+import ports from './ports';
 
 var app = Elm.Main.init({
   node: document.getElementById('root'),
@@ -10,7 +10,7 @@ var app = Elm.Main.init({
 });
 
 (async () => {
-  await launchJanus(app).catch((e) => {
+  await ports(app).catch((e) => {
     console.error(e)
   });
 })();

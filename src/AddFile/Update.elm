@@ -35,10 +35,22 @@ update msg model =
         FileBytesRead file bytes ->
             ( { model | calculatingHashFor = Just { file = file, bytes = bytes } }, calcHashBytes bytes )
 
+        -- TODO send one more message to figure out if it's an image
         FileHashReceived hash ->
             let
                 fileReady f =
-                    run <| FileReady f.file f.bytes hash
+                    let
+                        mime =
+                            File.mime f.file
+
+                        imageType =
+                            if String.startsWith "image/" mime then
+                                Just <| String.dropLeft 6 mime
+
+                            else
+                                Nothing
+                    in
+                    run <| FileReady imageType f.bytes hash
 
                 cmd =
                     Maybe.withDefault Cmd.none <| Maybe.map fileReady model.calculatingHashFor

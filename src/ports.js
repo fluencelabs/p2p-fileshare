@@ -6,7 +6,7 @@ import {genUUID} from "janus-beta/dist/function_call";
 
 import {imageType, ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
 
-export async function launchJanus(app) {
+export default async function ports(app) {
 
   let relays = [
     {peer: {id: "QmVL33cyaaGLWHkw5ZwC7WFiq1QATHrBsuJeZ2Zky7nDpz"}, host: "134.209.186.43", pport: 9001},

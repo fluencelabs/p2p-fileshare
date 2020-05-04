@@ -3,14 +3,33 @@ module View exposing (view)
 import AddFile.View
 import Browser exposing (Document)
 import Conn.View
-import Element exposing (Element, column, el, row)
+import Element
+    exposing
+        ( Element
+        , alignRight
+        , alignTop
+        , centerX
+        , column
+        , el
+        , fillPortion
+        , padding
+        , paragraph
+        , row
+        , spacing
+        , text
+        , textColumn
+        , width
+        )
 import Element.Events as Events
 import Element.Font as Font
 import FilesList.View
 import Html exposing (Html)
+import Ions.Background as BG
+import Ions.Border as B
+import Ions.Font as F
 import Model exposing (Model)
 import Msg exposing (..)
-import Palette exposing (dropdownBg, fillWidth, h1, layout, link, linkColor)
+import Palette exposing (fillWidth, h1, layout, limitLayoutWidth, link, linkColor)
 
 
 view : Model -> Document Msg
@@ -48,20 +67,29 @@ liftView getModel liftMsg subView =
         List.map liftInEl res
 
 
+longDescriptionText =
+    "Files are served via IPFS protocol, but actual file uploading is done lazily. "
+        ++ "First, you upload your file into browser and make it discoverable via Fluence network. "
+        ++ "Then your peers may discover your device as a holder of the file and ask it to provide the file to a publicly accessible IPFS node. "
+        ++ "The device uploads the file and then replies with an IPFS multiaddress of the node holding the file."
+
+
 header : List (Element Msg)
 header =
     [ row
-        [ Element.centerX ]
+        [ fillWidth, B.nearBlack, B.width1 B.Bottom, padding 20 ]
         [ h1 "Fluence demo" ]
     , row
-        [ Element.centerX ]
-        [ el [ Font.italic ] <| Element.text "Fluence-powered client-to-client file sharing via IPFS" ]
+        [ fillWidth, BG.nearWhite, padding 20 ]
+        [ el [ Font.italic, centerX ] <|
+            text "Fluence-powered client-to-client file sharing via IPFS"
+        ]
     , row
-        [ Element.width Element.fill ]
-        [ Element.textColumn [ Element.width <| Element.fillPortion 5 ] [ Element.text "Long description" ]
-        , column [ Element.width <| Element.fillPortion 1 ]
-            [ link "https://fluence.network" "Whitepaper"
-            , link "https://fluence.network" "Deep dive"
+        [ centerX, limitLayoutWidth, padding 20 ]
+        [ textColumn [ width <| fillPortion 5 ] [ paragraph [] [ text longDescriptionText ] ]
+        , column [ width <| fillPortion 1, spacing 5, Element.alignTop ]
+            [ el [ alignRight, alignTop ] <| link "https://fluence.network" "Whitepaper"
+            , el [ alignRight, alignTop ] <| link "https://fluence.network" "Deep dive"
             ]
         ]
     ]

@@ -6,7 +6,7 @@ import File exposing (File)
 
 type Msg
     = NoOp
-    | AddFile File Bytes String
+    | AddFile (Maybe String) Bytes String
     | FileAdvertised String
     | FileLog String String
     | FileAsked String

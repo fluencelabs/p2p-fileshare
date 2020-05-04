@@ -2,9 +2,28 @@ module AddFile.View exposing (view)
 
 import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
-import Element exposing (Element, column, el, row, text)
+import Element
+    exposing
+        ( Element
+        , centerX
+        , column
+        , el
+        , fillPortion
+        , mouseOver
+        , padding
+        , paddingXY
+        , row
+        , spacing
+        , text
+        , width
+        )
+import Element.Font as Font
 import Element.Input as Input
-import Palette exposing (buttonColor, fillWidth)
+import Ions.Background as BG
+import Ions.Border as B
+import Ions.Color as C
+import Ions.Font as F
+import Palette exposing (buttonColor, fillWidth, limitLayoutWidth)
 
 
 view : Model -> List (Element Msg)
@@ -16,8 +35,22 @@ view addFile =
 
             else
                 Element.none
+
+        addFileButton =
+            Input.button
+                [ BG.white
+                , B.lightGreen
+                , B.width2 B.AllSides
+                , limitLayoutWidth
+                , centerX
+                , padding 10
+                , Font.center
+                , C.easeIn
+                , mouseOver [ B.green ]
+                ]
+                { onPress = Just <| SetVisible <| not addFile.visible, label = text "Add File" }
     in
-    [ Input.button [ buttonColor, Element.padding 10 ] { onPress = Just <| SetVisible <| not addFile.visible, label = text "Add File" }
+    [ row [ fillWidth, BG.washedGreen, paddingXY 0 20 ] [ addFileButton ]
     , block
     ]
 
@@ -26,23 +59,42 @@ addFileBlock : Model -> Element Msg
 addFileBlock model =
     let
         addUpload =
-            Input.button [ buttonColor, Element.padding 10 ] { onPress = Just FileRequested, label = text "Select & Upload" }
+            row [ centerX, limitLayoutWidth, BG.white ]
+                [ el [ width (fillPortion 3), padding 10, F.nearBlack ] <| text "Provide a file from your computer:"
+                , Input.button
+                    [ centerX
+                    , width (fillPortion 2)
+                    , Font.center
+                    , B.orange
+                    , B.width1 B.AllSides
+                    , padding 10
+                    ]
+                    { onPress = Just FileRequested, label = text "Select & Upload" }
+                ]
 
         ipfsDownload =
-            Input.button [ buttonColor, Element.padding 10 ] { onPress = Just DownloadIpfs, label = text "Download" }
+            Input.button
+                [ B.orange
+                , B.width1 B.AllSides
+                , padding 10
+                , fillWidth
+                , Font.center
+                ]
+                { onPress = Just DownloadIpfs, label = text "Download" }
 
         ipfsInput =
-            Input.text []
+            Input.text [ width (fillPortion 4), centerX ]
                 { onChange = ChangeIpfsHash
                 , text = model.ipfsHash
                 , placeholder = Just <| Input.placeholder [] <| text "Enter IPFS hash"
-                , label = Input.labelRight [ Element.centerY ] <| ipfsDownload
+                , label = Input.labelRight [ Element.centerY, width (fillPortion 1) ] <| ipfsDownload
                 }
 
         addIpfs =
-            row [ fillWidth ] [ ipfsInput ]
+            row [ limitLayoutWidth, centerX, BG.white, spacing 0 ] [ ipfsInput ]
     in
-    column [ fillWidth, Element.spacing 30 ]
+    column [ fillWidth, spacing 20, BG.washedGreen ]
         [ addUpload
         , addIpfs
+        , el [ Element.height <| Element.px 0 ] <| Element.none
         ]
