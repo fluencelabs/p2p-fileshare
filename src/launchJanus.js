@@ -39,15 +39,19 @@ export async function launchJanus(app) {
    * Handle connection commands
    */
   app.ports.connRequest.subscribe(async ({command, id}) => {
-    if (command === "set_relay") {
-      let relay = relays.find(r => r.peer.id === id);
-      if (relay) {
+    switch (command) {
+      case "set_relay":
+        let relay = relays.find(r => r.peer.id === id);
+        if (relay) {
           // if the connection already established, connect to another node and save previous services and subscriptions
           await conn.connect(relay.peer.id, relay.host, relay.pport);
           relayEvent("relay_connected", relay);
-      }
-    } else {
-      console.error("Received unknown connRequest from the Elm app", command);
+        }
+
+        break;
+
+      default:
+        console.error("Received unknown connRequest from the Elm app", command);
     }
   });
 
