@@ -27,23 +27,20 @@ export async function launchJanus(app) {
 
   let privateKey = await Janus.generatePrivateKey();
 
-  let conn = null;
-
-  let connect = async (relay) => {
-    if (conn) {
-      // if the connection already established, connect to another node and save previous services and subscriptions
-      conn.connect(relay.peer.id, relay.host, relay.pport)
-    } else {
-      conn = await Janus.connect(relay.peer.id, relay.host, relay.pport, privateKey);
-    }
-
-    peerEvent("set_peer", {id: conn.selfPeerIdStr});
-    relayEvent("relay_connected", relay);
-  };
-
   // connect to a random node
   let randomNodeNum = Math.floor(Math.random() * Math.floor(relays.length));
-  await connect( relays[randomNodeNum] );
+  let randomRelay = relays[randomNodeNum];
+  let conn = await Janus.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, privateKey);
+
+  peerEvent("set_peer", {id: conn.selfPeerIdStr});
+  relayEvent("relay_connected", randomRelay);
+
+  let reconnect = async (relay) => {
+    // if the connection already established, connect to another node and save previous services and subscriptions
+    await conn.connect(relay.peer.id, relay.host, relay.pport);
+
+    relayEvent("relay_connected", relay);
+  };
 
   /**
    * Handle connection commands
@@ -51,7 +48,7 @@ export async function launchJanus(app) {
   app.ports.connRequest.subscribe(async ({command, id}) => {
     if (command === "set_relay") {
       let relay = relays.find(r => r.peer.id === id);
-      relay && await connect(relay);
+      relay && await reconnect(relay);
     } else {
       console.error("Received unknown connRequest from the Elm app", command);
     }
