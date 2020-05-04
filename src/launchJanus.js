@@ -1,17 +1,22 @@
 import "regenerator-runtime";
 import Hash from 'ipfs-only-hash';
 
-import {JanusClient} from 'janus-beta';
-import {genUUID, makeFunctionCall} from "janus-beta/dist/function_call";
+import Janus from 'janus-beta';
+import {genUUID} from "janus-beta/dist/function_call";
 
 import {imageType, ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
 
 export async function launchJanus(app) {
 
   let relays = [
-    {peer: {id: "QmVL33cyaaGLWHkw5ZwC7WFiq1QATHrBsuJeZ2Zky7nDpz"}, host: "104.248.25.59", pport: 9001},
-    {peer: {id: "QmVzDnaPYN12QAYLDbGzvMgso7gbRD9FQqRvGZBfeKDSqW"}, host: "104.248.25.59", pport: 9002},
-  ]
+    {peer: {id: "QmVL33cyaaGLWHkw5ZwC7WFiq1QATHrBsuJeZ2Zky7nDpz"}, host: "134.209.186.43", pport: 9001},
+    {peer: {id: "QmVzDnaPYN12QAYLDbGzvMgso7gbRD9FQqRvGZBfeKDSqW"}, host: "134.209.186.43", pport: 9002},
+    {peer: {id: "QmSTTTbAu6fa5aT8MjWN922Y8As29KTqBwvvp7CyrC2S6D"}, host: "134.209.186.43", pport: 9003},
+    {peer: {id: "QmUGQ2ikgcbJUVyaxBPDSWLNUMDo2hDvE9TdRNJY21Eqde"}, host: "134.209.186.43", pport: 9004},
+    {peer: {id: "Qmdqrm4iHuHPzgeTkWxC8KRj1voWzKDq8MUG115uH2WVSs"}, host: "134.209.186.43", pport: 9005},
+    {peer: {id: "QmX6yYZd4iLW7YpmZz4waLrtb5Y9f5v3PPGEmNGh9k3iW2"}, host: "134.209.186.43", pport: 9990},
+    {peer: {id: "QmR76HURX8teLSpLgsWwy5jgemJukbE6VMLK5mMe7UGXez"}, host: "134.209.186.43", pport: 9100},
+  ];
 
   let peerEvent = (name, peer) =>
     app.ports.connReceiver.send({event: name, relay: null, peer});
@@ -20,29 +25,15 @@ export async function launchJanus(app) {
 
   relays.map(d => relayEvent("relay_discovered", d));
 
+  let peerId = await Janus.generatePeerId();
+  peerEvent("set_peer", {id: peerId.toB58String()});
 
-  let conn = null;
+  // connect to a random node
+  let randomNodeNum = Math.floor(Math.random() * relays.length);
+  let randomRelay = relays[randomNodeNum];
 
-  let connect = async (relay) => {
-    conn = await JanusClient.connect(relay.peer.id, relay.host, relay.pport);
-
-    peerEvent("set_peer", {id: conn.selfPeerIdStr});
-    relayEvent("relay_connected", relay);
-  }
-
-  await connect( relays[0] );
-
-  let getResultById = (msgId) => new Promise((resolve, reject) => {
-    // subscribe for responses, to handle response
-    // TODO if there's no conn, reject
-    conn && conn.subscribe((call) => {
-      if (call.arguments.msg_id && call.arguments.msg_id === msgId) {
-        resolve(call.arguments);
-        return true;
-      }
-      return false;
-    });
-  });
+  let conn = await Janus.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, peerId);
+  relayEvent("relay_connected", randomRelay);
 
   /**
    * Handle connection commands
@@ -50,8 +41,12 @@ export async function launchJanus(app) {
   app.ports.connRequest.subscribe(async ({command, id}) => {
     switch (command) {
       case "set_relay":
-        let relay = relays.find(r => r.peer.id === id)
-        relay && await connect(relay);
+        let relay = relays.find(r => r.peer.id === id);
+        if (relay) {
+          // if the connection already established, connect to another node and save previous services and subscriptions
+          await conn.connect(relay.peer.id, relay.host, relay.pport);
+          relayEvent("relay_connected", relay);
+        }
 
         break;
 
@@ -64,7 +59,7 @@ export async function launchJanus(app) {
    * Handle file commands, sending events
    */
 
-  let emptyFileEvent = {log:null, data:[], imageType:null}
+  let emptyFileEvent = {log:null, data:[], imageType:null};
   let sendToFileReceiver = ev =>
     app.ports.fileReceiver.send({...ev, ...emptyFileEvent});
 
@@ -78,6 +73,8 @@ export async function launchJanus(app) {
     sendToFileReceiver({event: "loaded", data, hash, imageType});
   let fileLog = (hash, log) =>
     sendToFileReceiver({event: "log", hash, log});
+
+  let multiaddrService = "IPFS.multiaddr";
 
   let knownFiles = {};
 
@@ -104,7 +101,7 @@ export async function launchJanus(app) {
                 fileAsked(hash);
 
                 let replyWithMultiaddr = async (multiaddr) =>
-                  await conn.sendFunctionCall(makeFunctionCall(genUUID(), fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr}));
+                  await conn.sendMessage(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
 
                 // check cache
                 if(knownFiles[hash].multiaddr) {
@@ -113,11 +110,11 @@ export async function launchJanus(app) {
 
                   // call multiaddr
                   let msgId = genUUID();
-                  await conn.sendServiceCall("IPFS.multiaddr", {msg_id: msgId});
-                  let multiaddrResult = await getResultById(msgId);
+
+                  let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
                   let multiaddr = multiaddrResult.multiaddr;
                   // upload a file
-                  console.log("going to upload")
+                  console.log("going to upload");
                   await ipfsAdd(multiaddr, knownFiles[hash].bytes);
                   fileLog(hash, "File uploaded to "+multiaddr);
                   knownFiles[hash].multiaddr = multiaddr;
@@ -154,12 +151,12 @@ export async function launchJanus(app) {
     } else {
 
       let msgId = genUUID();
-      let serviceName = "IPFS.get_" + hash
-      await conn.sendServiceCall("IPFS.get_" + hash, {msg_id: msgId});
-      fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
+      let serviceName = "IPFS.get_" + hash;
 
-      let res = await getResultById(msgId);
-      let multiaddr = res.multiaddr;
+      fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
+      let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+      let multiaddr = multiaddrResult.multiaddr;
+
       fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
 
       let data = await ipfsGet(multiaddr, hash);
@@ -176,7 +173,7 @@ export async function launchJanus(app) {
 
 
   app.ports.calcHash.subscribe(async (fileBytesArray) => {
-    let h = await Hash.of(fileBytesArray)
+    let h = await Hash.of(fileBytesArray);
 
     knownFiles[h] = {bytes:Uint8Array.from(fileBytesArray)};
 
