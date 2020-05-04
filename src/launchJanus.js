@@ -89,7 +89,7 @@ export async function launchJanus(app) {
                 fileAsked(hash);
 
                 let replyWithMultiaddr = async (multiaddr) =>
-                  await conn.sendFunctionCall(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
+                  await conn.sendMessage(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
 
                 // check cache
                 if(knownFiles[hash].multiaddr) {
@@ -99,7 +99,7 @@ export async function launchJanus(app) {
                   // call multiaddr
                   let msgId = genUUID();
 
-                  let multiaddrResult = await conn.sendServiceCallWaitResponse("IPFS.multiaddr", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);;
+                  let multiaddrResult = await conn.sendServiceCallWaitResponse("IPFS.multiaddr", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
                   let multiaddr = multiaddrResult.multiaddr;
                   // upload a file
                   console.log("going to upload");
