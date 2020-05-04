@@ -1,7 +1,7 @@
 import "regenerator-runtime";
 import Hash from 'ipfs-only-hash';
 
-import {Janus} from 'janus-beta';
+import Janus from 'janus-beta';
 import {genUUID} from "janus-beta/dist/function_call";
 
 import {imageType, ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
@@ -25,14 +25,14 @@ export async function launchJanus(app) {
 
   relays.map(d => relayEvent("relay_discovered", d));
 
-  let privateKey = await Janus.generatePrivateKey();
+  let peerId = await Janus.generatePeerId();
+  peerEvent("set_peer", {id: peerId.toB58String()});
 
   // connect to a random node
-  let randomNodeNum = Math.floor(Math.random() * Math.floor(relays.length));
+  let randomNodeNum = Math.floor(Math.random() * relays.length);
   let randomRelay = relays[randomNodeNum];
-  let conn = await Janus.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, privateKey);
 
-  peerEvent("set_peer", {id: conn.selfPeerIdStr});
+  let conn = await Janus.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, peerId);
   relayEvent("relay_connected", randomRelay);
 
   /**
