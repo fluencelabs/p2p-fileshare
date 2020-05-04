@@ -25,19 +25,24 @@ export async function launchJanus(app) {
 
   relays.map(d => relayEvent("relay_discovered", d));
 
+  let privateKey = await Janus.generatePrivateKey();
 
   let conn = null;
 
   let connect = async (relay) => {
-    let privateKey = await Janus.generatePrivateKey();
-    conn = await Janus.connect(relay.peer.id, relay.host, relay.pport, privateKey);
+    if (conn) {
+      // if the connection already established, connect to another node and save previous services and subscriptions
+      conn.connect(relay.peer.id, relay.host, relay.pport)
+    } else {
+      conn = await Janus.connect(relay.peer.id, relay.host, relay.pport, privateKey);
+    }
 
     peerEvent("set_peer", {id: conn.selfPeerIdStr});
     relayEvent("relay_connected", relay);
   };
 
   // connect to a random node
-  let randomNodeNum = Math.floor(Math.random() * Math.floor(relays.length))
+  let randomNodeNum = Math.floor(Math.random() * Math.floor(relays.length));
   await connect( relays[randomNodeNum] );
 
   /**
