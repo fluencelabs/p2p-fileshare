@@ -1,7 +1,7 @@
 import "regenerator-runtime";
 import Hash from 'ipfs-only-hash';
 
-import {Janus, JanusClient} from 'janus-beta';
+import {Janus} from 'janus-beta';
 import {genUUID} from "janus-beta/dist/function_call";
 
 import {imageType, ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
@@ -36,7 +36,9 @@ export async function launchJanus(app) {
     relayEvent("relay_connected", relay);
   };
 
-  await connect( relays[Math.floor(Math.random() * Math.floor(relays.length))] );
+  // connect to a random node
+  let randomNodeNum = Math.floor(Math.random() * Math.floor(relays.length))
+  await connect( relays[randomNodeNum] );
 
   /**
    * Handle connection commands
@@ -68,6 +70,8 @@ export async function launchJanus(app) {
     sendToFileReceiver({event: "loaded", data, hash, imageType});
   let fileLog = (hash, log) =>
     sendToFileReceiver({event: "log", hash, log});
+
+  let multiaddrService = "IPFS.multiaddr";
 
   let knownFiles = {};
 
@@ -104,7 +108,7 @@ export async function launchJanus(app) {
                   // call multiaddr
                   let msgId = genUUID();
 
-                  let multiaddrResult = await conn.sendServiceCallWaitResponse("IPFS.multiaddr", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                  let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
                   let multiaddr = multiaddrResult.multiaddr;
                   // upload a file
                   console.log("going to upload");
@@ -145,10 +149,9 @@ export async function launchJanus(app) {
 
       let msgId = genUUID();
       let serviceName = "IPFS.get_" + hash;
-      await conn.sendServiceCall("IPFS.get_" + hash, {msg_id: msgId});
 
       fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
-      let multiaddrResult = await conn.sendServiceCallWaitResponse("IPFS.get_" + hash, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+      let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
       let multiaddr = multiaddrResult.multiaddr;
 
       fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
