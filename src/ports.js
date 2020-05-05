@@ -1,5 +1,6 @@
 import "regenerator-runtime";
 import Hash from 'ipfs-only-hash';
+import bs58 from 'bs58';
 
 import Janus from 'janus-beta';
 import {genUUID} from "janus-beta/dist/function_call";
@@ -139,9 +140,26 @@ export default async function ports(app) {
       }
   });
 
+  function validateHash(hash) {
+    if (typeof hash === "string" && hash.length === 46 && hash.substring(0, 2) === "Qm"){
+      try {
+        bs58.decode(hash);
+        return true;
+      } catch (e) {
+        console.error(`Cannot decode hash '${hash}': ${e}`)
+      }
+    }
 
+    return false;
+  }
 
   app.ports.addFileByHash.subscribe(async (hash) => {
+
+    if (!validateHash(hash)) {
+      console.error(`Hash '${hash}' is not valid.`);
+      return;
+    }
+
     // TODO verify that hash is a valid IPFS hash
     fileRequested(hash);
 

@@ -2,18 +2,17 @@ module FilesList.Update exposing (update)
 
 import Bytes exposing (Bytes)
 import Bytes.Encode
-import File
 import FilesList.Model exposing (FileEntry, Model, Status(..))
 import FilesList.Msg exposing (Msg(..))
 import FilesList.Port
 
 
 updateEntry : Model -> String -> (FileEntry -> FileEntry) -> Model
-updateEntry model hash up =
+updateEntry model hash upd =
     let
         updateFile entry =
             if entry.hash == hash then
-                up entry
+                upd entry
 
             else
                 entry

@@ -15,18 +15,18 @@ liftUpdate :
     -> (msg -> Msg)
     -> (msg -> model -> ( model, Cmd msg ))
     -> (msg -> Model -> ( Model, Cmd Msg ))
-liftUpdate getModel setModel liftMsg up =
+liftUpdate getModel setModel liftMsg updateComponent =
     \msg ->
         \model ->
             let
                 m =
                     getModel model
 
-                ( mP, mCmd ) =
-                    up msg m
+                ( updatedComponentModel, modelCmd ) =
+                    updateComponent msg m
             in
-            ( setModel mP model
-            , Cmd.map liftMsg mCmd
+            ( setModel updatedComponentModel model
+            , Cmd.map liftMsg modelCmd
             )
 
 
@@ -45,9 +45,9 @@ updateFilesList =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AddFileMsg (AddFile.Msg.FileReady file bytes hash) ->
+        AddFileMsg (AddFile.Msg.FileReady imageType bytes hash) ->
             -- Move Ready event from AddFile to FilesList
-            update (FilesListMsg <| FilesList.Msg.AddFile file bytes hash) model
+            update (FilesListMsg <| FilesList.Msg.AddFile imageType bytes hash) model
 
         ConnMsg m ->
             updateConn m model
