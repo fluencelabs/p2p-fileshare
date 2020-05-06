@@ -5,7 +5,7 @@ import bs58 from 'bs58';
 import Janus from 'janus-beta';
 import {genUUID} from "janus-beta/dist/function_call";
 
-import {imageType, ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
+import {ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
 
 export default async function ports(app) {
 
@@ -60,7 +60,7 @@ export default async function ports(app) {
    * Handle file commands, sending events
    */
 
-  let emptyFileEvent = {log:null, data:[], imageType:null};
+  let emptyFileEvent = {log:null, data:[]};
   let sendToFileReceiver = ev => {
     app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
   };
@@ -71,8 +71,8 @@ export default async function ports(app) {
     sendToFileReceiver({event: "asked", hash});
   let fileRequested = (hash) =>
     sendToFileReceiver({event: "requested", hash});
-  let fileLoaded = (hash, data, imageType) =>
-    sendToFileReceiver({event: "loaded", data, hash, imageType});
+  let fileLoaded = (hash, data) =>
+    sendToFileReceiver({event: "loaded", data, hash});
   let fileLog = (hash, log) =>
     sendToFileReceiver({event: "log", hash, log});
 
@@ -181,9 +181,7 @@ export default async function ports(app) {
       let data = await ipfsGet(multiaddr, hash);
       fileLog(hash, "File downloaded from " + multiaddr);
 
-      let imgType = imageType(data);
-      console.log("img type: " + imgType);
-      fileLoaded(hash, Array.from(data), imgType);
+      fileLoaded(hash, Array.from(data));
       knownFiles[hash] = {
         bytes: data,
         multiaddr

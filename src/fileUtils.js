@@ -63,8 +63,3 @@ export function downloadBlob(data, fileName, mimeType) {
     return window.URL.revokeObjectURL(url);
   }, 1000);
 }
-
-// TODO delete and remove from dependencies
-export function imageType(data) {
-  return isPng(data) ? "png" : (isGif(data) ? "gif" : (isJpg(data) ? "jpg" : null));
-}
