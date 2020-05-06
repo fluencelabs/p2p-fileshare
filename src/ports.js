@@ -61,8 +61,9 @@ export default async function ports(app) {
    */
 
   let emptyFileEvent = {log:null, data:[], imageType:null};
-  let sendToFileReceiver = ev =>
-    app.ports.fileReceiver.send({...ev, ...emptyFileEvent});
+  let sendToFileReceiver = ev => {
+    app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
+  };
 
   let fileAdvertised = (hash) =>
     sendToFileReceiver({event: "advertised", hash});
@@ -180,7 +181,9 @@ export default async function ports(app) {
       let data = await ipfsGet(multiaddr, hash);
       fileLog(hash, "File downloaded from " + multiaddr);
 
-      fileLoaded(hash, Array.from(data), imageType(data));
+      let imgType = imageType(data);
+      console.log("img type: " + imgType);
+      fileLoaded(hash, Array.from(data), imgType);
       knownFiles[hash] = {
         bytes: data,
         multiaddr

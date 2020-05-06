@@ -49,19 +49,22 @@ update msg model =
 
                             else
                                 let
-                                    firstFourBytes =
-                                        case Bytes.Decode.decode (Bytes.Decode.bytes 4) f.bytes of
+                                    firstEightBytes =
+                                        case Bytes.Decode.decode (Bytes.Decode.bytes 8) f.bytes of
                                             Just bs ->
                                                 bytesToList bs
 
                                             Nothing ->
                                                 []
                                 in
-                                case firstFourBytes of
-                                    [ 255, 216, 255, _ ] ->
-                                        Just "jpg"
 
-                                    -- TODO png and gif
+                                case firstEightBytes of
+                                    [ 0xFF, 0xD8, 0xFF, _, _, _, _, _] ->
+                                        Just "jpeg"
+                                    [ 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A] ->
+                                        Just "png"
+                                    [ 0x47, 0x49, 0x46, _ , _, _, _, _] ->
+                                        Just "gif"
                                     _ ->
                                         Nothing
                     in
