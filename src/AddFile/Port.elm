@@ -6,8 +6,8 @@ import Bytes exposing (Bytes)
 import Bytes.Decode
 
 
-calcHashBytes : Bytes -> Cmd msg
-calcHashBytes bytes =
+bytesToList : Bytes -> List Int
+bytesToList bytes =
     let
         listStep decoder ( n, xs ) =
             if n <= 0 then
@@ -22,7 +22,12 @@ calcHashBytes bytes =
         listDecode =
             bytesListDecode Bytes.Decode.unsignedInt8 (Bytes.width bytes)
     in
-    calcHash <| List.reverse <| Maybe.withDefault [] (Bytes.Decode.decode listDecode bytes)
+    List.reverse <| Maybe.withDefault [] (Bytes.Decode.decode listDecode bytes)
+
+
+calcHashBytes : Bytes -> Cmd msg
+calcHashBytes =
+    calcHash << bytesToList
 
 
 port calcHash : List Int -> Cmd msg

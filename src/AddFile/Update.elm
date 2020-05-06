@@ -2,7 +2,8 @@ module AddFile.Update exposing (update)
 
 import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
-import AddFile.Port exposing (calcHashBytes)
+import AddFile.Port exposing (bytesToList, calcHashBytes)
+import Bytes.Decode
 import File exposing (File)
 import File.Select as Select
 import Platform.Cmd exposing (Cmd(..))
@@ -35,7 +36,6 @@ update msg model =
         FileBytesRead file bytes ->
             ( { model | calculatingHashFor = Just { file = file, bytes = bytes } }, calcHashBytes bytes )
 
-        -- TODO send one more message to figure out if it's an image
         FileHashReceived hash ->
             let
                 fileReady f =
@@ -48,7 +48,22 @@ update msg model =
                                 Just <| String.dropLeft 6 mime
 
                             else
-                                Nothing
+                                let
+                                    firstFourBytes =
+                                        case Bytes.Decode.decode (Bytes.Decode.bytes 4) f.bytes of
+                                            Just bs ->
+                                                bytesToList bs
+
+                                            Nothing ->
+                                                []
+                                in
+                                case firstFourBytes of
+                                    [ 255, 216, 255, _ ] ->
+                                        Just "jpg"
+
+                                    -- TODO png and gif
+                                    _ ->
+                                        Nothing
                     in
                     run <| FileReady imageType f.bytes hash
 
