@@ -10,13 +10,13 @@ import {imageType, ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
 export default async function ports(app) {
 
   let relays = [
-    {peer: {id: "QmVL33cyaaGLWHkw5ZwC7WFiq1QATHrBsuJeZ2Zky7nDpz"}, host: "134.209.186.43", pport: 9001},
-    {peer: {id: "QmVzDnaPYN12QAYLDbGzvMgso7gbRD9FQqRvGZBfeKDSqW"}, host: "134.209.186.43", pport: 9002},
-    {peer: {id: "QmSTTTbAu6fa5aT8MjWN922Y8As29KTqBwvvp7CyrC2S6D"}, host: "134.209.186.43", pport: 9003},
-    {peer: {id: "QmUGQ2ikgcbJUVyaxBPDSWLNUMDo2hDvE9TdRNJY21Eqde"}, host: "134.209.186.43", pport: 9004},
-    {peer: {id: "Qmdqrm4iHuHPzgeTkWxC8KRj1voWzKDq8MUG115uH2WVSs"}, host: "134.209.186.43", pport: 9005},
-    {peer: {id: "QmX6yYZd4iLW7YpmZz4waLrtb5Y9f5v3PPGEmNGh9k3iW2"}, host: "134.209.186.43", pport: 9990},
-    {peer: {id: "QmR76HURX8teLSpLgsWwy5jgemJukbE6VMLK5mMe7UGXez"}, host: "134.209.186.43", pport: 9100},
+    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"}, host: "104.248.25.59", pport: 9001},
+    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er"}, host: "104.248.25.59", pport: 9002},
+    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb"}, host: "104.248.25.59", pport: 9003},
+    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB"}, host: "104.248.25.59", pport: 9004},
+    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb"}, host: "104.248.25.59", pport: 9005},
+    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz"}, host: "104.248.25.59", pport: 9990},
+    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM"}, host: "104.248.25.59", pport: 9100},
   ];
 
   let peerEvent = (name, peer) =>
