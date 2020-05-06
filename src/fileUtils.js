@@ -64,6 +64,7 @@ export function downloadBlob(data, fileName, mimeType) {
   }, 1000);
 }
 
+// TODO delete and remove from dependencies
 export function imageType(data) {
   return isPng(data) ? "png" : (isGif(data) ? "gif" : (isJpg(data) ? "jpg" : null));
 }
