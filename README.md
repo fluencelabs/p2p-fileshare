@@ -5,6 +5,3 @@ npm install create-elm-app -g
 
 elm-app start
 ```
-
-TODO FIX:
-- can add empty hash

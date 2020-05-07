@@ -158,6 +158,7 @@ export default async function ports(app) {
 
     if (!validateHash(hash)) {
       console.error(`Hash '${hash}' is not valid.`);
+      fileLog(hash, `Hash is not valid.`);
       return;
     }
 
