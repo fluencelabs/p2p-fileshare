@@ -20,8 +20,8 @@ import Element
         , textColumn
         , width
         )
-import Element.Events as Events
 import Element.Font as Font
+import Element.Lazy exposing (lazy)
 import FilesList.View
 import Html exposing (Html)
 import Ions.Background as BG
@@ -44,14 +44,14 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header, connectivity model, addFile model, filesList model ]
+    layout <| List.concat [ header, [ connectivity model, addFile model, filesList model ] ]
 
 
 liftView :
     (Model -> model)
     -> (msg -> Msg)
-    -> (model -> List (Element msg))
-    -> (Model -> List (Element Msg))
+    -> (model -> Element msg)
+    -> (Model -> Element Msg)
 liftView getModel liftMsg subView =
     \model ->
         let
@@ -59,12 +59,9 @@ liftView getModel liftMsg subView =
                 getModel model
 
             res =
-                subView subModel
-
-            liftInEl =
-                Element.map liftMsg
+                lazy subView <| subModel
         in
-        List.map liftInEl res
+        Element.map liftMsg res
 
 
 longDescriptionText =
@@ -95,16 +92,16 @@ header =
     ]
 
 
-connectivity : Model -> List (Element Msg)
+connectivity : Model -> Element Msg
 connectivity model =
     liftView .connectivity ConnMsg Conn.View.view <| model
 
 
-addFile : Model -> List (Element Msg)
+addFile : Model -> Element Msg
 addFile model =
     liftView .addFile AddFileMsg AddFile.View.view <| model
 
 
-filesList : Model -> List (Element Msg)
+filesList : Model -> Element Msg
 filesList model =
     liftView .filesList FilesListMsg FilesList.View.view <| model

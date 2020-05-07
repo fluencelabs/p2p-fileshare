@@ -26,7 +26,7 @@ import Ions.Font as F
 import Palette exposing (buttonColor, fillWidth, limitLayoutWidth)
 
 
-view : Model -> List (Element Msg)
+view : Model -> Element Msg
 view addFile =
     let
         block =
@@ -50,9 +50,10 @@ view addFile =
                 ]
                 { onPress = Just <| SetVisible <| not addFile.visible, label = text "Add File" }
     in
-    [ row [ fillWidth, BG.washedGreen, paddingXY 0 20 ] [ addFileButton ]
-    , block
-    ]
+    column [ fillWidth ]
+        [ row [ fillWidth, BG.washedGreen, paddingXY 0 20 ] [ addFileButton ]
+        , block
+        ]
 
 
 addFileBlock : Model -> Element Msg
