@@ -9,7 +9,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, hash : String, log : Maybe String, data : List Int, imageType : Maybe String }
+    { event : String, hash : String, log : Maybe String, data : List Int }
 
 
 port fileRequest : Command -> Cmd msg
@@ -29,7 +29,7 @@ eventToMsg event =
                 Just <| FileRequested event.hash
 
             "loaded" ->
-                Just <| FileLoaded event.hash event.data event.imageType
+                Just <| FileLoaded event.hash event.data
 
             "asked" ->
                 Just <| FileAsked event.hash

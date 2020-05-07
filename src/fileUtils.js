@@ -1,10 +1,5 @@
 import IpfsClient from "ipfs-http-client";
 
-
-import isPng from "is-png";
-import isGif from "is-gif";
-import isJpg from "is-jpg";
-
 // Get a file from a node with $multiaddr address
 export async function ipfsGet(multiaddr, path) {
   const ipfs = new IpfsClient(multiaddr);
@@ -62,9 +57,4 @@ export function downloadBlob(data, fileName, mimeType) {
   setTimeout(function() {
     return window.URL.revokeObjectURL(url);
   }, 1000);
-}
-
-// TODO delete and remove from dependencies
-export function imageType(data) {
-  return isPng(data) ? "png" : (isGif(data) ? "gif" : (isJpg(data) ? "jpg" : null));
 }

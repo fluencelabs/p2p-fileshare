@@ -12,4 +12,4 @@ type Msg
     | FileProvided File
     | FileBytesRead File Bytes
     | FileHashReceived String
-    | FileReady (Maybe String) Bytes String
+    | FileReady Bytes String

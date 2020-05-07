@@ -39,33 +39,7 @@ update msg model =
         FileHashReceived hash ->
             let
                 fileReady f =
-                    let
-                        mime =
-                            File.mime f.file
-
-                        imageType =
-                            if String.startsWith "image/" mime then
-                                Just <| String.dropLeft 6 mime
-
-                            else
-                                let
-                                    firstFourBytes =
-                                        case Bytes.Decode.decode (Bytes.Decode.bytes 4) f.bytes of
-                                            Just bs ->
-                                                bytesToList bs
-
-                                            Nothing ->
-                                                []
-                                in
-                                case firstFourBytes of
-                                    [ 255, 216, 255, _ ] ->
-                                        Just "jpg"
-
-                                    -- TODO png and gif
-                                    _ ->
-                                        Nothing
-                    in
-                    run <| FileReady imageType f.bytes hash
+                    run <| FileReady f.bytes hash
 
                 cmd =
                     Maybe.withDefault Cmd.none <| Maybe.map fileReady model.calculatingHashFor

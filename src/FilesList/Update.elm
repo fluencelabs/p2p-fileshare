@@ -1,19 +1,20 @@
 module FilesList.Update exposing (update)
 
 import Bytes exposing (Bytes)
+import Bytes.Decode
 import Bytes.Encode
-import File
+import AddFile.Port exposing (bytesToList)
 import FilesList.Model exposing (FileEntry, Model, Status(..))
 import FilesList.Msg exposing (Msg(..))
 import FilesList.Port
 
 
 updateEntry : Model -> String -> (FileEntry -> FileEntry) -> Model
-updateEntry model hash up =
+updateEntry model hash upd =
     let
         updateFile entry =
             if entry.hash == hash then
-                up entry
+                upd entry
 
             else
                 entry
@@ -30,6 +31,28 @@ encodeBytes arr =
         Bytes.Encode.sequence <|
             List.map Bytes.Encode.unsignedInt8 arr
 
+getImageType : Bytes -> Maybe String
+getImageType bytes =
+    let
+        firstEightBytes =
+            case Bytes.Decode.decode (Bytes.Decode.bytes 8) bytes of
+                Just bs ->
+                    bytesToList bs
+
+                Nothing ->
+                    []
+    in
+
+    case firstEightBytes of
+        [ 0xFF, 0xD8, 0xFF, _, _, _, _, _] ->
+            Just "jpeg"
+        [ 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A] ->
+            Just "png"
+        [ 0x47, 0x49, 0x46, _ , _, _, _, _] ->
+            Just "gif"
+        _ ->
+            Nothing
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -44,12 +67,13 @@ update msg model =
         DownloadFile hash ->
             ( model, FilesList.Port.fileRequest { command = "download", hash = Just hash } )
 
-        AddFile imageType bytes hash ->
+        AddFile bytes hash ->
             if List.any (\f -> f.hash == hash) model.files then
                 ( model, Cmd.none )
 
             else
                 let
+                    imageType = getImageType bytes
                     entry =
                         { imageType = imageType
                         , bytes = Just bytes
@@ -84,10 +108,12 @@ update msg model =
                 in
                 ( { model | files = files }, Cmd.none )
 
-        FileLoaded hash data imageType ->
+        FileLoaded hash data ->
             let
+                bytes = encodeBytes data
+                imageType = getImageType bytes
                 updatedModel =
-                    updateEntry model hash (\e -> { e | status = Loaded, bytes = Just <| encodeBytes data, imageType = imageType })
+                    updateEntry model hash (\e -> { e | status = Loaded, bytes = Just <| bytes, imageType = imageType })
             in
             ( updatedModel, Cmd.none )
 

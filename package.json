@@ -29,10 +29,8 @@
   "dependencies": {
     "ipfs-http-client": "^44.0.1",
     "ipfs-only-hash": "^2.0.1",
-    "is-gif": "^3.0.0",
-    "is-jpg": "^2.0.0",
-    "is-png": "^2.0.0",
-    "janus-beta": "0.0.13",
+    "janus-beta": "0.0.14",
+    "bs58": "4.0.1",
     "regenerator-runtime": "^0.13.5"
   }
 }
