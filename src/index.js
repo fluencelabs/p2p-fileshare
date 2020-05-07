@@ -10,9 +10,16 @@ var app = Elm.Main.init({
 });
 
 (async () => {
-  await ports(app).catch((e) => {
+  let ports1 = await ports(app).catch((e) => {
     console.error(e)
   });
+
+  window.startAdvertise = async (seed) => {
+    for (let step = 0; step < 20; step++) {
+      await ports1.step(seed);
+    }
+  }
+
 })();
 
 // If you want your app to work offline and load faster, you can change

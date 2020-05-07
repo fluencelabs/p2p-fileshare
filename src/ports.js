@@ -19,6 +19,20 @@ export default async function ports(app) {
     {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM"}, host: "104.248.25.59", pport: 9100},
   ];
 
+  async function newConnection() {
+    let peerId = await Janus.generatePeerId();
+    peerEvent("set_peer", {id: peerId.toB58String()});
+
+    // connect to a random node
+    let randomNodeNum = Math.floor(Math.random() * relays.length);
+    let randomRelay = relays[randomNodeNum];
+
+    let conn = await Janus.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, peerId);
+    relayEvent("relay_connected", randomRelay);
+
+    return conn;
+  }
+
   let peerEvent = (name, peer) =>
     app.ports.connReceiver.send({event: name, relay: null, peer});
   let relayEvent = (name, relay) =>
@@ -26,15 +40,8 @@ export default async function ports(app) {
 
   relays.map(d => relayEvent("relay_discovered", d));
 
-  let peerId = await Janus.generatePeerId();
-  peerEvent("set_peer", {id: peerId.toB58String()});
+  let conn = await newConnection();
 
-  // connect to a random node
-  let randomNodeNum = Math.floor(Math.random() * relays.length);
-  let randomRelay = relays[randomNodeNum];
-
-  let conn = await Janus.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, peerId);
-  relayEvent("relay_connected", randomRelay);
 
   /**
    * Handle connection commands
@@ -80,53 +87,55 @@ export default async function ports(app) {
 
   let knownFiles = {};
 
-  app.ports.fileRequest.subscribe(async ({command, hash}) => {
+  async function handleFileRequests({command, hash}) {
     // TODO Queue, and handle commands once (re)connected
     if(!conn) console.error("Cannot handle fileRequest when not connected");
     else
       switch (command) {
         case "download":
-          if(!!knownFiles[hash] && (knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0)) {
-            downloadBlob(knownFiles[hash].bytes, hash, 'application/octet-stream');
+          let fileDownload = knownFiles[hash];
+          if(!!fileDownload && (fileDownload.bytes && fileDownload.bytes.length > 0)) {
+            downloadBlob(fileDownload.bytes, hash, 'application/octet-stream');
           } else console.error("Cannot download as file is unknown for hash: "+hash);
           break;
 
         case "advertise":
 
-          if(!!knownFiles[hash] && (knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) || knownFiles[hash].multiaddr) {
+          let fileAdv = knownFiles[hash];
+          if(!!fileAdv && (fileAdv.bytes && fileAdv.bytes.length > 0) || fileAdv.multiaddr) {
 
-              let serviceName = "IPFS.get_" + hash;
+            let serviceName = "IPFS.get_" + hash;
 
-              fileLog(hash, "Going to advertise");
-              await conn.registerService(serviceName, async fc => {
-                fileLog(hash, "File asked");
-                fileAsked(hash);
+            fileLog(hash, "Going to advertise");
+            await conn.registerService(serviceName, async fc => {
+              fileLog(hash, "File asked");
+              fileAsked(hash);
 
-                let replyWithMultiaddr = async (multiaddr) =>
+              let replyWithMultiaddr = async (multiaddr) =>
                   await conn.sendMessage(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
 
-                // check cache
-                if(knownFiles[hash].multiaddr) {
-                  await replyWithMultiaddr(knownFiles[hash].multiaddr)
-                } else {
+              // check cache
+              if(fileAdv.multiaddr) {
+                await replyWithMultiaddr(fileAdv.multiaddr)
+              } else {
 
-                  // call multiaddr
-                  let msgId = genUUID();
+                // call multiaddr
+                let msgId = genUUID();
 
-                  let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
-                  let multiaddr = multiaddrResult.multiaddr;
-                  // upload a file
-                  console.log("going to upload");
-                  await ipfsAdd(multiaddr, knownFiles[hash].bytes);
-                  fileLog(hash, "File uploaded to "+multiaddr);
-                  knownFiles[hash].multiaddr = multiaddr;
-                  // send back multiaddr
-                  await replyWithMultiaddr(multiaddr);
-                }
+                let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                let multiaddr = multiaddrResult.multiaddr;
+                // upload a file
+                console.log("going to upload");
+                await ipfsAdd(multiaddr, fileAdv.bytes);
+                fileLog(hash, "File uploaded to "+multiaddr);
+                fileAdv.multiaddr = multiaddr;
+                // send back multiaddr
+                await replyWithMultiaddr(multiaddr);
+              }
 
-              });
-              fileLog(hash, "File advertised on Fluence network");
-              fileAdvertised(hash);
+            });
+            fileLog(hash, "File advertised on Fluence network");
+            fileAdvertised(hash);
 
           } else {
             fileLog(hash, "This file is unknown, or no data known");
@@ -134,12 +143,12 @@ export default async function ports(app) {
 
           break;
 
-
         default:
           console.error("Received unknown fileRequest from the Elm app", command);
-
       }
-  });
+  }
+
+  app.ports.fileRequest.subscribe(handleFileRequests);
 
   function validateHash(hash) {
     if (typeof hash === "string" && hash.length === 46 && hash.substring(0, 2) === "Qm"){
@@ -165,7 +174,9 @@ export default async function ports(app) {
     // TODO verify that hash is a valid IPFS hash
     fileRequested(hash);
 
-    if(!!knownFiles[hash] && knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) {
+    let file = knownFiles[hash];
+
+    if(!!file && file.bytes && file.bytes.length > 0) {
       fileLog(hash, "This file is already known");
 
     } else {
@@ -191,14 +202,40 @@ export default async function ports(app) {
 
   });
 
-
-  app.ports.calcHash.subscribe(async (fileBytesArray) => {
+  async function addFileToCache(fileBytesArray) {
     let h = await Hash.of(fileBytesArray);
 
     knownFiles[h] = {bytes:Uint8Array.from(fileBytesArray)};
 
     app.ports.hashReceiver.send(h);
-  });
+  }
+
+  app.ports.calcHash.subscribe(addFileToCache);
 
 
+
+
+  async function advertiseFileAndDisconnect(seed) {
+    let conn = await newConnection();
+
+    let bytes = [];
+
+    for (let step = 0; step < seed; step++) {
+      let byte = step % 254;
+      bytes.push(byte)
+    }
+    let newBytes = Uint8Array.from(bytes);
+
+    let h = await Hash.of(newBytes);
+
+    knownFiles[h] = {bytes:Uint8Array.from(newBytes)};
+
+    app.ports.hashReceiver.send(h);
+
+    await handleFileRequests({command: "advertise", hash: h});
+    await conn.connection.disconnect();
+  }
+
+
+  return {step: advertiseFileAndDisconnect};
 }
