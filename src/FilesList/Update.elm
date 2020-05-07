@@ -1,9 +1,10 @@
 module FilesList.Update exposing (update)
 
+import AddFile.Port exposing (bytesToArray)
+import Array
 import Bytes exposing (Bytes)
 import Bytes.Decode
 import Bytes.Encode
-import AddFile.Port exposing (bytesToList)
 import FilesList.Model exposing (FileEntry, Model, Status(..))
 import FilesList.Msg exposing (Msg(..))
 import FilesList.Port
@@ -31,25 +32,28 @@ encodeBytes arr =
         Bytes.Encode.sequence <|
             List.map Bytes.Encode.unsignedInt8 arr
 
+
 getImageType : Bytes -> Maybe String
 getImageType bytes =
     let
         firstEightBytes =
             case Bytes.Decode.decode (Bytes.Decode.bytes 8) bytes of
                 Just bs ->
-                    bytesToList bs
+                    Array.toList <| bytesToArray bs
 
                 Nothing ->
                     []
     in
-
     case firstEightBytes of
-        [ 0xFF, 0xD8, 0xFF, _, _, _, _, _] ->
+        [ 0xFF, 0xD8, 0xFF, _, _, _, _, _ ] ->
             Just "jpeg"
-        [ 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A] ->
+
+        [ 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A ] ->
             Just "png"
-        [ 0x47, 0x49, 0x46, _ , _, _, _, _] ->
+
+        [ 0x47, 0x49, 0x46, _, _, _, _, _ ] ->
             Just "gif"
+
         _ ->
             Nothing
 
@@ -73,7 +77,9 @@ update msg model =
 
             else
                 let
-                    imageType = getImageType bytes
+                    imageType =
+                        getImageType bytes
+
                     entry =
                         { imageType = imageType
                         , bytes = Just bytes
@@ -110,8 +116,12 @@ update msg model =
 
         FileLoaded hash data ->
             let
-                bytes = encodeBytes data
-                imageType = getImageType bytes
+                bytes =
+                    encodeBytes data
+
+                imageType =
+                    getImageType bytes
+
                 updatedModel =
                     updateEntry model hash (\e -> { e | status = Loaded, bytes = Just <| bytes, imageType = imageType })
             in

@@ -2,7 +2,7 @@ module AddFile.Update exposing (update)
 
 import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
-import AddFile.Port exposing (bytesToList, calcHashBytes)
+import AddFile.Port exposing (bytesToArray, calcHashBytes)
 import Bytes.Decode
 import File exposing (File)
 import File.Select as Select

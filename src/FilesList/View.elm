@@ -7,6 +7,7 @@ import Element.Border exposing (dashed)
 import Element.Events
 import Element.Font as Font
 import Element.Input as Input
+import Element.Lazy exposing (lazy)
 import FilesList.Model exposing (FileEntry, Model, Status(..))
 import FilesList.Msg exposing (Msg(..))
 import Ions.Background as BG
@@ -15,7 +16,7 @@ import Ions.Font as F
 import Palette exposing (fillWidth, limitLayoutWidth, shortHash)
 
 
-view : Model -> List (Element Msg)
+view : Model -> Element Msg
 view { files } =
     let
         filesList =
@@ -23,13 +24,14 @@ view { files } =
                 [ el [ limitLayoutWidth, padding 60, F.size6, Font.italic, Font.center, centerX, B.black, B.width1 B.Bottom ] <| text "Please add a file to be shown" ]
 
             else
-                files |> List.map showFile
+                files |> List.map showFileLazy
     in
-    [ row [ fillWidth, F.white, F.size2, BG.black, padding 20 ]
-        [ el [ centerX ] <| text "Provided & Discovered files:"
+    column [ fillWidth ] <|
+        [ row [ fillWidth, F.white, F.size2, BG.black, padding 20 ]
+            [ el [ centerX ] <| text "Provided & Discovered files:"
+            ]
         ]
-    ]
-        ++ filesList
+            ++ filesList
 
 
 showFilePreview : Maybe Bytes -> String -> Element Msg
@@ -94,6 +96,11 @@ showStatus s =
 
             Loaded ->
                 text "Loaded"
+
+
+showFileLazy : FileEntry -> Element Msg
+showFileLazy =
+    lazy showFile
 
 
 showFile : FileEntry -> Element Msg

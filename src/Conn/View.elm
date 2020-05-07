@@ -12,7 +12,7 @@ import Ions.Font as F
 import Palette exposing (dropdownBg, fillWidth, h1, layout, limitLayoutWidth, link, linkColor, shortHash)
 
 
-view : Model -> List (Element Msg)
+view : Model -> Element Msg
 view conn =
     let
         peer =
@@ -76,7 +76,7 @@ view conn =
                 )
                 (Element.text "Change")
     in
-    [ column [ fillWidth, BG.lightYellow, F.nearBlack, spacing 3, paddingXY 0 5 ]
+    column [ fillWidth, BG.lightYellow, F.nearBlack, spacing 3, paddingXY 0 5 ]
         [ row [ limitLayoutWidth, centerX, BG.white ] [ defn "Peer ID:", valn <| shortHash peer.id ]
         , row [ limitLayoutWidth, centerX, BG.white ] [ defn "Discovered peers:", valn <| Element.text discovered ]
         , row [ limitLayoutWidth, centerX, BG.white ]
@@ -85,4 +85,3 @@ view conn =
             , changeRelay
             ]
         ]
-    ]
