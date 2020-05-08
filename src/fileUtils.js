@@ -58,3 +58,17 @@ export function downloadBlob(data, fileName, mimeType) {
     return window.URL.revokeObjectURL(url);
   }, 1000);
 }
+
+const PNG = Uint8Array.from([ 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A ]);
+
+export function getImageType(data) {
+  if (data[0] === 0xFF && data[1] === 0xD8 && data[2] === 0xFF) {
+    return "jpeg"
+  } else if (data.subarray(0, 8) === PNG) {
+    return "png"
+  } else if (data[0] === 0x47 && data[1] === 0x49 && data[2] === 0x46) {
+    return "gif"
+  }
+
+  return null;
+}

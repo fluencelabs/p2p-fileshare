@@ -1,7 +1,5 @@
 module FilesList.View exposing (view)
 
-import Base64.Encode as Encode
-import Bytes exposing (Bytes)
 import Element exposing (Element, alignRight, centerX, centerY, column, el, height, mouseOver, padding, paddingXY, paragraph, px, row, text, width)
 import Element.Border exposing (dashed)
 import Element.Events
@@ -13,7 +11,7 @@ import FilesList.Msg exposing (Msg(..))
 import Ions.Background as BG
 import Ions.Border as B
 import Ions.Font as F
-import Palette exposing (fillWidth, limitLayoutWidth, shortHash)
+import Palette exposing (fillWidth, limitLayoutWidth)
 
 
 view : Model -> Element Msg
@@ -34,15 +32,15 @@ view { files } =
             ++ filesList
 
 
-showFilePreview : Maybe Bytes -> String -> Element Msg
-showFilePreview maybeBytes imageType =
+showFilePreview : Maybe String -> Maybe String -> Element Msg
+showFilePreview maybeImageType maybeBase64 =
     let
         imgPreviewSrc =
-            case maybeBytes of
-                Just bytes ->
-                    Just <| "data:image/" ++ imageType ++ ";base64," ++ Encode.encode (Encode.bytes bytes)
+            case (maybeBase64, maybeImageType) of
+                (Just base64, Just imageType) ->
+                    Just <| "data:image/" ++ imageType ++ ";base64," ++ base64
 
-                Nothing ->
+                (_, _)  ->
                     Nothing
     in
     case imgPreviewSrc of
@@ -56,14 +54,14 @@ showFilePreview maybeBytes imageType =
                 { description = "", src = src }
 
         Nothing ->
-            text "preview n/a"
+            el [ centerY, centerX ] <| text "n/a"
 
 
 showPreview : FileEntry -> Element Msg
-showPreview { hash, imageType, bytes } =
+showPreview { imageType, base64, hash } =
     let
         p =
-            imageType |> Maybe.map (showFilePreview bytes)
+             showFilePreview imageType base64
     in
     el
         [ Element.Events.onClick <| DownloadFile hash
@@ -75,7 +73,7 @@ showPreview { hash, imageType, bytes } =
         , Element.pointer
         ]
     <|
-        Maybe.withDefault (el [ centerY, centerX ] <| text "n/a") p
+        p
 
 
 showStatus : Status -> Element Msg
