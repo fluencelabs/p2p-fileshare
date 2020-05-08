@@ -5,7 +5,7 @@ import bs58 from 'bs58';
 import Janus from 'janus-beta';
 import {genUUID} from "janus-beta/dist/function_call";
 
-import {ipfsAdd, ipfsGet, downloadBlob} from "./fileUtils";
+import {ipfsAdd, ipfsGet, downloadBlob, getImageType} from "./fileUtils";
 
 export default async function ports(app) {
 
@@ -60,25 +60,88 @@ export default async function ports(app) {
    * Handle file commands, sending events
    */
 
-  let emptyFileEvent = {log:null, data:[]};
+  let emptyFileEvent = {log:null, preview: null};
   let sendToFileReceiver = ev => {
     app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
   };
 
-  let fileAdvertised = (hash) =>
-    sendToFileReceiver({event: "advertised", hash});
+  let fileAdvertised = (hash, preview) =>
+    sendToFileReceiver({event: "advertised", hash, preview});
   let fileAsked = (hash) =>
     sendToFileReceiver({event: "asked", hash});
   let fileRequested = (hash) =>
     sendToFileReceiver({event: "requested", hash});
-  let fileLoaded = (hash, data) =>
-    sendToFileReceiver({event: "loaded", data, hash});
+  let fileLoaded = (hash, preview) =>
+    sendToFileReceiver({event: "loaded", hash, preview});
   let fileLog = (hash, log) =>
     sendToFileReceiver({event: "log", hash, log});
 
   let multiaddrService = "IPFS.multiaddr";
 
   let knownFiles = {};
+
+  app.ports.selectFile.subscribe(async () => {
+    var input = document.createElement('input');
+    input.type = 'file';
+
+    input.onchange = async e => {
+      let file = e.target.files[0];
+      let arrayBuffer = await file.arrayBuffer();
+      let array = new Uint8Array(arrayBuffer);
+
+      let hash = await Hash.of(array);
+
+      if(!knownFiles[hash]) {
+
+        fileRequested(hash);
+
+        let previewStr = getPreview(array);
+
+        knownFiles[hash] = {bytes:array, preview: previewStr};
+
+        let serviceName = "IPFS.get_" + hash;
+
+        fileLog(hash, "Going to advertise");
+        fileLoaded(hash, previewStr);
+        await conn.registerService(serviceName, async fc => {
+          fileLog(hash, "File asked");
+          fileAsked(hash);
+
+          let replyWithMultiaddr = async (multiaddr) =>
+              await conn.sendMessage(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
+
+          // check cache
+          if(knownFiles[hash].multiaddr) {
+            await replyWithMultiaddr(knownFiles[hash].multiaddr)
+          } else {
+
+            // call multiaddr
+            let msgId = genUUID();
+
+            let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+            let multiaddr = multiaddrResult.multiaddr;
+            // upload a file
+            console.log("going to upload");
+            await ipfsAdd(multiaddr, knownFiles[hash].bytes);
+            fileLog(hash, "File uploaded to "+multiaddr);
+            knownFiles[hash].multiaddr = multiaddr;
+            // send back multiaddr
+            await replyWithMultiaddr(multiaddr);
+          }
+
+        });
+        fileLog(hash, "File advertised on Fluence network");
+
+        fileAdvertised(hash, previewStr);
+
+      } else {
+        console.log("This file is already advertised.");
+        fileLog(hash, "Trying to advertise this file, but the file is already advertised.");
+      }
+    };
+
+    input.click();
+  });
 
   app.ports.fileRequest.subscribe(async ({command, hash}) => {
     // TODO Queue, and handle commands once (re)connected
@@ -90,50 +153,6 @@ export default async function ports(app) {
             downloadBlob(knownFiles[hash].bytes, hash, 'application/octet-stream');
           } else console.error("Cannot download as file is unknown for hash: "+hash);
           break;
-
-        case "advertise":
-
-          if(!!knownFiles[hash] && (knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) || knownFiles[hash].multiaddr) {
-
-              let serviceName = "IPFS.get_" + hash;
-
-              fileLog(hash, "Going to advertise");
-              await conn.registerService(serviceName, async fc => {
-                fileLog(hash, "File asked");
-                fileAsked(hash);
-
-                let replyWithMultiaddr = async (multiaddr) =>
-                  await conn.sendMessage(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
-
-                // check cache
-                if(knownFiles[hash].multiaddr) {
-                  await replyWithMultiaddr(knownFiles[hash].multiaddr)
-                } else {
-
-                  // call multiaddr
-                  let msgId = genUUID();
-
-                  let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
-                  let multiaddr = multiaddrResult.multiaddr;
-                  // upload a file
-                  console.log("going to upload");
-                  await ipfsAdd(multiaddr, knownFiles[hash].bytes);
-                  fileLog(hash, "File uploaded to "+multiaddr);
-                  knownFiles[hash].multiaddr = multiaddr;
-                  // send back multiaddr
-                  await replyWithMultiaddr(multiaddr);
-                }
-
-              });
-              fileLog(hash, "File advertised on Fluence network");
-              fileAdvertised(hash);
-
-          } else {
-            fileLog(hash, "This file is unknown, or no data known");
-          }
-
-          break;
-
 
         default:
           console.error("Received unknown fileRequest from the Elm app", command);
@@ -162,14 +181,12 @@ export default async function ports(app) {
       return;
     }
 
-    // TODO verify that hash is a valid IPFS hash
     fileRequested(hash);
 
-    if(!!knownFiles[hash] && knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) {
+    let file = knownFiles[hash];
+    if(!!file && file.bytes && file.bytes.length > 0) {
       fileLog(hash, "This file is already known");
-
     } else {
-
       let msgId = genUUID();
       let serviceName = "IPFS.get_" + hash;
 
@@ -182,23 +199,28 @@ export default async function ports(app) {
       let data = await ipfsGet(multiaddr, hash);
       fileLog(hash, "File downloaded from " + multiaddr);
 
-      fileLoaded(hash, Array.from(data));
+      let preview = getPreview(data);
+
+      fileLoaded(hash, preview);
       knownFiles[hash] = {
         bytes: data,
-        multiaddr
+        multiaddr,
+        preview
       };
     }
 
   });
 
+  // TODO resize images
+  function getPreview(data) {
+    let imageType = getImageType(data);
 
-  app.ports.calcHash.subscribe(async (fileBytesArray) => {
-    let h = await Hash.of(fileBytesArray);
+    let preview = null;
+    if (imageType) {
+      let base64 = Buffer.from(data).toString('base64');
+      preview = "data:image/" + imageType + ";base64," + base64;
+    }
 
-    knownFiles[h] = {bytes:Uint8Array.from(fileBytesArray)};
-
-    app.ports.hashReceiver.send(h);
-  });
-
-
+    return preview;
+  }
 }

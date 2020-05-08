@@ -1,7 +1,5 @@
 module FilesList.View exposing (view)
 
-import Base64.Encode as Encode
-import Bytes exposing (Bytes)
 import Element exposing (Element, alignRight, centerX, centerY, column, el, height, mouseOver, padding, paddingXY, paragraph, px, row, text, width)
 import Element.Border exposing (dashed)
 import Element.Events
@@ -34,18 +32,9 @@ view { files } =
             ++ filesList
 
 
-showFilePreview : Maybe Bytes -> String -> Element Msg
-showFilePreview maybeBytes imageType =
-    let
-        imgPreviewSrc =
-            case maybeBytes of
-                Just bytes ->
-                    Just <| "data:image/" ++ imageType ++ ";base64," ++ Encode.encode (Encode.bytes bytes)
-
-                Nothing ->
-                    Nothing
-    in
-    case imgPreviewSrc of
+showFilePreview : Maybe String -> Element Msg
+showFilePreview maybePreview =
+    case maybePreview of
         Just src ->
             Element.image
                 [ width <| Element.px 30
@@ -56,14 +45,14 @@ showFilePreview maybeBytes imageType =
                 { description = "", src = src }
 
         Nothing ->
-            text "preview n/a"
+            el [ centerY, centerX ] <| text "n/a"
 
 
 showPreview : FileEntry -> Element Msg
-showPreview { hash, imageType, bytes } =
+showPreview { preview, hash } =
     let
         p =
-            imageType |> Maybe.map (showFilePreview bytes)
+             showFilePreview preview
     in
     el
         [ Element.Events.onClick <| DownloadFile hash
@@ -75,7 +64,7 @@ showPreview { hash, imageType, bytes } =
         , Element.pointer
         ]
     <|
-        Maybe.withDefault (el [ centerY, centerX ] <| text "n/a") p
+        p
 
 
 showStatus : Status -> Element Msg

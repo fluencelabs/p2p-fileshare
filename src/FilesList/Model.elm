@@ -1,8 +1,5 @@
 module FilesList.Model exposing (FileEntry, Model, Status(..), emptyFilesList)
 
-import Bytes exposing (Bytes)
-
-
 type Status
     = Prepared
     | Advertised
@@ -12,8 +9,7 @@ type Status
 
 
 type alias FileEntry =
-    { imageType : Maybe String
-    , bytes : Maybe Bytes
+    { preview : Maybe String
     , hash : String
     , status : Status
     , logs : List String
