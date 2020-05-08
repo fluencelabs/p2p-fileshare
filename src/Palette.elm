@@ -10,25 +10,51 @@ import Ions.Background as BG
 import Ions.Border as B
 import Ions.Color as C
 import Ions.Font as F
+import Ions.Size as S
 
 
-linkColor =
-    F.darkBlue
+accentFontColor =
+    F.darkRed
 
 
-buttonColor =
-    BG.orange
+letterSpacing =
+    Font.letterSpacing 1.7
+
+
+accentButton =
+    [ F.white, BG.darkRed ]
+
+
+blockBackground =
+    BG.nearWhite
+
+
+blockTitle inside =
+    el [ fillWidth, accentFontColor, letterSpacing, Font.bold, Element.paddingXY 0 <| S.baseRem 1 ] <| inside
 
 
 link : String -> String -> Element msg
 link url label =
     Element.link
-        [ linkColor, C.easeIn, mouseOver [ BG.washedYellow ] ]
+        linkStyle
         { url = url, label = Element.text label }
 
 
+linkStyle =
+    [ accentFontColor, C.easeIn, mouseOver [ BG.washedYellow ], Font.underline ]
+
+
 h1 txt =
-    el [ Region.heading 1, F.size1, Font.semiBold, Element.centerX ] <| Element.text txt
+    el
+        [ Region.heading 1
+        , F.size2
+        , Font.semiBold
+        , Element.paddingXY 0 (S.baseRem 0.67)
+        , F.code
+        , accentFontColor
+        ]
+    <|
+        Element.text txt
 
 
 fillWidth =
@@ -36,11 +62,15 @@ fillWidth =
 
 
 limitLayoutWidth =
-    Element.width (Element.fill |> Element.maximum 700)
+    Element.width (Element.fill |> Element.maximum (S.baseRem 64))
 
 
-dropdownBg =
-    Background.color <| Element.rgb255 210 187 187
+layoutBlock =
+    [ Element.centerX, limitLayoutWidth, Element.paddingXY (S.baseRem 4) (S.baseRem 1) ]
+
+
+pSpacing =
+    Element.spacing <| S.baseRem 0.5
 
 
 shortHash hash =
@@ -54,18 +84,31 @@ shortHash hash =
     in
     Element.el
         [ B.nearBlack
-        , Font.family [ Font.monospace ]
+        , F.code
         ]
     <|
         Element.text sh
 
 
+showHash hash =
+    Element.el
+        [ B.nearBlack
+        , F.code
+        ]
+    <|
+        Element.text hash
+
+
 layout : List (Element msg) -> Html msg
 layout elms =
-    Element.layout [] <|
+    Element.layout
+        [ F.size6
+        , F.sansSerif
+        , Element.padding (S.baseRem 1)
+        ]
+    <|
         Element.column
             [ Element.centerX
             , fillWidth
-            , F.baseSize
             ]
             elms
