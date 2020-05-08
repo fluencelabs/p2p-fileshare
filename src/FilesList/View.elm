@@ -32,18 +32,9 @@ view { files } =
             ++ filesList
 
 
-showFilePreview : Maybe String -> Maybe String -> Element Msg
-showFilePreview maybeImageType maybeBase64 =
-    let
-        imgPreviewSrc =
-            case (maybeBase64, maybeImageType) of
-                (Just base64, Just imageType) ->
-                    Just <| "data:image/" ++ imageType ++ ";base64," ++ base64
-
-                (_, _)  ->
-                    Nothing
-    in
-    case imgPreviewSrc of
+showFilePreview : Maybe String -> Element Msg
+showFilePreview maybePreview =
+    case maybePreview of
         Just src ->
             Element.image
                 [ width <| Element.px 30
@@ -58,10 +49,10 @@ showFilePreview maybeImageType maybeBase64 =
 
 
 showPreview : FileEntry -> Element Msg
-showPreview { imageType, base64, hash } =
+showPreview { preview, hash } =
     let
         p =
-             showFilePreview imageType base64
+             showFilePreview preview
     in
     el
         [ Element.Events.onClick <| DownloadFile hash

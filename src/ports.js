@@ -60,19 +60,19 @@ export default async function ports(app) {
    * Handle file commands, sending events
    */
 
-  let emptyFileEvent = {log:null, imageType:null,base64:null};
+  let emptyFileEvent = {log:null, preview: null};
   let sendToFileReceiver = ev => {
     app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
   };
 
-  let fileAdvertised = (hash, imageType, base64) =>
-    sendToFileReceiver({event: "advertised", hash, imageType, base64});
+  let fileAdvertised = (hash, preview) =>
+    sendToFileReceiver({event: "advertised", hash, preview});
   let fileAsked = (hash) =>
     sendToFileReceiver({event: "asked", hash});
   let fileRequested = (hash) =>
     sendToFileReceiver({event: "requested", hash});
-  let fileLoaded = (hash, imageType, base64) =>
-    sendToFileReceiver({event: "loaded", hash, imageType, base64});
+  let fileLoaded = (hash, preview) =>
+    sendToFileReceiver({event: "loaded", hash, preview});
   let fileLog = (hash, log) =>
     sendToFileReceiver({event: "log", hash, log});
 
@@ -95,14 +95,9 @@ export default async function ports(app) {
 
         fileRequested(hash);
 
-        let imageType = getImageType(array);
+        let previewStr = getPreview(array);
 
-        let base64 = null;
-        if (imageType) {
-          base64 = Buffer.from(array).toString('base64');
-        }
-
-        knownFiles[hash] = {bytes:array, imageType, base64};
+        knownFiles[hash] = {bytes:array, preview: previewStr};
 
         let serviceName = "IPFS.get_" + hash;
 
@@ -135,7 +130,8 @@ export default async function ports(app) {
 
         });
         fileLog(hash, "File advertised on Fluence network");
-        fileAdvertised(hash, imageType, base64);
+
+        fileAdvertised(hash, previewStr);
 
       } else {
         console.log("This file is already advertised.");
@@ -210,21 +206,27 @@ export default async function ports(app) {
       let data = await ipfsGet(multiaddr, hash);
       fileLog(hash, "File downloaded from " + multiaddr);
 
-      let imageType = getImageType(data);
+      let preview = getPreview(data);
 
-      let base64 = null;
-      if (imageType) {
-        base64 = Buffer.from(data).toString('base64')
-      }
-
-      fileLoaded(hash, imageType, base64);
+      fileLoaded(hash, preview);
       knownFiles[hash] = {
         bytes: data,
         multiaddr,
-        imageType,
-        base64
+        preview
       };
     }
 
   });
+
+  function getPreview(data) {
+    let imageType = getImageType(data);
+
+    let preview = null;
+    if (imageType) {
+      let base64 = Buffer.from(data).toString('base64');
+      preview = "data:image/" + imageType + ";base64," + base64;
+    }
+
+    return preview;
+  }
 }

@@ -9,8 +9,7 @@ type Status
 
 
 type alias FileEntry =
-    { imageType : Maybe String
-    , base64: Maybe String
+    { preview : Maybe String
     , hash : String
     , status : Status
     , logs : List String

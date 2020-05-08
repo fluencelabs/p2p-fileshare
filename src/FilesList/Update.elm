@@ -40,8 +40,7 @@ update msg model =
             else
                 let
                     entry =
-                        { imageType = Nothing
-                        , base64 = Nothing
+                        { preview = Nothing
                         , hash = hash
                         , status = Requested
                         , logs = [ "just requested to download" ]
@@ -53,17 +52,17 @@ update msg model =
                 in
                 ( { model | files = files }, Cmd.none )
 
-        FileLoaded hash imageType base64 ->
+        FileLoaded hash preview ->
             let
                 updatedModel =
-                    updateEntry model hash (\e -> { e | status = Loaded, imageType = imageType, base64 = base64 })
+                    updateEntry model hash (\e -> { e | status = Loaded, preview = preview })
             in
             ( updatedModel, Cmd.none )
 
-        FileAdvertised hash imageType base64 ->
+        FileAdvertised hash preview ->
             let
                 updatedModel =
-                    updateEntry model hash (\e -> { e | status = Advertised, imageType = imageType, base64 = base64  })
+                    updateEntry model hash (\e -> { e | status = Advertised, preview = preview })
             in
             ( updatedModel, Cmd.none )
 
