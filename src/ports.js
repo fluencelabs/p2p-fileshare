@@ -102,6 +102,7 @@ export default async function ports(app) {
         let serviceName = "IPFS.get_" + hash;
 
         fileLog(hash, "Going to advertise");
+        fileLoaded(hash, previewStr);
         await conn.registerService(serviceName, async fc => {
           fileLog(hash, "File asked");
           fileAsked(hash);
@@ -153,13 +154,6 @@ export default async function ports(app) {
           } else console.error("Cannot download as file is unknown for hash: "+hash);
           break;
 
-        case "advertise":
-
-
-
-          break;
-
-
         default:
           console.error("Received unknown fileRequest from the Elm app", command);
 
@@ -189,11 +183,10 @@ export default async function ports(app) {
 
     fileRequested(hash);
 
-    if(!!knownFiles[hash] && knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0) {
+    let file = knownFiles[hash];
+    if(!!file && file.bytes && file.bytes.length > 0) {
       fileLog(hash, "This file is already known");
-
     } else {
-
       let msgId = genUUID();
       let serviceName = "IPFS.get_" + hash;
 

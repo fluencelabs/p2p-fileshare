@@ -4,18 +4,15 @@ import IpfsClient from "ipfs-http-client";
 export async function ipfsGet(multiaddr, path) {
     const ipfs = new IpfsClient(multiaddr);
     const source = ipfs.cat(path);
-    let bytes = new Uint8Array();
+    let chunks = [];
     try {
         for await (const chunk of source) {
-            const newArray = new Uint8Array(bytes.length + chunk.length);
-            newArray.set(bytes, 0);
-            newArray.set(chunk, bytes.length);
-            bytes = newArray;
+            chunks.push(Buffer.from(chunk));
         }
+        return Promise.resolve(Buffer.concat(chunks));
     } catch (err) {
         console.error(err);
     }
-    return Promise.resolve(bytes);
 }
 
 // Add a file to IPFS node with $multiaddr address
