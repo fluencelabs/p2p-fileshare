@@ -11,7 +11,7 @@ import FilesList.Msg exposing (Msg(..))
 import Ions.Background as BG
 import Ions.Border as B
 import Ions.Font as F
-import Palette exposing (fillWidth, limitLayoutWidth)
+import Palette exposing (blockBackground, fillWidth, layoutBlock, limitLayoutWidth, pSpacing, showHash)
 
 
 view : Model -> Element Msg
@@ -24,9 +24,9 @@ view { files } =
             else
                 files |> List.map showFileLazy
     in
-    column [ fillWidth ] <|
+    column (layoutBlock ++ [ blockBackground ]) <|
         [ row [ fillWidth, F.white, F.size2, BG.black, padding 20 ]
-            [ el [ centerX ] <| text "Provided & Discovered files:"
+            [ el [ centerX ] <| text "Files list"
             ]
         ]
             ++ filesList
@@ -105,7 +105,7 @@ showFile : FileEntry -> Element Msg
 showFile fileEntry =
     let
         hashView =
-            el [ Font.family [ Font.monospace ], Font.alignRight, centerX ] <| text fileEntry.hash
+            el [ Font.alignRight, centerX ] <| showHash fileEntry.hash
 
         seeLogsStyles =
             if fileEntry.logsVisible then
@@ -117,7 +117,7 @@ showFile fileEntry =
         seeLogs =
             Input.button
                 ([ B.width1 B.AllSides
-                 , B.darkGray
+                 , B.lightGray
                  , padding 10
                  , alignRight
                  ]
@@ -135,18 +135,18 @@ showFile fileEntry =
                     , centerX
                     , Element.paddingXY 45 20
                     , Element.spacing 5
-                    , BG.whiteAlpha 850
+                    , BG.white
                     , B.width1 B.Left
                     , B.gray
                     , dashed
                     ]
                 <|
-                    List.map (\l -> paragraph [ Font.family [ Font.monospace ] ] [ text <| "> " ++ l ]) fileEntry.logs
+                    List.map (\l -> paragraph [ F.code ] [ text <| "> " ++ l ]) fileEntry.logs
 
             else
                 Element.none
     in
-    column [ fillWidth, paddingXY 0 10, mouseOver [ BG.washedRed ], B.width1 B.Bottom, B.nearBlack ]
+    column [ fillWidth, paddingXY 0 10, B.width1 B.Bottom, B.nearBlack ]
         [ row [ limitLayoutWidth, BG.white, centerX ]
             [ showPreview fileEntry
             , hashView

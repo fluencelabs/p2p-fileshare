@@ -23,7 +23,8 @@ import Ions.Background as BG
 import Ions.Border as B
 import Ions.Color as C
 import Ions.Font as F
-import Palette exposing (buttonColor, fillWidth, limitLayoutWidth)
+import Ions.Size as S
+import Palette exposing (accentButton, blockTitle, fillWidth, layoutBlock)
 
 
 view : Model -> Element Msg
@@ -38,20 +39,15 @@ view addFile =
 
         addFileButton =
             Input.button
-                [ BG.white
-                , B.lightGreen
-                , B.width2 B.AllSides
-                , limitLayoutWidth
-                , centerX
-                , padding 10
-                , Font.center
-                , C.easeIn
-                , mouseOver [ B.green ]
-                ]
-                { onPress = Just <| SetVisible <| not addFile.visible, label = text "Add File" }
+                (accentButton
+                    ++ [ paddingXY (S.baseRem 3) (S.baseRem 0.5)
+                       , Font.center
+                       ]
+                )
+                { onPress = Just <| SetVisible <| not addFile.visible, label = text "Add File +" }
     in
     column [ fillWidth ]
-        [ row [ fillWidth, BG.washedGreen, paddingXY 0 20 ] [ addFileButton ]
+        [ row layoutBlock [ addFileButton ]
         , block
         ]
 
@@ -60,8 +56,8 @@ addFileBlock : Model -> Element Msg
 addFileBlock model =
     let
         addUpload =
-            row [ centerX, limitLayoutWidth, BG.white ]
-                [ el [ width (fillPortion 3), padding 10, F.nearBlack ] <| text "Provide a file from your computer:"
+            row [ centerX, fillWidth, BG.white ]
+                [ el [ width (fillPortion 3), padding 10, F.nearBlack ] <| text "Choose file from your device"
                 , Input.button
                     [ centerX
                     , width (fillPortion 2)
@@ -70,7 +66,7 @@ addFileBlock model =
                     , B.width1 B.AllSides
                     , padding 10
                     ]
-                    { onPress = Just FileRequested, label = text "Select & Upload" }
+                    { onPress = Just FileRequested, label = text "Browse file" }
                 ]
 
         ipfsDownload =
@@ -92,10 +88,11 @@ addFileBlock model =
                 }
 
         addIpfs =
-            row [ limitLayoutWidth, centerX, BG.white, spacing 0 ] [ ipfsInput ]
+            row [ fillWidth, centerX, BG.white, spacing 0 ] [ ipfsInput ]
     in
-    column [ fillWidth, spacing 20, BG.washedGreen ]
-        [ addUpload
+    column (layoutBlock ++ [ B.width1 B.AllSides, B.radius2, B.blackAlpha 100, spacing 20, F.size7 ])
+        [ blockTitle <| text "ADD FILE"
+        , addUpload
         , addIpfs
         , el [ Element.height <| Element.px 0 ] <| Element.none
         ]
