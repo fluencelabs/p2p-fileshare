@@ -5,6 +5,14 @@ import Ions.Color as TC
 import Ions.Size as S
 
 
+sansSerif =
+    Element.Font.family <| List.map Element.Font.typeface [ "-apple-system", "BlinkMacSystemFont", "avenir next", "avenir", "helvetica neue", "helvetica", "ubuntu", "roboto", "noto", "segoe ui", "arial", "sans-serif" ]
+
+
+code =
+    Element.Font.family <| List.map Element.Font.typeface [ "Consolas", "monaco", "monospace" ]
+
+
 baseSize =
     size S.base
 
@@ -31,6 +39,10 @@ size5 =
 
 size6 =
     size <| S.baseRem 0.875
+
+
+size7 =
+    size <| S.baseRem 0.75
 
 
 black =

@@ -12,7 +12,9 @@ import Element
         , column
         , el
         , fillPortion
+        , height
         , padding
+        , paddingXY
         , paragraph
         , row
         , spacing
@@ -27,9 +29,10 @@ import Html exposing (Html)
 import Ions.Background as BG
 import Ions.Border as B
 import Ions.Font as F
+import Ions.Size as S
 import Model exposing (Model)
 import Msg exposing (..)
-import Palette exposing (fillWidth, h1, layout, limitLayoutWidth, link, linkColor)
+import Palette exposing (fillWidth, h1, layout, layoutBlock, link, pSpacing)
 
 
 view : Model -> Document Msg
@@ -73,21 +76,25 @@ longDescriptionText =
 
 header : List (Element Msg)
 header =
-    [ row
-        [ fillWidth, B.nearBlack, B.width1 B.Bottom, padding 20 ]
-        [ h1 "Fluence demo" ]
-    , row
-        [ fillWidth, BG.nearWhite, padding 20 ]
-        [ el [ Font.italic, centerX ] <|
-            text "Fluence-powered client-to-client file sharing via IPFS"
-        ]
-    , row
-        [ centerX, limitLayoutWidth, padding 20 ]
-        [ textColumn [ width <| fillPortion 5 ] [ paragraph [] [ text longDescriptionText ] ]
-        , column [ width <| fillPortion 1, spacing 5, Element.alignTop ]
-            [ el [ alignRight, alignTop ] <| link "https://fluence.network" "Whitepaper"
-            , el [ alignRight, alignTop ] <| link "https://fluence.network" "Deep dive"
+    [ column (layoutBlock ++ [ spacing (S.baseRem 1.125) ])
+        [ row
+            [ fillWidth ]
+            [ h1 "P2P Application Fluence Demo" ]
+        , row
+            [ fillWidth ]
+            [ paragraph [ Font.italic, F.gray, pSpacing ] <|
+                [ text "P2P file-sharing application over IPFS via Fluence relay" ]
             ]
+        , row
+            [ fillWidth ]
+            [ textColumn
+                [ fillWidth, spacing <| S.baseRem 1 ]
+                [ paragraph [ pSpacing ] [ text "This is a peer-to-peer file-sharing demo, that uses Fluence protocol to advertise and discover files, and IPFS to upload/download." ]
+                , paragraph [ pSpacing ] [ text "First, choose your local file and make it discoverable via Fluence network. Other peers may discover your device as a holder of the file and ask it to provide the file to a publicly accessible IPFS node. Your device will upload the file to the IPFS node and then share its multiaddress with the requesting peer." ]
+                , row [ spacing (S.baseRem 1) ] [ link "https://fluence.network" "More about Fluence", link "https://fluence.network" "Documentation" ]
+                ]
+            ]
+        , el [ height <| Element.px <| S.baseRem 0.5 ] Element.none
         ]
     ]
 
