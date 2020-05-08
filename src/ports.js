@@ -211,6 +211,7 @@ export default async function ports(app) {
 
   });
 
+  // TODO resize images
   function getPreview(data) {
     let imageType = getImageType(data);
 
