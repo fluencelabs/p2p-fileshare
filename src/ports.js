@@ -60,13 +60,15 @@ export default async function ports(app) {
    * Handle file commands, sending events
    */
 
-  let emptyFileEvent = {log:null, preview: null};
+  let emptyFileEvent = {log:null, preview: null, status: null};
   let sendToFileReceiver = ev => {
     app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
   };
 
   let fileAdvertised = (hash, preview) =>
     sendToFileReceiver({event: "advertised", hash, preview});
+  let changeStatus = (hash, status) =>
+      sendToFileReceiver({event: "change-status", hash, status});
   let fileAsked = (hash) =>
     sendToFileReceiver({event: "asked", hash});
   let fileRequested = (hash) =>
@@ -105,7 +107,6 @@ export default async function ports(app) {
         fileLoaded(hash, previewStr);
         await conn.registerService(serviceName, async fc => {
           fileLog(hash, "File asked");
-          fileAsked(hash);
 
           let replyWithMultiaddr = async (multiaddr) =>
               await conn.sendMessage(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
@@ -122,12 +123,15 @@ export default async function ports(app) {
             let multiaddr = multiaddrResult.multiaddr;
             // upload a file
             console.log("going to upload");
+            changeStatus(hash, "uploading");
             await ipfsAdd(multiaddr, knownFiles[hash].bytes);
             fileLog(hash, "File uploaded to "+multiaddr);
             knownFiles[hash].multiaddr = multiaddr;
             // send back multiaddr
             await replyWithMultiaddr(multiaddr);
           }
+
+          fileAsked(hash);
 
         });
         fileLog(hash, "File advertised on Fluence network");
@@ -196,6 +200,7 @@ export default async function ports(app) {
 
       fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
 
+      changeStatus(hash, "downloading");
       let data = await ipfsGet(multiaddr, hash);
       fileLog(hash, "File downloaded from " + multiaddr);
 
@@ -213,6 +218,10 @@ export default async function ports(app) {
 
   // TODO resize images
   function getPreview(data) {
+
+    // if data is more than 10Mb, do not show preview, it will be laggy
+    if (data.length > 10 * 1000 * 1000) return null;
+
     let imageType = getImageType(data);
 
     let preview = null;

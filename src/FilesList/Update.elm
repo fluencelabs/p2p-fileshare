@@ -43,6 +43,7 @@ update msg model =
                         { preview = Nothing
                         , hash = hash
                         , status = Requested
+                        , askedCounter = 0
                         , logs = [ "just requested to download" ]
                         , logsVisible = False
                         }
@@ -66,6 +67,13 @@ update msg model =
             in
             ( updatedModel, Cmd.none )
 
+        ChangeStatus hash status ->
+                    let
+                        updatedModel =
+                            updateEntry model hash (\e -> { e | status = status })
+                    in
+                    ( updatedModel, Cmd.none )
+
         FileLog hash log ->
             let
                 updatedModel =
@@ -80,15 +88,9 @@ update msg model =
                         hash
                         (\e ->
                             let
-                                st =
-                                    case e.status of
-                                        Seeding i ->
-                                            Seeding (i + 1)
-
-                                        _ ->
-                                            Seeding 1
+                                newAskedCounter = e.askedCounter + 1
                             in
-                            { e | status = st }
+                            { e | status = Seeding newAskedCounter, askedCounter = newAskedCounter }
                         )
             in
             ( updatedModel, Cmd.none )

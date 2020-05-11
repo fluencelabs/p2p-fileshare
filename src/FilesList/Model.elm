@@ -6,12 +6,15 @@ type Status
     | Seeding Int
     | Requested
     | Loaded
+    | Uploading
+    | Downloading
 
 
 type alias FileEntry =
     { preview : Maybe String
     , hash : String
     , status : Status
+    , askedCounter : Int
     , logs : List String
     , logsVisible : Bool
     }
