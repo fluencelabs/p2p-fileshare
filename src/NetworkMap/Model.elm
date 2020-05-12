@@ -9,8 +9,7 @@ type alias Peer =
     { id : String }
 
 type alias NodeEntry =
-    { updateDate: String
-    , peer: Peer
+    { peer: Peer
     , peerType: PeerType
     }
 

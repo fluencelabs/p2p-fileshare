@@ -8,11 +8,10 @@ import NetworkMap.Port
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        PeerAppeared peer peerType date ->
+        PeerAppeared peer peerType ->
             let
                 entry =
-                    { updateDate = date
-                    , peer = peer
+                    { peer = peer
                     , peerType = peerType
                     }
                 peers = model.network ++ [ entry ]

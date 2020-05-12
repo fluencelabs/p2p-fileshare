@@ -36,6 +36,24 @@ export default async function ports(app) {
   let conn = await Fluence.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, peerId);
   relayEvent("relay_connected", randomRelay);
 
+  let peerAppearedEvent = (peer, peerType) => {
+    app.ports.networkMapReceiver.send({event: "peer_appeared", peer: {id: peer}, peerType});
+  };
+
+  conn.subscribe((args, target, replyTo) => {
+    for (const protocol of replyTo.protocols) {
+      if (protocol.protocol !== 'signature') {
+        peerAppearedEvent(protocol.value, protocol.protocol)
+      }
+    }
+
+    for (const protocol of target.protocols) {
+      if (protocol.protocol !== 'signature') {
+        peerAppearedEvent(protocol.value, protocol.protocol)
+      }
+    }
+  });
+
   /**
    * Handle connection commands
    */

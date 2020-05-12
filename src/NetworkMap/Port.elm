@@ -31,7 +31,7 @@ eventToMsg event =
                 let
                     peerType = stringToPeerType event.peerType
                 in
-                Maybe.map (\pt -> PeerAppeared event.peer pt event.updateDate) peerType
+                Maybe.map (\pt -> PeerAppeared event.peer pt) peerType
 
             _ ->
                 Nothing
