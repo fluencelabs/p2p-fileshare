@@ -60,7 +60,7 @@ export default async function ports(app) {
    * Handle file commands, sending events
    */
 
-  let emptyFileEvent = {log:null, preview: null, status: null};
+  let emptyFileEvent = {log:null, preview: null};
   let sendToFileReceiver = ev => {
     app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
   };

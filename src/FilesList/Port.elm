@@ -17,23 +17,6 @@ port fileRequest : Command -> Cmd msg
 
 port fileReceiver : (Event -> msg) -> Sub msg
 
-stringToStatus : String -> Maybe Status
-stringToStatus statusString =
-    case statusString of
-        "prepared" ->
-            Just Prepared
-        "advertised" ->
-            Just Advertised
-        "requested" ->
-            Just Requested
-        "uploading" ->
-            Just Uploading
-        "downloading" ->
-            Just Downloading
-        _ ->
-            Nothing
-
-
 eventToMsg : Event -> Msg
 eventToMsg event =
     Maybe.withDefault NoOp <|
