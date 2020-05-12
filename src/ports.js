@@ -68,11 +68,11 @@ export default async function ports(app) {
   let fileAdvertised = (hash, preview) =>
     sendToFileReceiver({event: "advertised", hash, preview});
   let fileUploading = (hash) =>
-      sendToFileReceiver({event: "file-uploading", hash});
+      sendToFileReceiver({event: "uploading", hash});
   let fileUploaded = (hash) =>
-      sendToFileReceiver({event: "file-uploaded", hash});
+      sendToFileReceiver({event: "uploaded", hash});
   let fileDownloading = (hash) =>
-      sendToFileReceiver({event: "file-downloading", hash});
+      sendToFileReceiver({event: "downloading", hash});
   let fileAsked = (hash) =>
     sendToFileReceiver({event: "asked", hash});
   let fileRequested = (hash) =>

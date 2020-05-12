@@ -9,7 +9,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, hash : String, log : Maybe String, preview: Maybe String, status: Maybe String }
+    { event : String, hash : String, log : Maybe String, preview: Maybe String }
 
 
 port fileRequest : Command -> Cmd msg
@@ -21,11 +21,11 @@ eventToMsg : Event -> Msg
 eventToMsg event =
     Maybe.withDefault NoOp <|
         case event.event of
-            "file-uploading" ->
+            "uploading" ->
                 Just <| FileUploading event.hash
-            "file-uploaded" ->
+            "uploaded" ->
                 Just <| FileUploaded event.hash
-            "file-downloading" ->
+            "downloading" ->
                 Just <| FileDownloading event.hash
             "advertised" ->
                 Just <| FileAdvertised event.hash event.preview
