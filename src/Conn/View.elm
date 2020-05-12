@@ -4,10 +4,7 @@ import Conn.Model exposing (Model)
 import Conn.Msg exposing (Msg(..))
 import Element exposing (Element, below, centerX, column, el, fillPortion, height, mouseOver, none, padding, paddingXY, px, row, spacing, text, width)
 import Element.Events as Events
-import Element.Font as Font
 import Ions.Background as BG
-import Ions.Border as B
-import Ions.Color as C
 import Ions.Font as F
 import Ions.Size as S
 import Palette exposing (blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)

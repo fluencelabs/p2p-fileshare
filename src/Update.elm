@@ -1,12 +1,11 @@
 module Update exposing (update)
 
-import AddFile.Msg
 import AddFile.Update
 import Conn.Update
-import FilesList.Msg
 import FilesList.Update
 import Model exposing (Model)
 import Msg exposing (..)
+import NetworkMap.Update
 
 
 liftUpdate :
@@ -41,6 +40,9 @@ updateAddFile =
 updateFilesList =
     liftUpdate .filesList (\c -> \m -> { m | filesList = c }) FilesListMsg FilesList.Update.update
 
+updateNetworkMap =
+    liftUpdate .networkMap (\c -> \m -> { m | networkMap = c }) NetworkMapMsg NetworkMap.Update.update
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -53,6 +55,9 @@ update msg model =
 
         FilesListMsg m ->
             updateFilesList m model
+
+        NetworkMapMsg m ->
+            updateNetworkMap m model
 
         _ ->
             ( model, Cmd.none )
