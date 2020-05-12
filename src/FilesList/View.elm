@@ -86,9 +86,9 @@ showStatus s =
             Loaded ->
                 text "Loaded"
             Uploading ->
-                text "Uploading"
+                text "Uploading..."
             Downloading ->
-                text "Downloading"
+                text "Downloading..."
 
 
 showFileLazy : FileEntry -> Element Msg
