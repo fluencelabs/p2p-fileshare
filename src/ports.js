@@ -2,8 +2,8 @@ import "regenerator-runtime";
 import Hash from 'ipfs-only-hash';
 import bs58 from 'bs58';
 
-import Janus from 'janus-beta';
-import {genUUID} from "janus-beta/dist/function_call";
+import Fluence from 'fluence';
+import {genUUID} from "fluence/dist/function_call";
 
 import {ipfsAdd, ipfsGet, downloadBlob, getImageType} from "./fileUtils";
 
@@ -26,14 +26,14 @@ export default async function ports(app) {
 
   relays.map(d => relayEvent("relay_discovered", d));
 
-  let peerId = await Janus.generatePeerId();
+  let peerId = await Fluence.generatePeerId();
   peerEvent("set_peer", {id: peerId.toB58String()});
 
   // connect to a random node
   let randomNodeNum = Math.floor(Math.random() * relays.length);
   let randomRelay = relays[randomNodeNum];
 
-  let conn = await Janus.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, peerId);
+  let conn = await Fluence.connect(randomRelay.peer.id, randomRelay.host, randomRelay.pport, peerId);
   relayEvent("relay_connected", randomRelay);
 
   /**
@@ -113,7 +113,7 @@ export default async function ports(app) {
           fileLog(hash, "File asked");
 
           let replyWithMultiaddr = async (multiaddr) =>
-              await conn.sendMessage(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
+              await conn.sendCall(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
 
           // check cache
           if(knownFiles[hash].multiaddr) {
