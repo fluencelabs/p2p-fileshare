@@ -67,6 +67,12 @@ export default async function ports(app) {
 
   let fileAdvertised = (hash, preview) =>
     sendToFileReceiver({event: "advertised", hash, preview});
+  let fileUploading = (hash) =>
+      sendToFileReceiver({event: "uploading", hash});
+  let fileUploaded = (hash) =>
+      sendToFileReceiver({event: "uploaded", hash});
+  let fileDownloading = (hash) =>
+      sendToFileReceiver({event: "downloading", hash});
   let fileAsked = (hash) =>
     sendToFileReceiver({event: "asked", hash});
   let fileRequested = (hash) =>
@@ -105,7 +111,6 @@ export default async function ports(app) {
         fileLoaded(hash, previewStr);
         await conn.registerService(serviceName, async fc => {
           fileLog(hash, "File asked");
-          fileAsked(hash);
 
           let replyWithMultiaddr = async (multiaddr) =>
               await conn.sendMessage(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
@@ -122,12 +127,16 @@ export default async function ports(app) {
             let multiaddr = multiaddrResult.multiaddr;
             // upload a file
             console.log("going to upload");
+            fileUploading(hash);
             await ipfsAdd(multiaddr, knownFiles[hash].bytes);
+            fileUploaded(hash);
             fileLog(hash, "File uploaded to "+multiaddr);
             knownFiles[hash].multiaddr = multiaddr;
             // send back multiaddr
             await replyWithMultiaddr(multiaddr);
           }
+
+          fileAsked(hash);
 
         });
         fileLog(hash, "File advertised on Fluence network");
@@ -196,6 +205,7 @@ export default async function ports(app) {
 
       fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
 
+      fileDownloading(hash);
       let data = await ipfsGet(multiaddr, hash);
       fileLog(hash, "File downloaded from " + multiaddr);
 
@@ -213,6 +223,10 @@ export default async function ports(app) {
 
   // TODO resize images
   function getPreview(data) {
+
+    // if data is more than 10Mb, do not show preview, it will be laggy
+    if (data.length > 10 * 1000 * 1000) return null;
+
     let imageType = getImageType(data);
 
     let preview = null;

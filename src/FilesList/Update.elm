@@ -66,6 +66,27 @@ update msg model =
             in
             ( updatedModel, Cmd.none )
 
+        FileUploading hash ->
+            let
+                updatedModel =
+                    updateEntry model hash (\e -> { e | status = Uploading })
+            in
+            ( updatedModel, Cmd.none )
+
+        FileUploaded hash ->
+            let
+                updatedModel =
+                    updateEntry model hash (\e -> { e | status = Seeding 0 })
+            in
+            ( updatedModel, Cmd.none )
+
+        FileDownloading hash ->
+            let
+                updatedModel =
+                    updateEntry model hash (\e -> { e | status = Downloading })
+            in
+            ( updatedModel, Cmd.none )
+
         FileLog hash log ->
             let
                 updatedModel =
@@ -87,8 +108,7 @@ update msg model =
 
                                         _ ->
                                             Seeding 1
-                            in
-                            { e | status = st }
+                            in { e | status = st }
                         )
             in
             ( updatedModel, Cmd.none )

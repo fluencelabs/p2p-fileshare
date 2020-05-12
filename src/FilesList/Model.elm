@@ -6,6 +6,8 @@ type Status
     | Seeding Int
     | Requested
     | Loaded
+    | Uploading
+    | Downloading
 
 
 type alias FileEntry =
