@@ -38,8 +38,12 @@ eventToMsg : Event -> Msg
 eventToMsg event =
     Maybe.withDefault NoOp <|
         case event.event of
-            "change-status" ->
-                Maybe.map (ChangeStatus event.hash) (Maybe.andThen stringToStatus event.status)
+            "file-uploading" ->
+                Just <| FileUploading event.hash
+            "file-uploaded" ->
+                Just <| FileUploaded event.hash
+            "file-downloading" ->
+                Just <| FileDownloading event.hash
             "advertised" ->
                 Just <| FileAdvertised event.hash event.preview
 

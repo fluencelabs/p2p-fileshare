@@ -1,9 +1,10 @@
 module FilesList.Msg exposing (Msg(..))
 
-import FilesList.Model exposing (Status)
 type Msg
     = NoOp
-    | ChangeStatus String Status
+    | FileUploading String
+    | FileUploaded String
+    | FileDownloading String
     | FileAdvertised String (Maybe String)
     | FileLog String String
     | FileAsked String

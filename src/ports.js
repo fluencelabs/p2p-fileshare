@@ -67,8 +67,12 @@ export default async function ports(app) {
 
   let fileAdvertised = (hash, preview) =>
     sendToFileReceiver({event: "advertised", hash, preview});
-  let changeStatus = (hash, status) =>
-      sendToFileReceiver({event: "change-status", hash, status});
+  let fileUploading = (hash) =>
+      sendToFileReceiver({event: "file-uploading", hash});
+  let fileUploaded = (hash) =>
+      sendToFileReceiver({event: "file-uploaded", hash});
+  let fileDownloading = (hash) =>
+      sendToFileReceiver({event: "file-downloading", hash});
   let fileAsked = (hash) =>
     sendToFileReceiver({event: "asked", hash});
   let fileRequested = (hash) =>
@@ -123,8 +127,9 @@ export default async function ports(app) {
             let multiaddr = multiaddrResult.multiaddr;
             // upload a file
             console.log("going to upload");
-            changeStatus(hash, "uploading");
+            fileUploading(hash);
             await ipfsAdd(multiaddr, knownFiles[hash].bytes);
+            fileUploaded(hash);
             fileLog(hash, "File uploaded to "+multiaddr);
             knownFiles[hash].multiaddr = multiaddr;
             // send back multiaddr
@@ -200,7 +205,7 @@ export default async function ports(app) {
 
       fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
 
-      changeStatus(hash, "downloading");
+      fileDownloading(hash);
       let data = await ipfsGet(multiaddr, hash);
       fileLog(hash, "File downloaded from " + multiaddr);
 

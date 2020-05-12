@@ -43,7 +43,6 @@ update msg model =
                         { preview = Nothing
                         , hash = hash
                         , status = Requested
-                        , askedCounter = 0
                         , logs = [ "just requested to download" ]
                         , logsVisible = False
                         }
@@ -67,12 +66,26 @@ update msg model =
             in
             ( updatedModel, Cmd.none )
 
-        ChangeStatus hash status ->
-                    let
-                        updatedModel =
-                            updateEntry model hash (\e -> { e | status = status })
-                    in
-                    ( updatedModel, Cmd.none )
+        FileUploading hash ->
+            let
+                updatedModel =
+                    updateEntry model hash (\e -> { e | status = Uploading })
+            in
+            ( updatedModel, Cmd.none )
+
+        FileUploaded hash ->
+            let
+                updatedModel =
+                    updateEntry model hash (\e -> { e | status = Seeding 0 })
+            in
+            ( updatedModel, Cmd.none )
+
+        FileDownloading hash ->
+            let
+                updatedModel =
+                    updateEntry model hash (\e -> { e | status = Downloading })
+            in
+            ( updatedModel, Cmd.none )
 
         FileLog hash log ->
             let
@@ -88,9 +101,14 @@ update msg model =
                         hash
                         (\e ->
                             let
-                                newAskedCounter = e.askedCounter + 1
-                            in
-                            { e | status = Seeding newAskedCounter, askedCounter = newAskedCounter }
+                                st =
+                                    case e.status of
+                                        Seeding i ->
+                                            Seeding (i + 1)
+
+                                        _ ->
+                                            Seeding 1
+                            in { e | status = st }
                         )
             in
             ( updatedModel, Cmd.none )
