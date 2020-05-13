@@ -32,7 +32,14 @@ export default async function ports(app) {
   // connect to a random node
   let randomNodeNum = Math.floor(Math.random() * relays.length);
   let randomRelay = relays[randomNodeNum];
-  let multiaddr = `/ip4/${randomRelay.host}/tcp/${randomRelay.pport}/ws/p2p/${randomRelay.peer.id}`;
+
+  let host;
+  if (randomRelay.host) {
+      host = "/ip4/" + randomRelay.host
+  } else {
+      host = "/dns4/" + randomRelay.dns
+  }
+  let multiaddr = `${host}/tcp/${randomRelay.pport}/ws/p2p/${randomRelay.peer.id}`;
 
   let conn = await Fluence.connect(multiaddr, peerId);
   relayEvent("relay_connected", randomRelay);
