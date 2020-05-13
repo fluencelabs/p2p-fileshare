@@ -66,7 +66,6 @@ export default async function ports(app) {
       case "set_relay":
         let relay = relays.find(r => r.peer.id === id);
         if (relay) {
-          console.log(`relay is ${JSON.stringify(relay)}`)
           // if the connection already established, connect to another node and save previous services and subscriptions
           await conn.connect(to_multiaddr(relay), relay.peer.id);
           relayEvent("relay_connected", relay);
