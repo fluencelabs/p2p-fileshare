@@ -10,19 +10,27 @@ import {ipfsAdd, ipfsGet, downloadBlob, getImageType} from "./fileUtils";
 export default async function ports(app) {
 
   let relays = [
-    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"}, host: "104.248.25.59", pport: 9001},
-    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er"}, host: "104.248.25.59", pport: 9002},
-    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb"}, host: "104.248.25.59", pport: 9003},
-    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB"}, host: "104.248.25.59", pport: 9004},
-    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb"}, host: "104.248.25.59", pport: 9005},
-    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz"}, host: "104.248.25.59", pport: 9990},
-    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM"}, host: "104.248.25.59", pport: 9100},
+    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"}, dns: "relay01.fluence.dev", pport: 19001},
+    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er"}, dns: "relay01.fluence.dev", pport: 19002},
+    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb"}, dns: "relay01.fluence.dev", pport: 19003},
+    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB"}, dns: "relay01.fluence.dev", pport: 19004},
+    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb"}, dns: "relay01.fluence.dev", pport: 19005},
+    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz"}, dns: "relay01.fluence.dev", pport: 19990},
+    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM"}, dns: "relay01.fluence.dev", pport: 19100},
   ];
 
+  let emptyRelay = {
+    dns: null,
+    host: null
+  };
   let peerEvent = (name, peer) =>
     app.ports.connReceiver.send({event: name, relay: null, peer});
-  let relayEvent = (name, relay) =>
-    app.ports.connReceiver.send({event: name, peer: null, relay});
+  let relayEvent = (name, relay) => {
+    let relayToSend = {...emptyFileEvent, ...relay};
+    let ev = {event: name, peer: null, relay: relayToSend};
+    console.log(ev);
+    app.ports.connReceiver.send(ev);
+  };
 
   relays.map(d => relayEvent("relay_discovered", d));
 
@@ -39,7 +47,7 @@ export default async function ports(app) {
   } else {
       host = "/dns4/" + randomRelay.dns
   }
-  let multiaddr = `${host}/tcp/${randomRelay.pport}/ws/p2p/${randomRelay.peer.id}`;
+  let multiaddr = `${host}/tcp/${randomRelay.pport}/wss/p2p/${randomRelay.peer.id}`;
 
   let conn = await Fluence.connect(multiaddr, peerId);
   relayEvent("relay_connected", randomRelay);
