@@ -7,6 +7,20 @@ import {genUUID} from "fluence/dist/function_call";
 
 import {ipfsAdd, ipfsGet, downloadBlob, getImageType} from "./fileUtils";
 
+function to_multiaddr(relay) {
+  let host;
+  let protocol;
+  if (relay.host) {
+    host = "/ip4/" + relay.host
+    protocol = "ws"
+  } else {
+    host = "/dns4/" + relay.dns;
+    protocol = "wss"
+  }
+  let multiaddr = `${host}/tcp/${relay.pport}/${protocol}/p2p/${relay.peer.id}`;
+  return multiaddr;
+}
+
 export default async function ports(app) {
 
   let relays = [
@@ -41,18 +55,7 @@ export default async function ports(app) {
   let randomNodeNum = Math.floor(Math.random() * relays.length);
   let randomRelay = relays[randomNodeNum];
 
-  let host;
-  let protocol;
-  if (randomRelay.host) {
-      host = "/ip4/" + randomRelay.host
-      protocol = "ws"
-  } else {
-      host = "/dns4/" + randomRelay.dns;
-      protocol = "wss"
-  }
-  let multiaddr = `${host}/tcp/${randomRelay.pport}/${protocol}/p2p/${randomRelay.peer.id}`;
-
-  let conn = await Fluence.connect(multiaddr, peerId);
+  let conn = await Fluence.connect(to_multiaddr(randomRelay), peerId);
   relayEvent("relay_connected", randomRelay);
 
   /**
@@ -63,8 +66,9 @@ export default async function ports(app) {
       case "set_relay":
         let relay = relays.find(r => r.peer.id === id);
         if (relay) {
+          console.log(`relay is ${JSON.stringify(relay)}`)
           // if the connection already established, connect to another node and save previous services and subscriptions
-          await conn.connect(relay.peer.id, relay.host, relay.pport);
+          await conn.connect(to_multiaddr(relay), relay.peer.id);
           relayEvent("relay_connected", relay);
         }
 

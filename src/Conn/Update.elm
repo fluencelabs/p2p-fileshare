@@ -29,7 +29,6 @@ update msg model =
                 ( { model | discovered = relays ++ [ relay ] }, Cmd.none )
 
         RelayConnected relay ->
-            Debug.log "Setting relay" <|
                 ( { model | relay = Just relay }, Cmd.none )
 
         SetPeer peer ->
