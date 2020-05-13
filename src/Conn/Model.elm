@@ -7,8 +7,8 @@ type alias Peer =
 
 type alias Relay =
     { peer : Peer
-
-    , dns : String
+    , host : Maybe String
+    , dns : Maybe String
     , pport : Int
     }
 

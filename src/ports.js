@@ -26,7 +26,7 @@ export default async function ports(app) {
   let peerEvent = (name, peer) =>
     app.ports.connReceiver.send({event: name, relay: null, peer});
   let relayEvent = (name, relay) => {
-    let relayToSend = {...emptyFileEvent, ...relay};
+    let relayToSend = {...emptyRelay, ...relay};
     let ev = {event: name, peer: null, relay: relayToSend};
     console.log(ev);
     app.ports.connReceiver.send(ev);
