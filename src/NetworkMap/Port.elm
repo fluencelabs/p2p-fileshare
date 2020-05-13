@@ -16,7 +16,7 @@ port networkMapReceiver : (Event -> msg) -> Sub msg
 stringToPeerType : String -> Maybe PeerType
 stringToPeerType str =
     case str of
-        "relay" ->
+        "peer" ->
             Just Relay
         "client" ->
             Just Client
@@ -31,7 +31,7 @@ eventToMsg event =
                 let
                     peerType = stringToPeerType event.peerType
                 in
-                Maybe.map (\pt -> PeerAppeared event.peer pt) peerType
+                Maybe.map (\pt -> PeerAppeared event.peer pt event.updateDate) peerType
 
             _ ->
                 Nothing

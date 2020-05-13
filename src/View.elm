@@ -32,6 +32,7 @@ import Ions.Font as F
 import Ions.Size as S
 import Model exposing (Model)
 import Msg exposing (..)
+import NetworkMap.View
 import Palette exposing (fillWidth, h1, layout, layoutBlock, link, pSpacing)
 
 
@@ -47,7 +48,7 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header, [ connectivity model, addFile model, filesList model ] ]
+    layout <| List.concat [ header, [ connectivity model, addFile model, filesList model, networkMap model ] ]
 
 
 liftView :
@@ -112,3 +113,7 @@ addFile model =
 filesList : Model -> Element Msg
 filesList model =
     liftView .filesList FilesListMsg FilesList.View.view <| model
+
+networkMap : Model -> Element Msg
+networkMap model =
+    liftView .networkMap NetworkMapMsg NetworkMap.View.view <| model

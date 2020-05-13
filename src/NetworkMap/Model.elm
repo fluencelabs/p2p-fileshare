@@ -1,6 +1,7 @@
 module NetworkMap.Model exposing (..)
 
 
+import Dict exposing (Dict)
 type PeerType
     = Relay
     | Client
@@ -11,14 +12,15 @@ type alias Peer =
 type alias NodeEntry =
     { peer: Peer
     , peerType: PeerType
+    , date: String
     }
 
 type alias Model =
-    { network : List NodeEntry
+    { network : Dict String NodeEntry
     }
 
 
 emptyNetwork : Model
 emptyNetwork =
-    { network = []
+    { network = Dict.empty
     }
