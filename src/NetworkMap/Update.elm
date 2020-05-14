@@ -10,7 +10,6 @@ update msg model =
     case msg of
         PeerAppeared peer peerType date ->
             let
-                _ = Debug.log "peer appeared"
                 entry =
                     { peer = peer
                     , peerType = peerType
@@ -19,6 +18,7 @@ update msg model =
                 peers = Dict.insert entry.peer.id entry model.network
             in
                 ( { model | network = peers }, Cmd.none )
-
+        ShowHide ->
+            ( { model | show = not model.show }, Cmd.none )
         NoOp ->
             ( model, Cmd.none )

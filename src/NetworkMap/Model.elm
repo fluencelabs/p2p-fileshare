@@ -17,10 +17,12 @@ type alias NodeEntry =
 
 type alias Model =
     { network : Dict String NodeEntry
+    , show : Bool
     }
 
 
 emptyNetwork : Model
 emptyNetwork =
     { network = Dict.empty
+    , show = False
     }

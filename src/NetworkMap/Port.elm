@@ -1,5 +1,6 @@
 port module NetworkMap.Port exposing (..)
 
+import Maybe exposing (andThen)
 import NetworkMap.Model exposing (Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 
@@ -9,7 +10,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, peer: Peer, peerType: String, updateDate: String }
+    { event : String, peerAppeared: Maybe { peer: Peer, peerType: String, updateDate: String } }
 
 port networkMapReceiver : (Event -> msg) -> Sub msg
 
@@ -28,11 +29,11 @@ eventToMsg event =
     Maybe.withDefault NoOp <|
         case event.event of
             "peer_appeared" ->
-                let
-                    peerType = stringToPeerType event.peerType
-                in
-                Maybe.map (\pt -> PeerAppeared event.peer pt event.updateDate) peerType
-
+                event.peerAppeared
+                    |> andThen (\peerAppeared -> stringToPeerType peerAppeared.peerType
+                    |> andThen (\peerType -> Just (PeerAppeared peerAppeared.peer peerType peerAppeared.updateDate)))
+            "show-hide" ->
+                Just ShowHide
             _ ->
                 Nothing
 

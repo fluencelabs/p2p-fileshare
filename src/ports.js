@@ -52,19 +52,20 @@ export default async function ports(app) {
     relays.map(d => relayEvent("relay_discovered", d));
 
     let peerId = await Fluence.generatePeerId();
-    peerEvent("set_peer", {id: peerId.toB58String()});
+    let peerIdStr = peerId.toB58String();
+    peerEvent("set_peer", {id: peerIdStr});
 
     // connect to a random node
     let randomNodeNum = Math.floor(Math.random() * relays.length);
     let randomRelay = relays[randomNodeNum];
-    let multiaddr = `/ip4/${randomRelay.host}/tcp/${randomRelay.pport}/ws/p2p/${randomRelay.peer.id}`;
 
     let conn = await Fluence.connect(to_multiaddr(randomRelay), peerId);
     relayEvent("relay_connected", randomRelay);
 
     // call if we found out about any peers or relays in Fluence network
-    let peerAppearedEvent = (peer, peerType, date) => {
-        app.ports.networkMapReceiver.send({event: "peer_appeared", peer: {id: peer}, peerType, updateDate: date});
+    let peerAppearedEvent = (peer, peerType, updateDate) => {
+        let peerAppeared = { peer: {id: peer}, peerType, updateDate};
+        app.ports.networkMapReceiver.send({event: "peer_appeared", peerAppeared});
     };
 
     // add all relays from list as appeared
@@ -78,15 +79,9 @@ export default async function ports(app) {
         let date = new Date().toISOString();
         if (!!replyTo) {
             for (const protocol of replyTo.protocols) {
-                if (protocol.protocol !== 'signature') {
+                if (protocol.protocol !== 'signature' && protocol.value !== peerIdStr) {
                     peerAppearedEvent(protocol.value, protocol.protocol, date)
                 }
-            }
-        }
-
-        for (const protocol of target.protocols) {
-            if (protocol.protocol !== 'signature') {
-                peerAppearedEvent(protocol.value, protocol.protocol, date)
             }
         }
     });
@@ -276,4 +271,13 @@ export default async function ports(app) {
         }
 
     });
+
+    // call to show or hide network map
+    let showHideEvent = () => {
+        app.ports.networkMapReceiver.send({event: "show-hide", peerAppeared: null});
+    };
+
+    window.networkMap = () => {
+        showHideEvent()
+    }
 }

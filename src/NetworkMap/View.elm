@@ -4,22 +4,25 @@ import Dict
 import Element.Font as Font
 import NetworkMap.Model exposing (Model, NodeEntry)
 import NetworkMap.Msg exposing (Msg(..))
-import Element exposing (Element, alignLeft, alignRight, centerX, centerY, column, el, height, mouseOver, padding, paddingXY, paragraph, px, row, text, width)
+import Element exposing (Element, alignLeft, alignRight, centerX, centerY, column, el, padding, paddingXY, row, text)
 import Ions.Font as F
 import Ions.Background as Background
 import Ions.Border as Border
-import Palette exposing (blockBackground, fillWidth, layoutBlock, limitLayoutWidth, pSpacing, showHash)
+import Palette exposing (blockBackground, fillWidth, layoutBlock, limitLayoutWidth)
 
 view : Model -> Element Msg
 view networkModel =
-    let sortedEntries = List.sortBy .date (Dict.values networkModel.network)
-    in
-    column (layoutBlock ++ [ blockBackground ]) <|
+    if networkModel.show then
+        let sortedEntries = List.sortBy .date (Dict.values networkModel.network)
+        in
+        column (layoutBlock ++ [ blockBackground ]) <|
             [ row [ fillWidth, F.white, F.size2, Background.gray, padding 10 ]
                 [ el [ centerX ] <| text "Network map"
                 ]
             ]
                 ++ List.reverse (List.map showNode sortedEntries)
+    else
+        Element.none
 
 
 showNode : NodeEntry -> Element msg

@@ -6,28 +6,19 @@ import Conn.View
 import Element
     exposing
         ( Element
-        , alignRight
-        , alignTop
-        , centerX
         , column
         , el
-        , fillPortion
         , height
-        , padding
-        , paddingXY
         , paragraph
         , row
         , spacing
         , text
         , textColumn
-        , width
         )
 import Element.Font as Font
 import Element.Lazy exposing (lazy)
 import FilesList.View
 import Html exposing (Html)
-import Ions.Background as BG
-import Ions.Border as B
 import Ions.Font as F
 import Ions.Size as S
 import Model exposing (Model)
