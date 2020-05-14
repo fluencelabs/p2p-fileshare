@@ -1,6 +1,6 @@
 module FilesList.View exposing (view)
 
-import Element exposing (Element, alignRight, centerX, centerY, column, el, height, mouseOver, padding, paddingXY, paragraph, px, row, text, width)
+import Element exposing (Element, alignRight, centerX, centerY, column, el, height, padding, paddingXY, paragraph, px, row, spacing, text, width)
 import Element.Border exposing (dashed)
 import Element.Events
 import Element.Font as Font
@@ -102,6 +102,18 @@ showFile fileEntry =
         hashView =
             el [ Font.alignRight, centerX ] <| showHash fileEntry.hash
 
+        shareButton =
+            Input.button
+                ([ Element.padding 11
+                , Font.center
+                , B.width1 B.AllSides
+                , B.lightestBlue
+                ])
+            <|
+                { onPress = Just <| Copy fileEntry.hash
+                , label = text "Share"
+                }
+
         seeLogsStyles =
             if fileEntry.logsVisible then
                 [ BG.lightestBlue ]
@@ -112,7 +124,7 @@ showFile fileEntry =
         seeLogs =
             Input.button
                 ([ B.width1 B.AllSides
-                 , B.lightGray
+                 , B.lightestBlue
                  , padding 10
                  , alignRight
                  ]
@@ -120,7 +132,7 @@ showFile fileEntry =
                 )
             <|
                 { onPress = Just <| SetLogsVisible fileEntry.hash (not fileEntry.logsVisible)
-                , label = text "See logs"
+                , label = text "Show logs"
                 }
 
         logs =
@@ -129,7 +141,7 @@ showFile fileEntry =
                     [ limitLayoutWidth
                     , centerX
                     , Element.paddingXY 45 20
-                    , Element.spacing 5
+                    , spacing 5
                     , BG.white
                     , B.width1 B.Left
                     , B.gray
@@ -142,9 +154,10 @@ showFile fileEntry =
                 Element.none
     in
     column [ fillWidth, paddingXY 0 10, B.width1 B.Bottom, B.nearBlack ]
-        [ row [ limitLayoutWidth, BG.white, centerX ]
+        [ row [ limitLayoutWidth, BG.white, centerX, spacing 5 ]
             [ showPreview fileEntry
             , hashView
+            , shareButton
             , showStatus fileEntry.status
             , seeLogs
             ]
