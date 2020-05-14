@@ -29,7 +29,10 @@ update msg model =
                 ( { model | discovered = relays ++ [ relay ] }, Cmd.none )
 
         RelayConnected relay ->
-                ( { model | relay = Just relay }, Cmd.none )
+                ( { model | relay = Just relay, connectionStatus = "Connected" }, Cmd.none )
+
+        RelayConnecting ->
+                ( { model | connectionStatus = "Connecting..." }, Cmd.none )
 
         SetPeer peer ->
             ( { model | peer = peer }, Cmd.none )

@@ -30,7 +30,7 @@ view conn =
 
         relayId =
             el [ Element.width (Element.fillPortion 4) ] <|
-                Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text "Not Connected") <|
+                Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text conn.connectionStatus) <|
                     Maybe.map (.peer >> .id >> showHash) relay
 
         relaysSelect =

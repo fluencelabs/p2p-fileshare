@@ -43,9 +43,9 @@ export default async function ports(app) {
     };
     // new relay connection established
     let relayEvent = (name, relay) => {
-        let relayToSend = {...emptyRelay, ...relay};
+        let relayToSend = null;
+        if (relay) relayToSend = {...emptyRelay, ...relay};
         let ev = {event: name, peer: null, relay: relayToSend};
-        console.log(ev);
         app.ports.connReceiver.send(ev);
     };
 
@@ -59,6 +59,7 @@ export default async function ports(app) {
     let randomNodeNum = Math.floor(Math.random() * relays.length);
     let randomRelay = relays[randomNodeNum];
 
+    relayEvent("relay_connecting");
     let conn = await Fluence.connect(to_multiaddr(randomRelay), peerId);
     relayEvent("relay_connected", randomRelay);
 
@@ -94,6 +95,7 @@ export default async function ports(app) {
             case "set_relay":
                 let relay = relays.find(r => r.peer.id === id);
                 if (relay) {
+                    relayEvent("relay_connecting");
                     // if the connection already established, connect to another node and save previous services and subscriptions
                     await conn.connect(to_multiaddr(relay), relay.peer.id);
                     relayEvent("relay_connected", relay);

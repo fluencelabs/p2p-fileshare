@@ -16,6 +16,7 @@ type alias Relay =
 type alias Model =
     { peer : Peer
     , relay : Maybe Relay
+    , connectionStatus: String
     , discovered : List Relay
     , choosing : Bool
     }
@@ -25,6 +26,7 @@ emptyConn : Model
 emptyConn =
     { peer = { id = "-----" }
     , relay = Nothing
+    , connectionStatus = "Not Connected"
     , discovered = []
     , choosing = False
     }
