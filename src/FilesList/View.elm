@@ -1,7 +1,7 @@
 module FilesList.View exposing (view)
 
 import Element exposing (Element, alignRight, centerX, centerY, column, el, height, padding, paddingXY, paragraph, px, row, spacing, text, width)
-import Element.Border exposing (dashed)
+import Element.Border exposing (dashed, dotted)
 import Element.Events
 import Element.Font as Font
 import Element.Input as Input
@@ -104,14 +104,15 @@ showFile fileEntry =
 
         shareButton =
             Input.button
-                ([ Element.padding 11
+                ([ Element.padding 7
                 , Font.center
                 , B.width1 B.AllSides
+                , dotted
                 , B.lightestBlue
                 ])
             <|
                 { onPress = Just <| Copy fileEntry.hash
-                , label = text "Share"
+                , label = text (if fileEntry.copied then "Copied!" else "Share")
                 }
 
         seeLogsStyles =

@@ -130,6 +130,8 @@ export default async function ports(app) {
         sendToFileReceiver({event: "requested", hash});
     let fileLoaded = (hash, preview) =>
         sendToFileReceiver({event: "loaded", hash, preview});
+    let hashCopied = (hash) =>
+        sendToFileReceiver({event: "copied", hash});
     let fileLog = (hash, log) =>
         sendToFileReceiver({event: "log", hash, log});
 
@@ -214,7 +216,15 @@ export default async function ports(app) {
                         downloadBlob(knownFiles[hash].bytes, hash, 'application/octet-stream');
                     } else console.error("Cannot download as file is unknown for hash: " + hash);
                     break;
-
+                case "copy":
+                    const el = document.createElement('textarea');
+                    el.value = hash;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                    hashCopied(hash);
+                    break;
                 default:
                     console.error("Received unknown fileRequest from the Elm app", command);
 

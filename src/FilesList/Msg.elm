@@ -12,4 +12,6 @@ type Msg
     | FileLoaded String (Maybe String)
     | DownloadFile String
     | Copy String
+    | Copied String
+    | ReplaceCopyMessage String
     | SetLogsVisible String Bool

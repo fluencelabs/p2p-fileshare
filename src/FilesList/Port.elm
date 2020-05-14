@@ -29,7 +29,8 @@ eventToMsg event =
                 Just <| FileDownloading event.hash
             "advertised" ->
                 Just <| FileAdvertised event.hash event.preview
-
+            "copied" ->
+                Just <| Copied event.hash
             "requested" ->
                 Just <| FileRequested event.hash
 
