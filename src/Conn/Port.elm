@@ -28,6 +28,9 @@ eventToMsg event =
             "relay_connected" ->
                 Maybe.map RelayConnected event.relay
 
+            "relay_connecting" ->
+                Just RelayConnecting
+
             "set_peer" ->
                 Maybe.map SetPeer event.peer
 

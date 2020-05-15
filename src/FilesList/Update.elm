@@ -3,6 +3,8 @@ module FilesList.Update exposing (update)
 import FilesList.Model exposing (FileEntry, Model, Status(..))
 import FilesList.Msg exposing (Msg(..))
 import FilesList.Port
+import Process
+import Task
 
 
 updateEntry : Model -> String -> (FileEntry -> FileEntry) -> Model
@@ -30,6 +32,31 @@ update msg model =
             in
             ( updatedModel, Cmd.none )
 
+        Copy hash ->
+            ( model, FilesList.Port.fileRequest { command = "copy", hash = Just hash } )
+        Copied hash ->
+            let
+                replaceCopyMessageTask =
+                    Process.sleep 5000 |> Task.perform (\_ -> ReplaceCopyMessage hash)
+
+                updatedModel =
+                    updateEntry model
+                        hash
+                        (\e ->
+                            { e | hashCopied = True }
+                        )
+            in
+            ( updatedModel, replaceCopyMessageTask )
+        ReplaceCopyMessage hash ->
+            let
+                updatedModel =
+                    updateEntry model
+                        hash
+                        (\e ->
+                            { e | hashCopied = False }
+                        )
+            in
+            ( updatedModel, Cmd.none )
         DownloadFile hash ->
             ( model, FilesList.Port.fileRequest { command = "download", hash = Just hash } )
 
@@ -43,6 +70,7 @@ update msg model =
                         { preview = Nothing
                         , hash = hash
                         , status = Requested
+                        , hashCopied = False
                         , logs = [ "just requested to download" ]
                         , logsVisible = False
                         }

@@ -72,3 +72,19 @@ export function getImageType(data) {
 
     return null;
 }
+
+export function getPreview(data) {
+
+    // if data is more than 10Mb, do not show preview, it will be laggy
+    if (data.length > 10 * 1000 * 1000) return null;
+
+    let imageType = getImageType(data);
+
+    let preview = null;
+    if (imageType) {
+        let base64 = Buffer.from(data).toString('base64');
+        preview = "data:image/" + imageType + ";base64," + base64;
+    }
+
+    return preview;
+}

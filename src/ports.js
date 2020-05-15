@@ -5,25 +5,10 @@ import bs58 from 'bs58';
 import Fluence from 'fluence';
 import {genUUID} from "fluence/dist/function_call";
 
-import {ipfsAdd, ipfsGet, downloadBlob, getImageType} from "./fileUtils";
+import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
 
-function to_multiaddr(relay) {
-  let host;
-  let protocol;
-  if (relay.host) {
-    host = "/ip4/" + relay.host
-    protocol = "ws"
-  } else {
-    host = "/dns4/" + relay.dns;
-    protocol = "wss"
-  }
-  let multiaddr = `${host}/tcp/${relay.pport}/${protocol}/p2p/${relay.peer.id}`;
-  return multiaddr;
-}
 
-export default async function ports(app) {
-
-  let relays = [
+let relays = [
     {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"}, dns: "relay01.fluence.dev", pport: 19001},
     {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er"}, dns: "relay01.fluence.dev", pport: 19002},
     {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb"}, dns: "relay01.fluence.dev", pport: 19003},
@@ -31,232 +16,280 @@ export default async function ports(app) {
     {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb"}, dns: "relay01.fluence.dev", pport: 19005},
     {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz"}, dns: "relay01.fluence.dev", pport: 19990},
     {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM"}, dns: "relay01.fluence.dev", pport: 19100},
-  ];
+];
 
-  let emptyRelay = {
-    dns: null,
-    host: null
-  };
-  let peerEvent = (name, peer) =>
-    app.ports.connReceiver.send({event: name, relay: null, peer});
-  let relayEvent = (name, relay) => {
-    let relayToSend = {...emptyRelay, ...relay};
-    let ev = {event: name, peer: null, relay: relayToSend};
-    console.log(ev);
-    app.ports.connReceiver.send(ev);
-  };
+function to_multiaddr(relay) {
+    let host;
+    let protocol;
+    if (relay.host) {
+        host = "/ip4/" + relay.host;
+        protocol = "ws"
+    } else {
+        host = "/dns4/" + relay.dns;
+        protocol = "wss"
+    }
+    return `${host}/tcp/${relay.pport}/${protocol}/p2p/${relay.peer.id}`;
+}
 
-  relays.map(d => relayEvent("relay_discovered", d));
+export default async function ports(app) {
 
-  let peerId = await Fluence.generatePeerId();
-  peerEvent("set_peer", {id: peerId.toB58String()});
+    // new peer is generated
+    let peerEvent = (name, peer) =>
+        app.ports.connReceiver.send({event: name, relay: null, peer});
 
-  // connect to a random node
-  let randomNodeNum = Math.floor(Math.random() * relays.length);
-  let randomRelay = relays[randomNodeNum];
+    let emptyRelay = {
+        dns: null,
+        host: null
+    };
+    // new relay connection established
+    let relayEvent = (name, relay) => {
+        let relayToSend = null;
+        if (relay) relayToSend = {...emptyRelay, ...relay};
+        let ev = {event: name, peer: null, relay: relayToSend};
+        app.ports.connReceiver.send(ev);
+    };
 
-  let conn = await Fluence.connect(to_multiaddr(randomRelay), peerId);
-  relayEvent("relay_connected", randomRelay);
+    relays.map(d => relayEvent("relay_discovered", d));
 
-  /**
-   * Handle connection commands
-   */
-  app.ports.connRequest.subscribe(async ({command, id}) => {
-    switch (command) {
-      case "set_relay":
-        let relay = relays.find(r => r.peer.id === id);
-        if (relay) {
-          // if the connection already established, connect to another node and save previous services and subscriptions
-          await conn.connect(to_multiaddr(relay), relay.peer.id);
-          relayEvent("relay_connected", relay);
+    let peerId = await Fluence.generatePeerId();
+    let peerIdStr = peerId.toB58String();
+    peerEvent("set_peer", {id: peerIdStr});
+
+    // connect to a random node
+    let randomNodeNum = Math.floor(Math.random() * relays.length);
+    let randomRelay = relays[randomNodeNum];
+
+    relayEvent("relay_connecting");
+    let conn = await Fluence.connect(to_multiaddr(randomRelay), peerId);
+    relayEvent("relay_connected", randomRelay);
+
+    // call if we found out about any peers or relays in Fluence network
+    let peerAppearedEvent = (peer, peerType, updateDate) => {
+        let peerAppeared = { peer: {id: peer}, peerType, updateDate};
+        app.ports.networkMapReceiver.send({event: "peer_appeared", peerAppeared});
+    };
+
+    // add all relays from list as appeared
+    let date = new Date().toISOString();
+    for (const relay of relays) {
+        peerAppearedEvent(relay.peer.id, "peer", date)
+    }
+
+    // subscribe for all outgoing calls to watch for all Fluence network members
+    conn.subscribe((args, target, replyTo) => {
+        let date = new Date().toISOString();
+        if (!!replyTo) {
+            for (const protocol of replyTo.protocols) {
+                if (protocol.protocol !== 'signature' && protocol.value !== peerIdStr) {
+                    peerAppearedEvent(protocol.value, protocol.protocol, date)
+                }
+            }
+        }
+    });
+
+    /**
+     * Handle connection commands
+     */
+    app.ports.connRequest.subscribe(async ({command, id}) => {
+        switch (command) {
+            case "set_relay":
+                let relay = relays.find(r => r.peer.id === id);
+                if (relay) {
+                    relayEvent("relay_connecting");
+                    // if the connection already established, connect to another node and save previous services and subscriptions
+                    await conn.connect(to_multiaddr(relay), relay.peer.id);
+                    relayEvent("relay_connected", relay);
+                }
+
+                break;
+
+            default:
+                console.error("Received unknown connRequest from the Elm app", command);
+        }
+    });
+
+    /**
+     * Handle file commands, sending events
+     */
+    let emptyFileEvent = {log: null, preview: null};
+    let sendToFileReceiver = ev => {
+        app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
+    };
+
+    let fileAdvertised = (hash, preview) =>
+        sendToFileReceiver({event: "advertised", hash, preview});
+    let fileUploading = (hash) =>
+        sendToFileReceiver({event: "uploading", hash});
+    let fileUploaded = (hash) =>
+        sendToFileReceiver({event: "uploaded", hash});
+    let fileDownloading = (hash) =>
+        sendToFileReceiver({event: "downloading", hash});
+    let fileAsked = (hash) =>
+        sendToFileReceiver({event: "asked", hash});
+    let fileRequested = (hash) =>
+        sendToFileReceiver({event: "requested", hash});
+    let fileLoaded = (hash, preview) =>
+        sendToFileReceiver({event: "loaded", hash, preview});
+    let hashCopied = (hash) =>
+        sendToFileReceiver({event: "copied", hash});
+    let fileLog = (hash, log) =>
+        sendToFileReceiver({event: "log", hash, log});
+
+    let multiaddrService = "IPFS.multiaddr";
+
+    let knownFiles = {};
+
+    // callback to add a local file in Fluence network
+    app.ports.selectFile.subscribe(async () => {
+        var input = document.createElement('input');
+        input.type = 'file';
+
+        input.onchange = async e => {
+            let file = e.target.files[0];
+            let arrayBuffer = await file.arrayBuffer();
+            let array = new Uint8Array(arrayBuffer);
+
+            let hash = await Hash.of(array);
+
+            if (!knownFiles[hash]) {
+
+                fileRequested(hash);
+
+                let previewStr = getPreview(array);
+
+                knownFiles[hash] = {bytes: array, preview: previewStr};
+
+                let serviceName = "IPFS.get_" + hash;
+
+                fileLog(hash, "Going to advertise");
+                fileLoaded(hash, previewStr);
+                await conn.registerService(serviceName, async fc => {
+                    fileLog(hash, "File asked");
+
+                    let replyWithMultiaddr = async (multiaddr) =>
+                        await conn.sendCall(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
+
+                    // check cache
+                    if (knownFiles[hash].multiaddr) {
+                        await replyWithMultiaddr(knownFiles[hash].multiaddr)
+                    } else {
+
+                        // call multiaddr
+                        let msgId = genUUID();
+
+                        let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                        let multiaddr = multiaddrResult.multiaddr;
+                        // upload a file
+                        console.log("going to upload");
+                        fileUploading(hash);
+                        await ipfsAdd(multiaddr, knownFiles[hash].bytes);
+                        fileUploaded(hash);
+                        fileLog(hash, "File uploaded to " + multiaddr);
+                        knownFiles[hash].multiaddr = multiaddr;
+                        // send back multiaddr
+                        await replyWithMultiaddr(multiaddr);
+                    }
+
+                    fileAsked(hash);
+
+                });
+                fileLog(hash, "File advertised on Fluence network");
+
+                fileAdvertised(hash, previewStr);
+
+            } else {
+                console.log("This file is already advertised.");
+                fileLog(hash, "Trying to advertise this file, but the file is already advertised.");
+            }
+        };
+
+        input.click();
+    });
+
+    app.ports.fileRequest.subscribe(async ({command, hash}) => {
+        // TODO Queue, and handle commands once (re)connected
+        if (!conn) console.error("Cannot handle fileRequest when not connected");
+        else
+            switch (command) {
+                case "download":
+                    if (!!knownFiles[hash] && (knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0)) {
+                        downloadBlob(knownFiles[hash].bytes, hash, 'application/octet-stream');
+                    } else console.error("Cannot download as file is unknown for hash: " + hash);
+                    break;
+                case "copy":
+                    const el = document.createElement('textarea');
+                    el.value = hash;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                    hashCopied(hash);
+                    break;
+                default:
+                    console.error("Received unknown fileRequest from the Elm app", command);
+
+            }
+    });
+
+    function validateHash(hash) {
+        if (typeof hash === "string" && hash.length === 46 && hash.substring(0, 2) === "Qm") {
+            try {
+                bs58.decode(hash);
+                return true;
+            } catch (e) {
+                console.error(`Cannot decode hash '${hash}': ${e}`)
+            }
         }
 
-        break;
-
-      default:
-        console.error("Received unknown connRequest from the Elm app", command);
+        return false;
     }
-  });
 
-  /**
-   * Handle file commands, sending events
-   */
+    // callback to add a file from Fluence network by hash
+    app.ports.addFileByHash.subscribe(async (hash) => {
 
-  let emptyFileEvent = {log:null, preview: null};
-  let sendToFileReceiver = ev => {
-    app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
-  };
-
-  let fileAdvertised = (hash, preview) =>
-    sendToFileReceiver({event: "advertised", hash, preview});
-  let fileUploading = (hash) =>
-      sendToFileReceiver({event: "uploading", hash});
-  let fileUploaded = (hash) =>
-      sendToFileReceiver({event: "uploaded", hash});
-  let fileDownloading = (hash) =>
-      sendToFileReceiver({event: "downloading", hash});
-  let fileAsked = (hash) =>
-    sendToFileReceiver({event: "asked", hash});
-  let fileRequested = (hash) =>
-    sendToFileReceiver({event: "requested", hash});
-  let fileLoaded = (hash, preview) =>
-    sendToFileReceiver({event: "loaded", hash, preview});
-  let fileLog = (hash, log) =>
-    sendToFileReceiver({event: "log", hash, log});
-
-  let multiaddrService = "IPFS.multiaddr";
-
-  let knownFiles = {};
-
-  app.ports.selectFile.subscribe(async () => {
-    var input = document.createElement('input');
-    input.type = 'file';
-
-    input.onchange = async e => {
-      let file = e.target.files[0];
-      let arrayBuffer = await file.arrayBuffer();
-      let array = new Uint8Array(arrayBuffer);
-
-      let hash = await Hash.of(array);
-
-      if(!knownFiles[hash]) {
+        if (!validateHash(hash)) {
+            console.error(`Hash '${hash}' is not valid.`);
+            fileLog(hash, `Hash is not valid.`);
+            return;
+        }
 
         fileRequested(hash);
 
-        let previewStr = getPreview(array);
-
-        knownFiles[hash] = {bytes:array, preview: previewStr};
-
-        let serviceName = "IPFS.get_" + hash;
-
-        fileLog(hash, "Going to advertise");
-        fileLoaded(hash, previewStr);
-        await conn.registerService(serviceName, async fc => {
-          fileLog(hash, "File asked");
-
-          let replyWithMultiaddr = async (multiaddr) =>
-              await conn.sendCall(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
-
-          // check cache
-          if(knownFiles[hash].multiaddr) {
-            await replyWithMultiaddr(knownFiles[hash].multiaddr)
-          } else {
-
-            // call multiaddr
+        let file = knownFiles[hash];
+        if (!!file && file.bytes && file.bytes.length > 0) {
+            fileLog(hash, "This file is already known");
+        } else {
             let msgId = genUUID();
+            let serviceName = "IPFS.get_" + hash;
 
-            let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+            fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
+            let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
             let multiaddr = multiaddrResult.multiaddr;
-            // upload a file
-            console.log("going to upload");
-            fileUploading(hash);
-            await ipfsAdd(multiaddr, knownFiles[hash].bytes);
-            fileUploaded(hash);
-            fileLog(hash, "File uploaded to "+multiaddr);
-            knownFiles[hash].multiaddr = multiaddr;
-            // send back multiaddr
-            await replyWithMultiaddr(multiaddr);
-          }
 
-          fileAsked(hash);
+            fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
 
-        });
-        fileLog(hash, "File advertised on Fluence network");
+            fileDownloading(hash);
+            let data = await ipfsGet(multiaddr, hash);
+            fileLog(hash, "File downloaded from " + multiaddr);
 
-        fileAdvertised(hash, previewStr);
+            let preview = getPreview(data);
 
-      } else {
-        console.log("This file is already advertised.");
-        fileLog(hash, "Trying to advertise this file, but the file is already advertised.");
-      }
+            fileLoaded(hash, preview);
+            knownFiles[hash] = {
+                bytes: data,
+                multiaddr,
+                preview
+            };
+        }
+
+    });
+
+    // call to show or hide network map
+    let showHideEvent = () => {
+        app.ports.networkMapReceiver.send({event: "show-hide", peerAppeared: null});
     };
 
-    input.click();
-  });
-
-  app.ports.fileRequest.subscribe(async ({command, hash}) => {
-    // TODO Queue, and handle commands once (re)connected
-    if(!conn) console.error("Cannot handle fileRequest when not connected");
-    else
-      switch (command) {
-        case "download":
-          if(!!knownFiles[hash] && (knownFiles[hash].bytes && knownFiles[hash].bytes.length > 0)) {
-            downloadBlob(knownFiles[hash].bytes, hash, 'application/octet-stream');
-          } else console.error("Cannot download as file is unknown for hash: "+hash);
-          break;
-
-        default:
-          console.error("Received unknown fileRequest from the Elm app", command);
-
-      }
-  });
-
-  function validateHash(hash) {
-    if (typeof hash === "string" && hash.length === 46 && hash.substring(0, 2) === "Qm"){
-      try {
-        bs58.decode(hash);
-        return true;
-      } catch (e) {
-        console.error(`Cannot decode hash '${hash}': ${e}`)
-      }
+    window.networkMap = () => {
+        showHideEvent()
     }
-
-    return false;
-  }
-
-  app.ports.addFileByHash.subscribe(async (hash) => {
-
-    if (!validateHash(hash)) {
-      console.error(`Hash '${hash}' is not valid.`);
-      fileLog(hash, `Hash is not valid.`);
-      return;
-    }
-
-    fileRequested(hash);
-
-    let file = knownFiles[hash];
-    if(!!file && file.bytes && file.bytes.length > 0) {
-      fileLog(hash, "This file is already known");
-    } else {
-      let msgId = genUUID();
-      let serviceName = "IPFS.get_" + hash;
-
-      fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
-      let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
-      let multiaddr = multiaddrResult.multiaddr;
-
-      fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
-
-      fileDownloading(hash);
-      let data = await ipfsGet(multiaddr, hash);
-      fileLog(hash, "File downloaded from " + multiaddr);
-
-      let preview = getPreview(data);
-
-      fileLoaded(hash, preview);
-      knownFiles[hash] = {
-        bytes: data,
-        multiaddr,
-        preview
-      };
-    }
-
-  });
-
-  // TODO resize images
-  function getPreview(data) {
-
-    // if data is more than 10Mb, do not show preview, it will be laggy
-    if (data.length > 10 * 1000 * 1000) return null;
-
-    let imageType = getImageType(data);
-
-    let preview = null;
-    if (imageType) {
-      let base64 = Buffer.from(data).toString('base64');
-      preview = "data:image/" + imageType + ";base64," + base64;
-    }
-
-    return preview;
-  }
 }

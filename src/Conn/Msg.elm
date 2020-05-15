@@ -8,5 +8,6 @@ type Msg
     | ChoosingRelay Bool
     | RelayDiscovered Relay
     | RelayConnected Relay
+    | RelayConnecting
     | SetPeer Peer
     | NoOp
