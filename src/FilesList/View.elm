@@ -112,7 +112,7 @@ showFile fileEntry =
                 ])
             <|
                 { onPress = Just <| Copy fileEntry.hash
-                , label = text (if fileEntry.copied then "Copied!" else "Share")
+                , label = text (if fileEntry.hashCopied then "Copied!" else "Share")
                 }
 
         seeLogsStyles =

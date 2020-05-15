@@ -43,7 +43,7 @@ update msg model =
                     updateEntry model
                         hash
                         (\e ->
-                            { e | copied = True }
+                            { e | hashCopied = True }
                         )
             in
             ( updatedModel, replaceCopyMessageTask )
@@ -53,7 +53,7 @@ update msg model =
                     updateEntry model
                         hash
                         (\e ->
-                            { e | copied = False }
+                            { e | hashCopied = False }
                         )
             in
             ( updatedModel, Cmd.none )
@@ -70,7 +70,7 @@ update msg model =
                         { preview = Nothing
                         , hash = hash
                         , status = Requested
-                        , copied = False
+                        , hashCopied = False
                         , logs = [ "just requested to download" ]
                         , logsVisible = False
                         }

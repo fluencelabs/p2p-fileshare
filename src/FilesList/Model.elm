@@ -14,7 +14,7 @@ type alias FileEntry =
     { preview : Maybe String
     , hash : String
     , status : Status
-    , copied : Bool
+    , hashCopied : Bool
     , logs : List String
     , logsVisible : Bool
     }
