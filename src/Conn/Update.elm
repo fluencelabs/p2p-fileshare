@@ -1,6 +1,6 @@
 module Conn.Update exposing (update)
 
-import Conn.Model exposing (Model)
+import Conn.Model exposing (Model, Status(..))
 import Conn.Msg exposing (Msg(..))
 import Conn.Port
 
@@ -29,10 +29,10 @@ update msg model =
                 ( { model | discovered = relays ++ [ relay ] }, Cmd.none )
 
         RelayConnected relay ->
-                ( { model | relay = Just relay, connectionStatus = "Connected" }, Cmd.none )
+                ( { model | relay = Just relay, status = Connected }, Cmd.none )
 
         RelayConnecting ->
-                ( { model | connectionStatus = "Connecting..." }, Cmd.none )
+                ( { model | status = Connecting }, Cmd.none )
 
         SetPeer peer ->
             ( { model | peer = peer }, Cmd.none )

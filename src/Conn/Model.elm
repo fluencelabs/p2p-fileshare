@@ -12,11 +12,15 @@ type alias Relay =
     , pport : Int
     }
 
+type Status
+    = NotConnected
+    | Connecting
+    | Connected
 
 type alias Model =
     { peer : Peer
     , relay : Maybe Relay
-    , connectionStatus: String
+    , status: Status
     , discovered : List Relay
     , choosing : Bool
     }
@@ -26,7 +30,7 @@ emptyConn : Model
 emptyConn =
     { peer = { id = "-----" }
     , relay = Nothing
-    , connectionStatus = "Not Connected"
+    , status = NotConnected
     , discovered = []
     , choosing = False
     }

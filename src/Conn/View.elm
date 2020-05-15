@@ -1,6 +1,6 @@
 module Conn.View exposing (view)
 
-import Conn.Model exposing (Model)
+import Conn.Model exposing (Model, Status(..))
 import Conn.Msg exposing (Msg(..))
 import Element exposing (Element, below, centerX, column, el, fillPortion, height, mouseOver, none, padding, paddingXY, px, row, spacing, text, width)
 import Element.Events as Events
@@ -8,6 +8,16 @@ import Ions.Background as BG
 import Ions.Font as F
 import Ions.Size as S
 import Palette exposing (blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)
+
+statusToString : Status -> String
+statusToString status =
+    case status of
+        NotConnected ->
+            "Not Connected"
+        Connected ->
+            "Connected"
+        Connecting ->
+            "Connecting..."
 
 
 view : Model -> Element Msg
@@ -30,7 +40,7 @@ view conn =
 
         relayId =
             el [ Element.width (Element.fillPortion 4) ] <|
-                Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text conn.connectionStatus) <|
+                Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text (statusToString conn.status)) <|
                     Maybe.map (.peer >> .id >> showHash) relay
 
         relaysSelect =
