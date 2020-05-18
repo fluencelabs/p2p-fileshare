@@ -39,6 +39,12 @@ link url label =
         linkStyle
         { url = url, label = Element.text label }
 
+newTabLink : String -> String -> Element msg
+newTabLink url label =
+    Element.newTabLink
+        linkStyle
+        { url = url, label = Element.text label }
+
 
 linkStyle =
     [ accentFontColor, C.easeIn, mouseOver [ BG.washedYellow ], Font.underline ]
