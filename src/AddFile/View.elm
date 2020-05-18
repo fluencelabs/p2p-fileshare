@@ -57,7 +57,7 @@ addFileBlock model =
     let
         addUpload =
             row [ centerX, fillWidth, BG.white ]
-                [ el [ width (fillPortion 3), padding 10, F.nearBlack ] <| text "Choose file from your device"
+                [ el [ width (fillPortion 3), padding 10, F.nearBlack ] <| Element.el [ F.size5 ] <| text "Choose file from your device"
                 , Input.button
                     [ centerX
                     , width (fillPortion 2)

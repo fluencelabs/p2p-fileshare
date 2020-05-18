@@ -96,7 +96,7 @@ showHash hash =
         , F.code
         ]
     <|
-        Element.text hash
+        Element.text (hash)
 
 
 layout : List (Element msg) -> Html msg
