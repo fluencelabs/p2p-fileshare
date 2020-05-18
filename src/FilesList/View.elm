@@ -24,12 +24,7 @@ view { files } =
             else
                 files |> List.map showFileLazy
     in
-    column (layoutBlock ++ [ blockBackground ]) <|
-        [ row [ fillWidth, F.white, F.size2, BG.black, padding 20 ]
-            [ el [ centerX ] <| text "Files list"
-            ]
-        ]
-            ++ filesList
+    column (layoutBlock ++ [ blockBackground ]) <| filesList
 
 
 showFilePreview : Maybe String -> Element Msg
@@ -37,8 +32,8 @@ showFilePreview maybePreview =
     case maybePreview of
         Just src ->
             Element.image
-                [ width <| Element.px 30
-                , height <| Element.px 30
+                [ width <| Element.px 64
+                , height <| Element.px 64
                 , centerX
                 , centerY
                 ]
@@ -56,8 +51,8 @@ showPreview { preview, hash } =
     in
     el
         [ Element.Events.onClick <| DownloadFile hash
-        , width (px 40)
-        , height (px 40)
+        , width (px 66)
+        , height (px 66)
         , Font.center
         , BG.nearBlack
         , F.nearWhite
@@ -154,8 +149,8 @@ showFile fileEntry =
             else
                 Element.none
     in
-    column [ fillWidth, paddingXY 0 10, B.width1 B.Bottom, B.nearBlack ]
-        [ row [ limitLayoutWidth, BG.white, centerX, spacing 5 ]
+    column [ fillWidth, paddingXY 0 10, B.width005 B.Bottom, B.lightSilver ]
+        [ row [ limitLayoutWidth, centerX, spacing 5 ]
             [ showPreview fileEntry
             , hashView
             , shareButton

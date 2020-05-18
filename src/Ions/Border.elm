@@ -94,6 +94,8 @@ radius w c =
 width0 =
     width 0
 
+width005 =
+    width <| S.baseRem 0.05
 
 width1 =
     width <| S.baseRem 0.125
