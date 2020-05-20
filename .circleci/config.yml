@@ -1,3 +1,6 @@
+# run locally: 
+# $ circleci local execute -v /tmp/circleci:/root/repo --job build
+
 version: 2
 jobs:
   build:
