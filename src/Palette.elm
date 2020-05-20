@@ -39,9 +39,15 @@ link url label =
         linkStyle
         { url = url, label = Element.text label }
 
+newTabLink : String -> String -> Element msg
+newTabLink url label =
+    Element.newTabLink
+        linkStyle
+        { url = url, label = Element.text label }
+
 
 linkStyle =
-    [ accentFontColor, C.easeIn, mouseOver [ BG.washedYellow ], Font.underline ]
+    [ accentFontColor, C.easeIn, Font.underline ]
 
 
 h1 txt =
@@ -77,9 +83,9 @@ shortHash hash =
     let
         sh =
             String.concat
-                [ String.left 4 hash
+                [ String.left 6 hash
                 , "..."
-                , String.right 3 hash
+                , String.right 5 hash
                 ]
     in
     Element.el
@@ -96,7 +102,7 @@ showHash hash =
         , F.code
         ]
     <|
-        Element.text hash
+        Element.text (hash)
 
 
 layout : List (Element msg) -> Html msg

@@ -2,7 +2,7 @@ module Conn.View exposing (view)
 
 import Conn.Model exposing (Model, Status(..))
 import Conn.Msg exposing (Msg(..))
-import Element exposing (Element, below, centerX, column, el, fillPortion, height, mouseOver, none, padding, paddingXY, px, row, spacing, text, width)
+import Element exposing (Element, below, centerX, column, el, fillPortion, mouseOver, none, padding, paddingXY, row, spacing, text, width)
 import Element.Events as Events
 import Ions.Background as BG
 import Ions.Font as F

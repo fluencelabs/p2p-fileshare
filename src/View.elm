@@ -24,7 +24,7 @@ import Ions.Size as S
 import Model exposing (Model)
 import Msg exposing (..)
 import NetworkMap.View
-import Palette exposing (fillWidth, h1, layout, layoutBlock, link, pSpacing)
+import Palette exposing (fillWidth, h1, layout, layoutBlock, link, newTabLink, pSpacing)
 
 
 view : Model -> Document Msg
@@ -83,7 +83,7 @@ header =
                 [ fillWidth, spacing <| S.baseRem 1 ]
                 [ paragraph [ pSpacing ] [ text "This is a peer-to-peer file-sharing demo, that uses Fluence protocol to advertise and discover files, and IPFS to upload/download." ]
                 , paragraph [ pSpacing ] [ text "First, choose your local file and make it discoverable via Fluence network. Other peers may discover your device as a holder of the file and ask it to provide the file to a publicly accessible IPFS node. Your device will upload the file to the IPFS node and then share its multiaddress with the requesting peer." ]
-                , row [ spacing (S.baseRem 1) ] [ link "https://fluence.network" "More about Fluence", link "https://fluence.network" "Documentation" ]
+                , row [ spacing (S.baseRem 1) ] [ newTabLink "https://fluence.network" "More about Fluence", newTabLink "https://fluence.network" "Documentation" ]
                 ]
             ]
         , el [ height <| Element.px <| S.baseRem 0.5 ] Element.none

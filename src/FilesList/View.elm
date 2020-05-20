@@ -1,6 +1,6 @@
 module FilesList.View exposing (view)
 
-import Element exposing (Element, alignRight, centerX, centerY, column, el, height, padding, paddingXY, paragraph, px, row, spacing, text, width)
+import Element exposing (Element, alignLeft, alignRight, centerX, centerY, column, el, fill, fillPortion, height, padding, paddingXY, paragraph, px, row, spacing, text, width)
 import Element.Border exposing (dashed, dotted)
 import Element.Events
 import Element.Font as Font
@@ -16,20 +16,21 @@ import Palette exposing (blockBackground, fillWidth, layoutBlock, limitLayoutWid
 
 view : Model -> Element Msg
 view { files } =
-    let
-        filesList =
-            if List.isEmpty files then
-                [ el [ limitLayoutWidth, padding 60, F.size6, Font.italic, Font.center, centerX, B.black, B.width1 B.Bottom ] <| text "Please add a file to be shown" ]
-
-            else
-                files |> List.map showFileLazy
+    let table = if List.isEmpty files then
+                    [ el [ limitLayoutWidth, padding 60, F.size6, Font.italic, Font.center, centerX, B.black, B.width1 B.Bottom ]
+                        <| text "Please add a file to be shown" ]
+                else
+                    [ row [ limitLayoutWidth, spacing 15, F.gray, Font.bold ]
+                                [ el [ alignLeft, width <| fillPortion 1 ] <| text "PREVIEW"
+                                , el [ centerX, width <| fillPortion 7 ] <| text "FILE"
+                                , el [ centerX, width <| fillPortion 1 ] <| text "STATUS"
+                                , el [ alignRight, width <| fillPortion 1 ] <| text "LOGS"
+                                ]
+                    ] ++ (files |> List.map showFileLazy)
     in
-    column (layoutBlock ++ [ blockBackground ]) <|
-        [ row [ fillWidth, F.white, F.size2, BG.black, padding 20 ]
-            [ el [ centerX ] <| text "Files list"
-            ]
-        ]
-            ++ filesList
+        column (layoutBlock ++ [ blockBackground ]) <| table
+
+
 
 
 showFilePreview : Maybe String -> Element Msg
@@ -37,8 +38,8 @@ showFilePreview maybePreview =
     case maybePreview of
         Just src ->
             Element.image
-                [ width <| Element.px 30
-                , height <| Element.px 30
+                [ width <| Element.px 64
+                , height <| Element.px 64
                 , centerX
                 , centerY
                 ]
@@ -56,8 +57,8 @@ showPreview { preview, hash } =
     in
     el
         [ Element.Events.onClick <| DownloadFile hash
-        , width (px 40)
-        , height (px 40)
+        , width (px 66)
+        , height (px 66)
         , Font.center
         , BG.nearBlack
         , F.nearWhite
@@ -69,7 +70,7 @@ showPreview { preview, hash } =
 
 showStatus : Status -> Element Msg
 showStatus s =
-    el [ Element.alignRight, Font.center, BG.washedGreen, padding 11 ] <|
+    el [ Element.alignLeft, F.green, Font.bold, width <| Element.px 84 ] <|
         case s of
             Seeding i ->
                 text ("Seeding " ++ String.fromInt i)
@@ -100,40 +101,41 @@ showFile : FileEntry -> Element Msg
 showFile fileEntry =
     let
         hashView =
-            el [ Font.alignRight, centerX ] <| showHash fileEntry.hash
+            el [ alignLeft ] <| showHash fileEntry.hash
 
         shareButton =
             Input.button
-                ([ Element.padding 7
+                ([ Element.padding 5
+                , width <| Element.px 64
                 , Font.center
+                , alignLeft
                 , B.width1 B.AllSides
                 , dotted
-                , B.lightestBlue
+                , B.gray
                 ])
             <|
                 { onPress = Just <| Copy fileEntry.hash
                 , label = text (if fileEntry.hashCopied then "Copied!" else "Share")
                 }
 
-        seeLogsStyles =
+        seeLogsText =
             if fileEntry.logsVisible then
-                [ BG.lightestBlue ]
-
+                "Hide Logs"
             else
-                []
+                "Show Logs"
 
         seeLogs =
             Input.button
-                ([ B.width1 B.AllSides
-                 , B.lightestBlue
-                 , padding 10
-                 , alignRight
-                 ]
-                    ++ seeLogsStyles
+                ([ width <| Element.px 80 ]
                 )
             <|
                 { onPress = Just <| SetLogsVisible fileEntry.hash (not fileEntry.logsVisible)
-                , label = text "Show logs"
+
+                , label = Element.el
+                      [
+                        Font.underline
+                      ]
+                      (Element.text seeLogsText)
                 }
 
         logs =
@@ -154,13 +156,13 @@ showFile fileEntry =
             else
                 Element.none
     in
-    column [ fillWidth, paddingXY 0 10, B.width1 B.Bottom, B.nearBlack ]
-        [ row [ limitLayoutWidth, BG.white, centerX, spacing 5 ]
-            [ showPreview fileEntry
-            , hashView
-            , shareButton
-            , showStatus fileEntry.status
-            , seeLogs
+    column [ fillWidth, paddingXY 0 10, B.width005 B.Bottom, B.lightSilver ]
+        [ row [ limitLayoutWidth, centerX, spacing 15 ]
+            [ Element.el [ width <| fillPortion 1] <| showPreview fileEntry
+            , Element.el [ width <| fillPortion 6] <| hashView
+            , Element.el [ width <| fillPortion 1] <| shareButton
+            , Element.el [ width <| fillPortion 1] <| showStatus fileEntry.status
+            , Element.el [ width <| fillPortion 1] <| seeLogs
             ]
         , logs
         ]
