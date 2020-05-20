@@ -2,7 +2,7 @@ module NetworkMap.View exposing (view)
 
 import Dict
 import Element.Font as Font
-import NetworkMap.Model exposing (Model, NodeEntry)
+import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 import Element exposing (Element, alignLeft, alignRight, centerX, centerY, column, el, padding, paddingXY, row, text)
 import Ions.Font as F
@@ -24,6 +24,13 @@ view networkModel =
     else
         Element.none
 
+peerTypeToString : PeerType -> String
+peerTypeToString pt =
+    case pt of
+        Relay ->
+            "Relay"
+        Client ->
+            "Client"
 
 showNode : NodeEntry -> Element msg
 showNode nodeEntry =
@@ -34,7 +41,7 @@ showNode nodeEntry =
                       , centerY
                       , alignLeft
                       ] <| text nodeEntry.date
-                , el [ centerX, padding 10 ] <| text (Debug.toString nodeEntry.peerType)
+                , el [ centerX, padding 10 ] <| text (peerTypeToString nodeEntry.peerType)
                 , el [ alignRight, padding 10 ] <| text nodeEntry.peer.id
                 ]
             ]
