@@ -4,12 +4,6 @@ import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
 import AddFile.Port
 import Platform.Cmd exposing (Cmd(..))
-import Task
-
-
-run : msg -> Cmd msg
-run m =
-    Task.perform (always m) (Task.succeed ())
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

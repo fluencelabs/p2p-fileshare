@@ -31,37 +31,37 @@ function to_multiaddr(relay) {
     return `${host}/tcp/${relay.pport}/${protocol}/p2p/${relay.peer.id}`;
 }
 
+function subsribeToApper(conn) {
+    // subscribe for all outgoing calls to watch for all Fluence network members
+    conn.subscribe((args, target, replyTo) => {
+        let date = new Date().toISOString();
+        if (!!replyTo) {
+            for (const protocol of replyTo.protocols) {
+                if (protocol.protocol !== 'signature' && protocol.value !== peerIdStr) {
+                    peerAppearedEvent(protocol.value, protocol.protocol, date)
+                }
+            }
+        }
+    });
+}
+
 export default async function ports(app) {
+
+    let currentPeerId;
 
     // new peer is generated
     let peerEvent = (name, peer) =>
         app.ports.connReceiver.send({event: name, relay: null, peer});
 
-    let emptyRelay = {
-        dns: null,
-        host: null
-    };
     // new relay connection established
     let relayEvent = (name, relay) => {
         let relayToSend = null;
-        if (relay) relayToSend = {...emptyRelay, ...relay};
+        if (relay) relayToSend = {dns: null, host: null, ...relay};
         let ev = {event: name, peer: null, relay: relayToSend};
         app.ports.connReceiver.send(ev);
     };
 
     relays.map(d => relayEvent("relay_discovered", d));
-
-    let peerId = await Fluence.generatePeerId();
-    let peerIdStr = peerId.toB58String();
-    peerEvent("set_peer", {id: peerIdStr});
-
-    // connect to a random node
-    let randomNodeNum = Math.floor(Math.random() * relays.length);
-    let randomRelay = relays[randomNodeNum];
-
-    relayEvent("relay_connecting");
-    let conn = await Fluence.connect(to_multiaddr(randomRelay), peerId);
-    relayEvent("relay_connected", randomRelay);
 
     // call if we found out about any peers or relays in Fluence network
     let peerAppearedEvent = (peer, peerType, updateDate) => {
@@ -74,18 +74,6 @@ export default async function ports(app) {
     for (const relay of relays) {
         peerAppearedEvent(relay.peer.id, "peer", date)
     }
-
-    // subscribe for all outgoing calls to watch for all Fluence network members
-    conn.subscribe((args, target, replyTo) => {
-        let date = new Date().toISOString();
-        if (!!replyTo) {
-            for (const protocol of replyTo.protocols) {
-                if (protocol.protocol !== 'signature' && protocol.value !== peerIdStr) {
-                    peerAppearedEvent(protocol.value, protocol.protocol, date)
-                }
-            }
-        }
-    });
 
     /**
      * Handle connection commands
@@ -101,6 +89,30 @@ export default async function ports(app) {
                     relayEvent("relay_connected", relay);
                 }
 
+                break;
+
+            case "generate_peer":
+                console.log("generate peer")
+                let peerId = await Fluence.generatePeerId();
+                currentPeerId = peerId;
+                let peerIdStr = peerId.toB58String();
+                peerEvent("set_peer", {id: peerIdStr});
+                break;
+
+            case "discover_relays":
+
+                break;
+
+            case "random_connect":
+                console.log("random connect")
+                // connect to a random node
+                let randomNodeNum = Math.floor(Math.random() * relays.length);
+                let randomRelay = relays[randomNodeNum];
+
+                relayEvent("relay_connecting");
+                let conn = await Fluence.connect(to_multiaddr(randomRelay), currentPeerId);
+                relayEvent("relay_connected", randomRelay);
+                subsribeToApper(conn)
                 break;
 
             default:
@@ -289,6 +301,7 @@ export default async function ports(app) {
         app.ports.networkMapReceiver.send({event: "show-hide", peerAppeared: null});
     };
 
+    // call it to open the field with appeared peers and clients
     window.networkMap = () => {
         showHideEvent()
     }

@@ -11,6 +11,12 @@ update msg model =
         SetRelay relay ->
             ( { model | relay = Nothing }, Conn.Port.connRequest { command = "set_relay", id = Just relay.peer.id } )
 
+        GeneratePeer ->
+            ( model, Conn.Port.connRequest { command = "generate_peer", id = Nothing } )
+
+        RandomConnection ->
+            ( model, Conn.Port.connRequest { command = "random_connect", id = Nothing } )
+
         ChoosingRelay choosing ->
             ( { model | choosing = choosing }, Cmd.none )
 
@@ -35,7 +41,7 @@ update msg model =
                 ( { model | status = Connecting }, Cmd.none )
 
         SetPeer peer ->
-            ( { model | peer = peer }, Cmd.none )
+            ( { model | peer = peer }, Conn.Port.connRequest { command = "random_connect", id = Nothing } )
 
         NoOp ->
             ( model, Cmd.none )

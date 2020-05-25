@@ -5,6 +5,8 @@ import Conn.Model exposing (Peer, Relay)
 
 type Msg
     = SetRelay Relay
+    | RandomConnection
+    | GeneratePeer
     | ChoosingRelay Bool
     | RelayDiscovered Relay
     | RelayConnected Relay
