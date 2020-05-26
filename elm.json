@@ -21,7 +21,7 @@
             "elm-community/graph": "6.0.0",
             "elm-community/intdict": "3.0.0",
             "ivadzy/bbase64": "1.1.1",
-            "mdgriffith/elm-ui": "1.1.5",
+            "mdgriffith/elm-ui": "1.1.6",
             "mpizenberg/elm-pointer-events": "4.0.2",
             "noahzgordon/elm-color-extra": "1.0.2"
         },

@@ -8,6 +8,18 @@ import Conn.Port
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Connect ->
+            let
+                _ = Debug.log "connect"
+            in ( model, Cmd.none)
+        UpdateRelayInput str ->
+            let
+                _ = Debug.log "updateRelayInput" str
+            in ( { model | relayInput = str }, Cmd.none)
+        UpdatePeerInput str ->
+            let
+                _ = Debug.log "updatePeerInput" str
+            in ( { model | peerInput = str }, Cmd.none)
         SetRelay relay ->
             ( { model | relay = Nothing }, Conn.Port.connRequest { command = "set_relay", id = Just relay.peer.id } )
 

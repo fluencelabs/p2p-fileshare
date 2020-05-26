@@ -15,6 +15,8 @@ type alias Model =
     , discovered : List Relay
     , choosing : Bool
     , isAdmin : Bool
+    , peerInput : String
+    , relayInput : String
     }
 
 
@@ -28,6 +30,12 @@ emptyConn isAdmin =
             , discovered = []
             , choosing = False
             , isAdmin = isAdmin
+            , peerInput = "peerIn"
+            , relayInput = "relayInput"
             }
+        cmd = if (isAdmin) then
+                Cmd.none
+            else
+                run <| GeneratePeer
     in
-        ( emptyModel, run <| GeneratePeer )
+        ( emptyModel, cmd )

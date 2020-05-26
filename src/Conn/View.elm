@@ -8,6 +8,7 @@ import Ions.Background as BG
 import Ions.Font as F
 import Ions.Size as S
 import Palette exposing (blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)
+import Element.Input as Input
 
 statusToString : Status -> String
 statusToString status =
@@ -19,9 +20,30 @@ statusToString status =
         Connecting ->
             "Connecting..."
 
+adminView : Model -> List (Element Msg)
+adminView conn =
+    let
+        a = 1
+    in
+        [ row [ fillWidth, centerX ] [ defn "PEER ID", Input.text [] { onChange = UpdatePeerInput, text = conn.peerInput, placeholder=Nothing, label = Input.labelHidden "peer" } ]
+        , row [ fillWidth, centerX ]
+            [ defn "CONNECTED RELAY ID"
+            , Input.text [] { onChange = UpdateRelayInput, text = conn.relayInput, placeholder=Nothing, label = Input.labelHidden "relay" }
+            ]
+        , row [ fillWidth, centerX ] [ Input.button [] { onPress = Just Connect, label = text "connect button" } ]
+        , el [] none
+        ]
 
-view : Model -> Element Msg
-view conn =
+defn : String -> Element Msg
+defn t =
+    el [ width (fillPortion 2), letterSpacing, F.gray ] <| Element.text t
+
+valn : Element Msg -> Element Msg
+valn t =
+    el [ width (fillPortion 5) ] <| t
+
+demoView : Model -> List (Element Msg)
+demoView conn =
     let
         peer =
             conn.peer
@@ -31,12 +53,6 @@ view conn =
 
         discovered =
             String.fromInt <| List.length conn.discovered
-
-        defn t =
-            el [ width (fillPortion 2), letterSpacing, F.gray ] <| Element.text t
-
-        valn t =
-            el [ width (fillPortion 5) ] <| t
 
         relayId =
             el [ Element.width (Element.fillPortion 4) ] <|
@@ -81,9 +97,7 @@ view conn =
                 )
                 (Element.text "Change")
     in
-    column (layoutBlock ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
-        [ blockTitle <| text "NETWORK INFO"
-        , row [ fillWidth, centerX ] [ defn "PEER ID", valn <| showHash peer.id ]
+        [ row [ fillWidth, centerX ] [ defn "PEER ID", valn <| showHash peer.id ]
         , row [ fillWidth, centerX ]
             [ defn "CONNECTED RELAY ID"
             , relayId
@@ -92,3 +106,16 @@ view conn =
         , row [ fillWidth, centerX ] [ defn "PEERS", valn <| Element.text discovered ]
         , el [] none
         ]
+
+view : Model -> Element Msg
+view conn =
+    let
+        elements =
+            if (conn.isAdmin) then
+                adminView conn
+            else
+                demoView conn
+    in
+        column (layoutBlock ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
+            ([ blockTitle <| text "NETWORK INFO" ] ++ elements)
+

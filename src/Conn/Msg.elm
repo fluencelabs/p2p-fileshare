@@ -14,6 +14,9 @@ type alias Relay =
 type Msg
     = SetRelay Relay
     | ConnectToRandomRelay
+    | UpdatePeerInput String
+    | UpdateRelayInput String
+    | Connect
     | GeneratePeer
     | ChoosingRelay Bool
     | RelayDiscovered Relay
