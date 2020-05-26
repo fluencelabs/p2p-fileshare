@@ -1,11 +1,19 @@
-module Conn.Msg exposing (Msg(..))
+module Conn.Msg exposing (..)
 
-import Conn.Model exposing (Peer, Relay)
+type alias Peer =
+    { id : String }
 
+
+type alias Relay =
+    { peer : Peer
+    , host : Maybe String
+    , dns : Maybe String
+    , pport : Int
+    }
 
 type Msg
     = SetRelay Relay
-    | RandomConnection
+    | ConnectToRandomRelay
     | GeneratePeer
     | ChoosingRelay Bool
     | RelayDiscovered Relay

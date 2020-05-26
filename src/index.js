@@ -4,9 +4,18 @@ import * as serviceWorker from './serviceWorker';
 
 import ports from './ports';
 
-var app = Elm.Main.init({
+let path = window.location.pathname;
+
+let flags;
+if (path === "/admin") {
+  flags = { isAdmin: true, peerId: null }
+} else {
+  flags = null
+}
+
+let app = Elm.Main.init({
   node: document.getElementById('root'),
-  flags: null
+  flags: flags
 });
 
 (async () => {

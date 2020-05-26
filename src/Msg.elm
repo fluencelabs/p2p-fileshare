@@ -8,7 +8,6 @@ import NetworkMap.Msg
 
 type Msg
     = NoOp
-    | UrlChanged
     | ConnMsg Conn.Msg.Msg
     | AddFileMsg AddFile.Msg.Msg
     | FilesListMsg FilesList.Msg.Msg

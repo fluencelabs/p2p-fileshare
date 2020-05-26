@@ -1,7 +1,7 @@
 port module Conn.Port exposing (..)
 
-import Conn.Model exposing (Model, Peer, Relay)
-import Conn.Msg exposing (Msg(..))
+import Conn.Model exposing (Model)
+import Conn.Msg exposing (Msg(..), Peer, Relay)
 
 
 type alias Command =

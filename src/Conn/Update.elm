@@ -14,7 +14,7 @@ update msg model =
         GeneratePeer ->
             ( model, Conn.Port.connRequest { command = "generate_peer", id = Nothing } )
 
-        RandomConnection ->
+        ConnectToRandomRelay ->
             ( model, Conn.Port.connRequest { command = "random_connect", id = Nothing } )
 
         ChoosingRelay choosing ->

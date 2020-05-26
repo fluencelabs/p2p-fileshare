@@ -1,16 +1,7 @@
 module Conn.Model exposing (..)
 
-
-type alias Peer =
-    { id : String }
-
-
-type alias Relay =
-    { peer : Peer
-    , host : Maybe String
-    , dns : Maybe String
-    , pport : Int
-    }
+import Conn.Msg exposing (Msg(..), Peer, Relay)
+import Utils exposing (run)
 
 type Status
     = NotConnected
@@ -23,14 +14,20 @@ type alias Model =
     , status: Status
     , discovered : List Relay
     , choosing : Bool
+    , isAdmin : Bool
     }
 
 
-emptyConn : Model
-emptyConn =
-    { peer = { id = "-----" }
-    , relay = Nothing
-    , status = NotConnected
-    , discovered = []
-    , choosing = False
-    }
+emptyConn : Bool -> ( Model, Cmd Msg )
+emptyConn isAdmin =
+    let
+        emptyModel =
+            { peer = { id = "-----" }
+            , relay = Nothing
+            , status = NotConnected
+            , discovered = []
+            , choosing = False
+            , isAdmin = isAdmin
+            }
+    in
+        ( emptyModel, run <| GeneratePeer )
