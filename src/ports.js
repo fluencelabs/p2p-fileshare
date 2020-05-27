@@ -6,16 +6,18 @@ import Fluence from 'fluence';
 import {genUUID} from "fluence/dist/function_call";
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
+import {peerIdToSeed, seedToPeerId} from "fluence/dist/misc";
+import * as PeerId from "peer-id";
 
 
 let relays = [
-    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"}, dns: "relay01.fluence.dev", pport: 19001},
-    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er"}, dns: "relay01.fluence.dev", pport: 19002},
-    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb"}, dns: "relay01.fluence.dev", pport: 19003},
-    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB"}, dns: "relay01.fluence.dev", pport: 19004},
-    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb"}, dns: "relay01.fluence.dev", pport: 19005},
-    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz"}, dns: "relay01.fluence.dev", pport: 19990},
-    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM"}, dns: "relay01.fluence.dev", pport: 19100},
+    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", seed: null}, dns: "relay01.fluence.dev", pport: 19001},
+    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er", seed: null}, dns: "relay01.fluence.dev", pport: 19002},
+    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", seed: null}, dns: "relay01.fluence.dev", pport: 19003},
+    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB", seed: null}, dns: "relay01.fluence.dev", pport: 19004},
+    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", seed: null}, dns: "relay01.fluence.dev", pport: 19005},
+    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", seed: null}, dns: "relay01.fluence.dev", pport: 19990},
+    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", seed: null}, dns: "relay01.fluence.dev", pport: 19100},
 ];
 
 function to_multiaddr(relay) {
@@ -48,16 +50,26 @@ function subsribeToApper(conn) {
 export default async function ports(app) {
 
     let currentPeerId;
+    let conn;
+
+    // event with an error message
+    let peerErrorEvent = (errorMsg) => {
+        app.ports.connReceiver.send({event: "error", relay: null, peer: null, errorMsg});
+    }
 
     // new peer is generated
-    let peerEvent = (name, peer) =>
-        app.ports.connReceiver.send({event: name, relay: null, peer});
+    let peerEvent = (name, peer) => {
+        let peerToSend = {seed: null, ...peer};
+        app.ports.connReceiver.send({event: name, relay: null, errorMsg: null, peer: peerToSend});
+    }
 
     // new relay connection established
     let relayEvent = (name, relay) => {
         let relayToSend = null;
-        if (relay) relayToSend = {dns: null, host: null, ...relay};
-        let ev = {event: name, peer: null, relay: relayToSend};
+        if (relay) {
+            relayToSend = {dns: null, host: null, ...relay};
+        }
+        let ev = {event: name, peer: null, errorMsg: null, relay: relayToSend};
         app.ports.connReceiver.send(ev);
     };
 
@@ -78,14 +90,14 @@ export default async function ports(app) {
     /**
      * Handle connection commands
      */
-    app.ports.connRequest.subscribe(async ({command, id}) => {
+    app.ports.connRequest.subscribe(async ({command, id, connectTo}) => {
         switch (command) {
             case "set_relay":
                 let relay = relays.find(r => r.peer.id === id);
                 if (relay) {
                     relayEvent("relay_connecting");
                     // if the connection already established, connect to another node and save previous services and subscriptions
-                    await conn.connect(to_multiaddr(relay), relay.peer.id);
+                    conn = await conn.connect(to_multiaddr(relay), relay.peer.id);
                     relayEvent("relay_connected", relay);
                 }
 
@@ -99,7 +111,65 @@ export default async function ports(app) {
                 peerEvent("set_peer", {id: peerIdStr});
                 break;
 
-            case "discover_relays":
+            case "connect_to":
+                let errorMsg = "";
+                try {
+                    if (connectTo) {
+                        if (!connectTo.host) {
+                            errorMsg = errorMsg + "Host must be present\n"
+                        }
+
+                        let port;
+                        if (!connectTo.pport) {
+                            errorMsg = errorMsg +  "Port must be present\n"
+                        } else {
+                            try {
+                                port = parseInt(connectTo.pport)
+                            } catch (e) {
+                                errorMsg = errorMsg +  "Port must be a number\n"
+                            }
+                        }
+
+                        if (!connectTo.peerId) {
+                            errorMsg = errorMsg +  "Relay peerId must be present\n"
+                        } else {
+                            await PeerId.createFromB58String(connectTo.peerId);
+                        }
+
+                        console.log("ERROR MSG: " + errorMsg)
+
+                        if (errorMsg) {
+                            peerErrorEvent(errorMsg);
+                            break;
+                        }
+
+                        let peerId;
+                        let seed;
+                        if (connectTo.seed) {
+                            peerId = await seedToPeerId(connectTo.seed);
+                            seed = connectTo.seed;
+                        } else {
+                            peerId = await Fluence.generatePeerId();
+                            seed = peerIdToSeed(peerId);
+                            console.log("SEED GENERATED: " + seed)
+                        }
+
+                        currentPeerId = peerId;
+                        peerEvent("set_peer", {id: peerId.toB58String(), seed});
+                        relayEvent("relay_connecting");
+                        conn = await Fluence.connect(`/dns4/${connectTo.host}/tcp/${connectTo.pport}/wss/p2p/${connectTo.peerId}`, peerId);
+                        let relay = {
+                            host: connectTo.host,
+                            pport: port,
+                            peer: { id: connectTo.peerId, seed: null },
+                            dns: null
+                        }
+                        relayEvent("relay_connected", relay);
+                    }
+                } catch (e) {
+                    console.log(e);
+                    peerErrorEvent(errorMsg + e.message);
+                }
 
                 break;
 
@@ -110,9 +180,10 @@ export default async function ports(app) {
                 let randomRelay = relays[randomNodeNum];
 
                 relayEvent("relay_connecting");
-                let conn = await Fluence.connect(to_multiaddr(randomRelay), currentPeerId);
+                let connection = await Fluence.connect(to_multiaddr(randomRelay), currentPeerId);
+                conn = connection;
                 relayEvent("relay_connected", randomRelay);
-                subsribeToApper(conn)
+                subsribeToApper(connection)
                 break;
 
             default:

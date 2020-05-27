@@ -43,7 +43,7 @@ init maybeFlags =
         model =
             case initPeerId of
                 Just peerId ->
-                    { em | connectivity = { initConn | peer = { id = peerId } } }
+                    { em | connectivity = { initConn | peer = { id = peerId, seed = Nothing } } }
 
                 Nothing ->
                     em

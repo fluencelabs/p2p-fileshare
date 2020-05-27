@@ -1,18 +1,22 @@
 port module Conn.Port exposing (..)
 
-import Conn.Model exposing (Model)
+import Conn.Model exposing (Model, RelayInput)
 import Conn.Msg exposing (Msg(..), Peer, Relay)
 
 
 type alias Command =
-    { command : String, id : Maybe String }
+    { command : String, id : Maybe String, connectTo : Maybe RelayInput }
 
 
 type alias Event =
-    { event : String, peer : Maybe Peer, relay : Maybe Relay }
+    { event : String, peer : Maybe Peer, relay : Maybe Relay, errorMsg : Maybe String }
 
 
 port connRequest : Command -> Cmd msg
+
+command : String -> Command
+command c =
+    { command = c, id = Nothing, connectTo = Nothing }
 
 
 port connReceiver : (Event -> msg) -> Sub msg
@@ -33,6 +37,9 @@ eventToMsg event =
 
             "set_peer" ->
                 Maybe.map SetPeer event.peer
+
+            "error" ->
+                Maybe.map Error event.errorMsg
 
             _ ->
                 Nothing

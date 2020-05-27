@@ -1,7 +1,7 @@
 module Conn.Msg exposing (..)
 
 type alias Peer =
-    { id : String }
+    { id : String, seed: Maybe String }
 
 
 type alias Relay =
@@ -15,7 +15,9 @@ type Msg
     = SetRelay Relay
     | ConnectToRandomRelay
     | UpdatePeerInput String
-    | UpdateRelayInput String
+    | UpdateRelayHostInput String
+    | UpdateRelayPortInput String
+    | UpdateRelayPrivateKeyInput String
     | Connect
     | GeneratePeer
     | ChoosingRelay Bool
@@ -23,4 +25,5 @@ type Msg
     | RelayConnected Relay
     | RelayConnecting
     | SetPeer Peer
+    | Error String
     | NoOp
