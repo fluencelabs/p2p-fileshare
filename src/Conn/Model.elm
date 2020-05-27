@@ -17,9 +17,9 @@ type alias RelayInput =
 
 emptyRelayInput : RelayInput
 emptyRelayInput =
-    { host = ""
-    , pport = ""
-    , peerId = ""
+    { host = "relay01.fluence.dev"
+    , pport = "19001"
+    , peerId = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"
     , seed = ""
     }
 

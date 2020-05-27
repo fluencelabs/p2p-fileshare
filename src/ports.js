@@ -6,9 +6,10 @@ import Fluence from 'fluence';
 import {genUUID} from "fluence/dist/function_call";
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
-import {peerIdToSeed, seedToPeerId} from "fluence/dist/misc";
+import {peerIdToSeed, seedToPeerId} from "fluence/dist/seed";
 import * as PeerId from "peer-id";
 
+let Address4 = require('ip-address').Address4;
 
 let relays = [
     {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", seed: null}, dns: "relay01.fluence.dev", pport: 19001},
@@ -115,28 +116,32 @@ export default async function ports(app) {
                 let errorMsg = "";
                 try {
                     if (connectTo) {
+                        let isIp = false;
                         if (!connectTo.host) {
                             errorMsg = errorMsg + "Host must be present\n"
+                        } else {
+                            let addr = new Address4(connectTo.host);
+                            if (addr.isValid()) {
+                                isIp = true
+                            }
                         }
 
                         let port;
                         if (!connectTo.pport) {
-                            errorMsg = errorMsg +  "Port must be present\n"
+                            errorMsg = errorMsg + "Port must be present\n"
                         } else {
                             try {
                                 port = parseInt(connectTo.pport)
                             } catch (e) {
-                                errorMsg = errorMsg +  "Port must be a number\n"
+                                errorMsg = errorMsg + "Port must be a number\n"
                             }
                         }
 
                         if (!connectTo.peerId) {
-                            errorMsg = errorMsg +  "Relay peerId must be present\n"
+                            errorMsg = errorMsg + "Relay peerId must be present\n"
                         } else {
                             await PeerId.createFromB58String(connectTo.peerId);
                         }
-
-                        console.log("ERROR MSG: " + errorMsg)
 
                         if (errorMsg) {
                             peerErrorEvent(errorMsg);
@@ -157,13 +162,21 @@ export default async function ports(app) {
                         currentPeerId = peerId;
                         peerEvent("set_peer", {id: peerId.toB58String(), seed});
                         relayEvent("relay_connecting");
-                        conn = await Fluence.connect(`/dns4/${connectTo.host}/tcp/${connectTo.pport}/wss/p2p/${connectTo.peerId}`, peerId);
+                        let host = null;
+                        let dns = null;
+                        if (isIp) {
+                            host = connectTo.host
+                        } else {
+                            dns = connectTo.host
+                        }
                         let relay = {
-                            host: connectTo.host,
+                            host: host,
                             pport: port,
                             peer: { id: connectTo.peerId, seed: null },
-                            dns: null
+                            dns: dns
                         }
+                        conn = await Fluence.connect(to_multiaddr(relay), peerId);
+
                         relayEvent("relay_connected", relay);
                     }
                 } catch (e) {
@@ -224,7 +237,7 @@ export default async function ports(app) {
 
     // callback to add a local file in Fluence network
     app.ports.selectFile.subscribe(async () => {
-        var input = document.createElement('input');
+        let input = document.createElement('input');
         input.type = 'file';
 
         input.onchange = async e => {
