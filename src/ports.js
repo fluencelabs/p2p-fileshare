@@ -4,12 +4,9 @@ import bs58 from 'bs58';
 
 import Fluence from 'fluence';
 import {genUUID} from "fluence/dist/function_call";
+import {establishConnection} from "./admin"
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
-import {peerIdToSeed, seedToPeerId} from "fluence/dist/seed";
-import * as PeerId from "peer-id";
-
-let Address4 = require('ip-address').Address4;
 
 let relays = [
     {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", seed: null}, dns: "relay01.fluence.dev", pport: 19001},
@@ -21,7 +18,18 @@ let relays = [
     {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", seed: null}, dns: "relay01.fluence.dev", pport: 19100},
 ];
 
-function to_multiaddr(relay) {
+let currentPeerId;
+let conn;
+
+export function setCurrentPeerId(peerId) {
+    currentPeerId = peerId;
+}
+
+export function setConnection(connection) {
+    conn = connection;
+}
+
+export function to_multiaddr(relay) {
     let host;
     let protocol;
     if (relay.host) {
@@ -49,58 +57,67 @@ function subsribeToApper(app, conn, peerIdStr) {
 }
 
 // event with an error message
-let peerErrorEvent = (app, errorMsg) => {
+export function peerErrorEvent(app, errorMsg) {
     app.ports.connReceiver.send({event: "error", relay: null, peer: null, errorMsg});
 }
 
 // new peer is generated
-let peerEvent = (app, name, peer) => {
+export function peerEvent(app, name, peer) {
     let peerToSend = {seed: null, ...peer};
     app.ports.connReceiver.send({event: name, relay: null, errorMsg: null, peer: peerToSend});
 }
 
 // new relay connection established
-let relayEvent = (app, name, relay) => {
+export function relayEvent(app, name, relay) {
     let relayToSend = null;
     if (relay) {
         relayToSend = {dns: null, host: null, ...relay};
     }
     let ev = {event: name, peer: null, errorMsg: null, relay: relayToSend};
     app.ports.connReceiver.send(ev);
-};
+}
 
 // call if we found out about any peers or relays in Fluence network
-let peerAppearedEvent = (app, peer, peerType, updateDate) => {
+export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
     app.ports.networkMapReceiver.send({event: "peer_appeared", peerAppeared});
-};
+}
 
 /**
  * Handle file commands, sending events
  */
 let emptyFileEvent = {log: null, preview: null};
-let sendToFileReceiver = (app, ev) => {
+export function sendToFileReceiver(app, ev) {
     app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
-};
+}
 
-let fileAdvertised = (app, hash, preview) =>
+export function fileAdvertised(app, hash, preview) {
     sendToFileReceiver(app,{event: "advertised", hash, preview});
-let fileUploading = (app, hash) =>
+}
+export function fileUploading(app, hash) {
     sendToFileReceiver(app, {event: "uploading", hash});
-let fileUploaded = (app, hash) =>
+}
+export function fileUploaded(app, hash) {
     sendToFileReceiver(app, {event: "uploaded", hash});
-let fileDownloading = (app, hash) =>
+}
+export function fileDownloading(app, hash) {
     sendToFileReceiver(app, {event: "downloading", hash});
-let fileAsked = (app, hash) =>
+}
+export function fileAsked(app, hash) {
     sendToFileReceiver(app, {event: "asked", hash});
-let fileRequested = (app, hash) =>
+}
+export function fileRequested(app, hash) {
     sendToFileReceiver(app, {event: "requested", hash});
-let fileLoaded = (app, hash, preview) =>
+}
+export function fileLoaded(app, hash, preview) {
     sendToFileReceiver(app, {event: "loaded", hash, preview});
-let hashCopied = (app, hash) =>
+}
+export function hashCopied(app, hash) {
     sendToFileReceiver(app, {event: "copied", hash});
-let fileLog = (app, hash, log) =>
+}
+export function fileLog(app, hash, log) {
     sendToFileReceiver(app,{event: "log", hash, log});
+}
 
 function validateHash(hash) {
     if (typeof hash === "string" && hash.length === 46 && hash.substring(0, 2) === "Qm") {
@@ -116,9 +133,6 @@ function validateHash(hash) {
 }
 
 export default async function ports(app) {
-
-    let currentPeerId;
-    let conn;
 
     relays.map(d => relayEvent(app, "relay_discovered", d));
 
@@ -153,76 +167,7 @@ export default async function ports(app) {
                 break;
 
             case "connect_to":
-                let errorMsg = "";
-                try {
-                    if (connectTo) {
-                        let isIp = false;
-                        if (!connectTo.host) {
-                            errorMsg = errorMsg + "Host must be present\n"
-                        } else {
-                            let addr = new Address4(connectTo.host);
-                            if (addr.isValid()) {
-                                isIp = true
-                            }
-                        }
-
-                        let port;
-                        if (!connectTo.pport) {
-                            errorMsg = errorMsg + "Port must be present\n"
-                        } else {
-                            try {
-                                port = parseInt(connectTo.pport)
-                            } catch (e) {
-                                errorMsg = errorMsg + "Port must be a number\n"
-                            }
-                        }
-
-                        if (!connectTo.peerId) {
-                            errorMsg = errorMsg + "Relay peerId must be present\n"
-                        } else {
-                            await PeerId.createFromB58String(connectTo.peerId);
-                        }
-
-                        if (errorMsg) {
-                            peerErrorEvent(app, errorMsg);
-                            break;
-                        }
-
-                        let peerId;
-                        let seed;
-                        if (connectTo.seed) {
-                            peerId = await seedToPeerId(connectTo.seed);
-                            seed = connectTo.seed;
-                        } else {
-                            peerId = await Fluence.generatePeerId();
-                            seed = peerIdToSeed(peerId);
-                            console.log("SEED GENERATED: " + seed)
-                        }
-
-                        currentPeerId = peerId;
-                        peerEvent(app, "set_peer", {id: peerId.toB58String(), seed});
-                        relayEvent(app, "relay_connecting");
-                        let host = null;
-                        let dns = null;
-                        if (isIp) {
-                            host = connectTo.host
-                        } else {
-                            dns = connectTo.host
-                        }
-                        let relay = {
-                            host: host,
-                            pport: port,
-                            peer: { id: connectTo.peerId, seed: null },
-                            dns: dns
-                        }
-                        conn = await Fluence.connect(to_multiaddr(relay), peerId);
-
-                        relayEvent(app,"relay_connected", relay);
-                    }
-                } catch (e) {
-                    console.log(e);
-                    peerErrorEvent(app,errorMsg + e.message);
-                }
+                await establishConnection(app, connectTo);
 
                 break;
 
