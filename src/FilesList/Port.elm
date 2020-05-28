@@ -1,3 +1,5 @@
+port module FilesList.Port exposing (..)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-port module FilesList.Port exposing (..)
 
 import FilesList.Model exposing (Model, Status(..))
 import FilesList.Msg exposing (Msg(..))

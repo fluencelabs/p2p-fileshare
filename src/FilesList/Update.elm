@@ -1,3 +1,5 @@
+module FilesList.Update exposing (update)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module FilesList.Update exposing (update)
 
 import FilesList.Model exposing (FileEntry, Model, Status(..))
 import FilesList.Msg exposing (Msg(..))

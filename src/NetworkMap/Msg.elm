@@ -1,3 +1,5 @@
+module NetworkMap.Msg exposing (Msg(..))
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module NetworkMap.Msg exposing (Msg(..))
 
 import NetworkMap.Model exposing (Peer, PeerType)
 

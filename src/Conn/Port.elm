@@ -1,3 +1,5 @@
+port module Conn.Port exposing (..)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-port module Conn.Port exposing (..)
 
 import Conn.Model exposing (Model, RelayInput)
 import Conn.Msg exposing (Msg(..), Peer, Relay)

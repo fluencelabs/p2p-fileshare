@@ -1,3 +1,5 @@
+module FilesList.View exposing (view)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module FilesList.View exposing (view)
 
 import Element exposing (Element, alignLeft, alignRight, centerX, centerY, column, el, fill, fillPortion, height, padding, paddingXY, paragraph, px, row, spacing, text, width)
 import Element.Border exposing (dashed, dotted)

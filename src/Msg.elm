@@ -1,3 +1,5 @@
+module Msg exposing (Msg(..))
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module Msg exposing (Msg(..))
 
 import AddFile.Msg
 import Conn.Msg

@@ -1,3 +1,5 @@
+module Conn.View exposing (view)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module Conn.View exposing (view)
 
 import Conn.Model exposing (Model, Status(..))
 import Conn.Msg exposing (Msg(..))

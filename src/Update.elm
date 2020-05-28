@@ -1,3 +1,5 @@
+module Update exposing (update)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module Update exposing (update)
 
 import AddFile.Update
 import Conn.Update

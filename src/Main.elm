@@ -1,3 +1,5 @@
+module Main exposing (..)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module Main exposing (..)
 
 import Browser exposing (Document, UrlRequest)
 import Model exposing (Model, emptyModel)

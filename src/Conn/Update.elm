@@ -1,3 +1,5 @@
+module Conn.Update exposing (update)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module Conn.Update exposing (update)
 
 import Conn.Model exposing (Model, Status(..), setHost, setPeerId, setPort, setSeed)
 import Conn.Msg exposing (Msg(..))

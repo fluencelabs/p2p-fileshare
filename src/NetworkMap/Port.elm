@@ -1,3 +1,5 @@
+port module NetworkMap.Port exposing (..)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-port module NetworkMap.Port exposing (..)
 
 import Maybe exposing (andThen)
 import NetworkMap.Model exposing (Model, Peer, PeerType(..))

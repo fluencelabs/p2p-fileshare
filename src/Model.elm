@@ -1,3 +1,5 @@
+module Model exposing (Model, emptyModel)
+
 {-|
   Copyright 2020 Fluence Labs Limited
 
@@ -13,8 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -}
-
-module Model exposing (Model, emptyModel)
 
 import Msg exposing (Msg(..))
 import AddFile.Model exposing (emptyAddFile)
