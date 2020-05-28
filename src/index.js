@@ -15,29 +15,38 @@
  */
 
 import './main.css';
-import { Elm } from './Main.elm';
+import {Elm} from './Main.elm';
 import * as serviceWorker from './serviceWorker';
 
 import ports from './ports';
 
 let path = window.location.pathname;
 
-let flags;
+let flags = {
+    isAdmin: false,
+    peerId: null,
+    defaultPeerRelayInput: {
+        host: "relay01.fluence.dev",
+        pport: "19001",
+        peerId: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9",
+        seed: ""
+    }
+};
 if (path === "/admin") {
-  flags = { isAdmin: true, peerId: null }
+    flags.isAdmin = true;
 } else {
-  flags = null
+    flags = null
 }
 
 let app = Elm.Main.init({
-  node: document.getElementById('root'),
-  flags: flags
+    node: document.getElementById('root'),
+    flags: flags
 });
 
 (async () => {
-  await ports(app).catch((e) => {
-    console.error(e)
-  });
+    await ports(app).catch((e) => {
+        console.error(e)
+    });
 })();
 
 // If you want your app to work offline and load faster, you can change

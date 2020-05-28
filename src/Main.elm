@@ -17,6 +17,8 @@ module Main exposing (..)
 -}
 
 import Browser exposing (Document)
+import Config exposing (Flags)
+import Conn.Relay exposing (RelayInput)
 import Model exposing (Model, emptyModel)
 import Msg exposing (Msg(..))
 import Subscriptions exposing (subscriptions)
@@ -32,22 +34,12 @@ main =
         , subscriptions = subscriptions
         }
 
--- Should be used to provide keys from some cache
-
-
-type alias Config =
-    { peerId : Maybe String, isAdmin : Bool }
-
-
-type alias Flags =
-    Maybe Config
-
 
 init : Flags -> ( Model, Cmd Msg )
 init maybeFlags =
     let
         (em, initCmd) =
-            emptyModel <| Maybe.withDefault False (Maybe.map (\f -> f.isAdmin) maybeFlags)
+            emptyModel maybeFlags
 
         initConn =
             em.connectivity

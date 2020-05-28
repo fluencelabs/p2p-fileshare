@@ -17,44 +17,13 @@ module Conn.Model exposing (..)
 -}
 
 import Conn.Msg exposing (Msg(..))
-import Conn.Relay exposing (Peer, Relay)
+import Conn.Relay exposing (Peer, Relay, RelayInput, emptyRelayInput)
 import Utils exposing (run)
 
 type Status
     = NotConnected
     | Connecting
     | Connected
-
-type alias RelayInput =
-    { host : String
-    , pport : String
-    , peerId : String
-    , seed : String
-    }
-
-emptyRelayInput : RelayInput
-emptyRelayInput =
-    { host = "relay01.fluence.dev"
-    , pport = "19001"
-    , peerId = "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"
-    , seed = ""
-    }
-
-setHost : String -> RelayInput -> RelayInput
-setHost host input =
-    { input | host = host }
-
-setPeerId : String -> RelayInput -> RelayInput
-setPeerId peerId input =
-    { input | peerId = peerId }
-
-setPort : String -> RelayInput -> RelayInput
-setPort pport input =
-    { input | pport = pport }
-
-setSeed : String -> RelayInput -> RelayInput
-setSeed privateKey input =
-    { input | seed = privateKey }
 
 type alias Model =
     { peer : Peer
@@ -68,9 +37,11 @@ type alias Model =
     }
 
 
-emptyConn : Bool -> ( Model, Cmd Msg )
-emptyConn isAdmin =
+emptyConn : Bool -> Maybe RelayInput -> ( Model, Cmd Msg )
+emptyConn isAdmin defaultRelayInput =
     let
+        emptyInput =
+            Maybe.withDefault emptyRelayInput defaultRelayInput
         emptyModel =
             { peer = { id = "-----", seed = Nothing }
             , relay = Nothing
@@ -78,7 +49,7 @@ emptyConn isAdmin =
             , discovered = []
             , choosing = False
             , isAdmin = isAdmin
-            , relayInput = emptyRelayInput
+            , relayInput = emptyInput
             , errorMsg = ""
             }
         cmd = if (isAdmin) then

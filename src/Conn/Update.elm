@@ -16,9 +16,10 @@ module Conn.Update exposing (update)
   limitations under the License.
 -}
 
-import Conn.Model exposing (Model, Status(..), setHost, setPeerId, setPort, setSeed)
+import Conn.Model exposing (Model, Status(..))
 import Conn.Msg exposing (Msg(..))
 import Conn.Port exposing (command)
+import Conn.Relay exposing (setHost, setPeerId, setPort, setSeed)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =

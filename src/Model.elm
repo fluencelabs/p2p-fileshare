@@ -16,6 +16,7 @@ module Model exposing (Model, emptyModel)
   limitations under the License.
 -}
 
+import Config exposing (Config)
 import Msg exposing (Msg(..))
 import AddFile.Model exposing (emptyAddFile)
 import Conn.Model exposing (emptyConn)
@@ -31,10 +32,12 @@ type alias Model =
     }
 
 
-emptyModel : Bool -> ( Model, Cmd Msg )
-emptyModel isAdmin =
+emptyModel : Maybe Config -> ( Model, Cmd Msg )
+emptyModel config =
     let
-        (emptyConnModel, cmd) = emptyConn isAdmin
+        isAdmin = Maybe.withDefault False (Maybe.map (\f -> f.isAdmin) config)
+        defaultInput = Maybe.map .defaultPeerRelayInput config
+        (emptyConnModel, cmd) = emptyConn isAdmin defaultInput
     in
         ( { connectivity = emptyConnModel
         , addFile = emptyAddFile

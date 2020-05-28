@@ -26,3 +26,34 @@ type alias Relay =
     , dns : Maybe String
     , pport : Int
     }
+
+type alias RelayInput =
+    { host : String
+    , pport : String
+    , peerId : String
+    , seed : String
+    }
+
+emptyRelayInput : RelayInput
+emptyRelayInput =
+    { host = ""
+    , pport = ""
+    , peerId = ""
+    , seed = ""
+    }
+
+setHost : String -> RelayInput -> RelayInput
+setHost host input =
+    { input | host = host }
+
+setPeerId : String -> RelayInput -> RelayInput
+setPeerId peerId input =
+    { input | peerId = peerId }
+
+setPort : String -> RelayInput -> RelayInput
+setPort pport input =
+    { input | pport = pport }
+
+setSeed : String -> RelayInput -> RelayInput
+setSeed privateKey input =
+    { input | seed = privateKey }

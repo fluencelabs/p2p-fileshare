@@ -16,9 +16,9 @@ port module Conn.Port exposing (..)
   limitations under the License.
 -}
 
-import Conn.Model exposing (Model, RelayInput)
+import Conn.Model exposing (Model)
 import Conn.Msg exposing (Msg(..))
-import Conn.Relay exposing (Peer, Relay)
+import Conn.Relay exposing (Peer, Relay, RelayInput)
 
 
 type alias Command =
