@@ -157,5 +157,8 @@ update msg model =
             in
             ( updatedModel, Cmd.none )
 
+        ResetEntries ->
+            ( { model | files = [] }, Cmd.none )
+
         _ ->
             ( model, Cmd.none )

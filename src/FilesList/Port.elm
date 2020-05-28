@@ -18,6 +18,7 @@ port module FilesList.Port exposing (..)
 
 import FilesList.Model exposing (Model, Status(..))
 import FilesList.Msg exposing (Msg(..))
+import Maybe exposing (andThen)
 
 
 type alias Command =
@@ -25,7 +26,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, hash : String, log : Maybe String, preview: Maybe String }
+    { event : String, hash : Maybe String, log : Maybe String, preview: Maybe String }
 
 
 port fileRequest : Command -> Cmd msg
@@ -33,31 +34,38 @@ port fileRequest : Command -> Cmd msg
 
 port fileReceiver : (Event -> msg) -> Sub msg
 
+zip : Maybe a -> Maybe b -> Maybe (a, b)
+zip xs ys =
+  Maybe.map2 Tuple.pair xs ys
+
 eventToMsg : Event -> Msg
 eventToMsg event =
     Maybe.withDefault NoOp <|
         case event.event of
             "uploading" ->
-                Just <| FileUploading event.hash
+                Maybe.map (FileUploading) event.hash
             "uploaded" ->
-                Just <| FileUploaded event.hash
+                Maybe.map (FileUploaded) event.hash
             "downloading" ->
-                Just <| FileDownloading event.hash
+                Maybe.map (FileDownloading) event.hash
             "advertised" ->
-                Just <| FileAdvertised event.hash event.preview
+                Maybe.map (\m -> m event.preview) (Maybe.map (FileAdvertised) event.hash)
             "copied" ->
-                Just <| Copied event.hash
+                Maybe.map (Copied) event.hash
             "requested" ->
-                Just <| FileRequested event.hash
+                Maybe.map (FileRequested) event.hash
+            "reset_entries" ->
+                Just <| ResetEntries
 
             "loaded" ->
-                Just <| FileLoaded event.hash event.preview
-
+                Maybe.map (\m -> m event.preview) (Maybe.map (FileLoaded) event.hash)
             "asked" ->
-                Just <| FileAsked event.hash
+                Maybe.map (FileAsked) event.hash
 
             "log" ->
-                Maybe.map (FileLog event.hash) event.log
+                event.hash
+                    |> andThen (\h -> event.log
+                    |> andThen (\l -> Just (FileLog h l) ))
 
             _ ->
                 Nothing

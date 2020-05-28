@@ -124,20 +124,17 @@ demoView conn =
 
         -- change relay manually if not an admin page
         changeRelay =
-            if (conn.isAdmin) then
-                el [ width (fillPortion 1) ] none
-            else
-                el
-                    (linkStyle
-                        ++ [ width (fillPortion 1)
-                           , padding 5
-                           , Events.onMouseEnter (ChoosingRelay True)
-                           , Events.onMouseLeave (ChoosingRelay False)
-                           , Element.pointer
-                           ]
-                        ++ relaysSelect
-                    )
-                    (Element.text "Change")
+            el
+                (linkStyle
+                    ++ [ width (fillPortion 1)
+                       , padding 5
+                       , Events.onMouseEnter (ChoosingRelay True)
+                       , Events.onMouseLeave (ChoosingRelay False)
+                       , Element.pointer
+                       ]
+                    ++ relaysSelect
+                )
+                (Element.text "Change")
     in
         [ row [ fillWidth, centerX ] [ defn "PEER ID", valn <| showHash peer.id ]
         , row [ fillWidth, centerX ]

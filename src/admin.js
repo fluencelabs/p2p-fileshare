@@ -17,7 +17,16 @@
 import * as PeerId from "peer-id";
 import {peerIdToSeed, seedToPeerId} from "fluence/dist/seed";
 import Fluence from "fluence";
-import {peerErrorEvent, peerEvent, relayEvent, setConnection, setCurrentPeerId, to_multiaddr} from "./ports";
+import {
+    addRelay, getConnection,
+    getCurrentPeerId,
+    peerErrorEvent,
+    peerEvent,
+    relayEvent,
+    setConnection,
+    setCurrentPeerId,
+    to_multiaddr
+} from "./ports";
 
 let Address4 = require('ip-address').Address4;
 
@@ -68,8 +77,6 @@ export async function establishConnection(app, target) {
                 console.log("SEED GENERATED: " + seed)
             }
 
-            setCurrentPeerId(peerId);
-            peerEvent(app, "set_peer", {id: peerId.toB58String(), seed});
             relayEvent(app, "relay_connecting");
             let host = null;
             let dns = null;
@@ -84,8 +91,18 @@ export async function establishConnection(app, target) {
                 peer: { id: target.peerId, seed: null },
                 dns: dns
             }
-            let conn = await Fluence.connect(to_multiaddr(relay), peerId);
-            setConnection(conn);
+            addRelay(app, relay);
+
+            if (getCurrentPeerId() === peerId) {
+                let con = getConnection();
+                con.connect(to_multiaddr(relay), relay.peer.id);
+            } else {
+                setCurrentPeerId(peerId);
+                peerEvent(app, "set_peer", {id: peerId.toB58String(), seed});
+
+                let conn = await Fluence.connect(to_multiaddr(relay), peerId);
+                setConnection(app, conn);
+            }
 
             relayEvent(app,"relay_connected", relay);
         }

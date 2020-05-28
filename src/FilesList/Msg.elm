@@ -24,6 +24,7 @@ type Msg
     | FileAdvertised String (Maybe String)
     | FileLog String String
     | FileAsked String
+    | ResetEntries
     | FileRequested String
     | FileLoaded String (Maybe String)
     | DownloadFile String

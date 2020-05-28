@@ -18,15 +18,37 @@ let relays = [
     {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", seed: null}, dns: "relay01.fluence.dev", pport: 19100},
 ];
 
+// current state is here
+// TODO: maybe move it to a class?
 let currentPeerId;
 let conn;
+let knownFiles = {};
+
+export function addRelay(app, relay) {
+    // TODO: if the same peerId with different ip addresses?
+    if (!relays.find(r => r.peer.id === relay.peer.id)) {
+        relayEvent(app, "relay_discovered", relay)
+        relays.push(relay)
+    }
+}
+
+export function getCurrentPeerId() {
+    return currentPeerId
+}
 
 export function setCurrentPeerId(peerId) {
     currentPeerId = peerId;
 }
 
-export function setConnection(connection) {
+export function setConnection(app, connection) {
+    // if we create new connection - reset all old file entries
+    resetEntries(app);
+    knownFiles = {};
     conn = connection;
+}
+
+export function getConnection() {
+    return conn
 }
 
 export function to_multiaddr(relay) {
@@ -86,7 +108,7 @@ export function peerAppearedEvent(app, peer, peerType, updateDate) {
 /**
  * Handle file commands, sending events
  */
-let emptyFileEvent = {log: null, preview: null};
+let emptyFileEvent = {hash: null, log: null, preview: null};
 export function sendToFileReceiver(app, ev) {
     app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
 }
@@ -117,6 +139,9 @@ export function hashCopied(app, hash) {
 }
 export function fileLog(app, hash, log) {
     sendToFileReceiver(app,{event: "log", hash, log});
+}
+export function resetEntries(app) {
+    sendToFileReceiver(app,{event: "reset_entries"});
 }
 
 function validateHash(hash) {
@@ -152,7 +177,12 @@ export default async function ports(app) {
                 if (relay) {
                     relayEvent(app, "relay_connecting");
                     // if the connection already established, connect to another node and save previous services and subscriptions
-                    conn = await conn.connect(to_multiaddr(relay), relay.peer.id);
+                    if (conn) {
+                        conn.connect(to_multiaddr(relay));
+                    } else {
+                        conn = await Fluence.connect(to_multiaddr(relay), currentPeerId);
+                    }
+
                     relayEvent(app, "relay_connected", relay);
                 }
 
@@ -172,6 +202,12 @@ export default async function ports(app) {
                 break;
 
             case "random_connect":
+
+                if (!currentPeerId) {
+                    console.error("peerId should be generated before connecting");
+                    break;
+                }
+
                 console.log("random connect")
                 // connect to a random node
                 let randomNodeNum = Math.floor(Math.random() * relays.length);
@@ -192,8 +228,6 @@ export default async function ports(app) {
     });
 
     let multiaddrService = "IPFS.multiaddr";
-
-    let knownFiles = {};
 
     // callback to add a local file in Fluence network
     app.ports.selectFile.subscribe(async () => {
