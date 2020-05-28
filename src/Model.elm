@@ -40,4 +40,4 @@ emptyModel isAdmin =
         , addFile = emptyAddFile
         , filesList = emptyFilesList
         , networkMap = emptyNetwork
-        }, Cmd.batch[ Cmd.map ConnMsg cmd ])
+        }, Cmd.map ConnMsg cmd)

@@ -16,7 +16,7 @@ module Main exposing (..)
   limitations under the License.
 -}
 
-import Browser exposing (Document, UrlRequest)
+import Browser exposing (Document)
 import Model exposing (Model, emptyModel)
 import Msg exposing (Msg(..))
 import Subscriptions exposing (subscriptions)

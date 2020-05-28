@@ -17,7 +17,8 @@ port module Conn.Port exposing (..)
 -}
 
 import Conn.Model exposing (Model, RelayInput)
-import Conn.Msg exposing (Msg(..), Peer, Relay)
+import Conn.Msg exposing (Msg(..))
+import Conn.Relay exposing (Peer, Relay)
 
 
 type alias Command =

@@ -16,7 +16,8 @@ module Conn.Model exposing (..)
   limitations under the License.
 -}
 
-import Conn.Msg exposing (Msg(..), Peer, Relay)
+import Conn.Msg exposing (Msg(..))
+import Conn.Relay exposing (Peer, Relay)
 import Utils exposing (run)
 
 type Status
