@@ -22,8 +22,7 @@ type alias Peer =
 
 type alias Relay =
     { peer : Peer
-    , host : Maybe String
-    , dns : Maybe String
+    , host : String
     , pport : Int
     }
 

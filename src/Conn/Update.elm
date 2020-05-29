@@ -37,14 +37,19 @@ update msg model =
         UpdatePeerInput str ->
             ( { model | relayInput = setPeerId str model.relayInput }, Cmd.none)
         SetRelay relay ->
-            ( { model | relay = Nothing }, Conn.Port.connRequest { command = "set_relay", id = Just relay.peer.id, connectTo = Nothing } )
-
+            ( { model | relay = Nothing,
+                        relayInput =
+                            { host = relay.host
+                            , pport = String.fromInt relay.pport
+                            , peerId = relay.peer.id
+                            , seed = model.relayInput.seed
+                            }
+              },
+            Conn.Port.connRequest { command = "set_relay", id = Just relay.peer.id, connectTo = Nothing } )
         GeneratePeer ->
             ( model, Conn.Port.connRequest <| command "generate_peer" )
-
         ConnectToRandomRelay ->
             ( model, Conn.Port.connRequest <| command "random_connect" )
-
         ChoosingRelay choosing ->
             ( { model | choosing = choosing }, Cmd.none )
 

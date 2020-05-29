@@ -93,7 +93,13 @@ export function peerEvent(app, name, peer) {
 export function relayEvent(app, name, relay) {
     let relayToSend = null;
     if (relay) {
-        relayToSend = {dns: null, host: null, ...relay};
+        let host;
+        if (relay.host) {
+            host = relay.host;
+        } else {
+            host = relay.dns;
+        }
+        relayToSend = {host: host, peer: relay.peer, pport: relay.pport};
     }
     let ev = {event: name, peer: null, errorMsg: null, relay: relayToSend};
     app.ports.connReceiver.send(ev);
@@ -175,12 +181,16 @@ export default async function ports(app) {
             case "set_relay":
                 let relay = relays.find(r => r.peer.id === id);
                 if (relay) {
+                    if (!getCurrentPeerId()) {
+                        break;
+                    }
+
                     relayEvent(app, "relay_connecting");
                     // if the connection already established, connect to another node and save previous services and subscriptions
                     if (conn) {
                         conn.connect(to_multiaddr(relay));
                     } else {
-                        conn = await Fluence.connect(to_multiaddr(relay), currentPeerId);
+                        conn = await Fluence.connect(to_multiaddr(relay), getCurrentPeerId());
                     }
 
                     relayEvent(app, "relay_connected", relay);
@@ -231,6 +241,12 @@ export default async function ports(app) {
 
     // callback to add a local file in Fluence network
     app.ports.selectFile.subscribe(async () => {
+
+        if (!getConnection()) {
+            console.error("Establish connection before adding files.")
+            return;
+        }
+
         let input = document.createElement('input');
         input.type = 'file';
 
