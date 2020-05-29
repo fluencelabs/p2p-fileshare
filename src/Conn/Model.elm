@@ -37,16 +37,16 @@ type alias Model =
     }
 
 
-emptyConn : Bool -> Maybe RelayInput -> ( Model, Cmd Msg )
-emptyConn isAdmin defaultRelayInput =
+emptyConn : Bool -> Maybe RelayInput -> List Relay -> ( Model, Cmd Msg )
+emptyConn isAdmin defaultRelayInput relays =
     let
         emptyInput =
             Maybe.withDefault emptyRelayInput defaultRelayInput
         emptyModel =
-            { peer = { id = "-----", seed = Nothing }
+            { peer = { id = "-----", privateKey = Nothing }
             , relay = Nothing
             , status = NotConnected
-            , discovered = []
+            , discovered = relays
             , choosing = False
             , isAdmin = isAdmin
             , relayInput = emptyInput

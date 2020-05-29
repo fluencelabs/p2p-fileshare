@@ -19,7 +19,8 @@ module Conn.Update exposing (update)
 import Conn.Model exposing (Model, Status(..))
 import Conn.Msg exposing (Msg(..))
 import Conn.Port exposing (command)
-import Conn.Relay exposing (setHost, setPeerId, setPort, setSeed)
+import Conn.Relay exposing (Relay, setHost, setPeerId, setPort, setPrivateKey)
+import Random exposing (Generator)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -33,7 +34,7 @@ update msg model =
         UpdateRelayPortInput str ->
             ( { model | relayInput = setPort str model.relayInput }, Cmd.none)
         UpdateRelayPrivateKeyInput str ->
-            ( { model | relayInput = setSeed str model.relayInput }, Cmd.none)
+            ( { model | relayInput = setPrivateKey str model.relayInput }, Cmd.none)
         UpdatePeerInput str ->
             ( { model | relayInput = setPeerId str model.relayInput }, Cmd.none)
         SetRelay relay ->
@@ -42,14 +43,12 @@ update msg model =
                             { host = relay.host
                             , pport = String.fromInt relay.pport
                             , peerId = relay.peer.id
-                            , seed = model.relayInput.seed
+                            , privateKey = model.relayInput.privateKey
                             }
               },
             Conn.Port.connRequest { command = "set_relay", id = Just relay.peer.id, connectTo = Nothing } )
         GeneratePeer ->
             ( model, Conn.Port.connRequest <| command "generate_peer" )
-        ConnectToRandomRelay ->
-            ( model, Conn.Port.connRequest <| command "random_connect" )
         ChoosingRelay choosing ->
             ( { model | choosing = choosing }, Cmd.none )
 
@@ -79,9 +78,10 @@ update msg model =
                     if model.isAdmin then
                         Cmd.none
                     else
-                        -- if it is not an admin page, connect to a random node
-                        Conn.Port.connRequest <| command "random_connect"
-            in ( { model | peer = peer, relayInput = setSeed (Maybe.withDefault "" peer.seed) model.relayInput },  cmd)
+                        Random.generate
+                            (\n -> (Maybe.withDefault NoOp (Maybe.map SetRelay (List.head (List.drop n model.discovered)))))
+                            (Random.int 0 ((List.length model.discovered) - 1))
+            in ( { model | peer = peer, relayInput = setPrivateKey (Maybe.withDefault "" peer.privateKey) model.relayInput },  cmd)
 
         NoOp ->
             ( model, Cmd.none )

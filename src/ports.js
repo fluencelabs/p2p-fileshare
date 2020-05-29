@@ -9,14 +9,18 @@ import {establishConnection} from "./admin"
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
 
 let relays = [
-    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", seed: null}, dns: "relay01.fluence.dev", pport: 19001},
-    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er", seed: null}, dns: "relay01.fluence.dev", pport: 19002},
-    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", seed: null}, dns: "relay01.fluence.dev", pport: 19003},
-    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB", seed: null}, dns: "relay01.fluence.dev", pport: 19004},
-    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", seed: null}, dns: "relay01.fluence.dev", pport: 19005},
-    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", seed: null}, dns: "relay01.fluence.dev", pport: 19990},
-    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", seed: null}, dns: "relay01.fluence.dev", pport: 19100},
+    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", privateKey: null}, dns: "relay01.fluence.dev", pport: 19001},
+    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er", privateKey: null}, dns: "relay01.fluence.dev", pport: 19002},
+    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", privateKey: null}, dns: "relay01.fluence.dev", pport: 19003},
+    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB", privateKey: null}, dns: "relay01.fluence.dev", pport: 19004},
+    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", privateKey: null}, dns: "relay01.fluence.dev", pport: 19005},
+    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", privateKey: null}, dns: "relay01.fluence.dev", pport: 19990},
+    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", privateKey: null}, dns: "relay01.fluence.dev", pport: 19100},
 ];
+
+export function getRelays() {
+    return relays;
+}
 
 // current state is here
 // TODO: maybe move it to a class?
@@ -85,21 +89,25 @@ export function peerErrorEvent(app, errorMsg) {
 
 // new peer is generated
 export function peerEvent(app, name, peer) {
-    let peerToSend = {seed: null, ...peer};
+    let peerToSend = {privateKey: null, ...peer};
     app.ports.connReceiver.send({event: name, relay: null, errorMsg: null, peer: peerToSend});
+}
+
+export function convertRelayForELM(relay) {
+    let host;
+    if (relay.host) {
+        host = relay.host;
+    } else {
+        host = relay.dns;
+    }
+    return {host: host, peer: relay.peer, pport: relay.pport};
 }
 
 // new relay connection established
 export function relayEvent(app, name, relay) {
     let relayToSend = null;
     if (relay) {
-        let host;
-        if (relay.host) {
-            host = relay.host;
-        } else {
-            host = relay.dns;
-        }
-        relayToSend = {host: host, peer: relay.peer, pport: relay.pport};
+        relayToSend = convertRelayForELM(relay)
     }
     let ev = {event: name, peer: null, errorMsg: null, relay: relayToSend};
     app.ports.connReceiver.send(ev);
@@ -164,9 +172,6 @@ function validateHash(hash) {
 }
 
 export default async function ports(app) {
-
-    relays.map(d => relayEvent(app, "relay_discovered", d));
-
     // add all relays from list as appeared
     let date = new Date().toISOString();
     for (const relay of relays) {
@@ -209,27 +214,6 @@ export default async function ports(app) {
             case "connect_to":
                 await establishConnection(app, connectTo);
 
-                break;
-
-            case "random_connect":
-
-                if (!currentPeerId) {
-                    console.error("peerId should be generated before connecting");
-                    break;
-                }
-
-                console.log("random connect")
-                // connect to a random node
-                let randomNodeNum = Math.floor(Math.random() * relays.length);
-                let randomRelay = relays[randomNodeNum];
-
-                relayEvent(app,"relay_connecting");
-
-                // TODO: disconnect old connection
-                conn = await Fluence.connect(to_multiaddr(randomRelay), currentPeerId);
-
-                relayEvent(app,"relay_connected", randomRelay);
-                subsribeToApper(app, conn, currentPeerId.toB58String())
                 break;
 
             default:

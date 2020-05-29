@@ -17,7 +17,7 @@ module Conn.Relay exposing (..)
 -}
 
 type alias Peer =
-    { id : String, seed: Maybe String }
+    { id : String, privateKey: Maybe String }
 
 
 type alias Relay =
@@ -30,7 +30,7 @@ type alias RelayInput =
     { host : String
     , pport : String
     , peerId : String
-    , seed : String
+    , privateKey : String
     }
 
 emptyRelayInput : RelayInput
@@ -38,7 +38,7 @@ emptyRelayInput =
     { host = ""
     , pport = ""
     , peerId = ""
-    , seed = ""
+    , privateKey = ""
     }
 
 setHost : String -> RelayInput -> RelayInput
@@ -53,6 +53,6 @@ setPort : String -> RelayInput -> RelayInput
 setPort pport input =
     { input | pport = pport }
 
-setSeed : String -> RelayInput -> RelayInput
-setSeed privateKey input =
-    { input | seed = privateKey }
+setPrivateKey : String -> RelayInput -> RelayInput
+setPrivateKey privateKey input =
+    { input | privateKey = privateKey }

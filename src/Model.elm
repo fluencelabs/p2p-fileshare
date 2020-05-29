@@ -36,8 +36,9 @@ emptyModel : Maybe Config -> ( Model, Cmd Msg )
 emptyModel config =
     let
         isAdmin = Maybe.withDefault False (Maybe.map (\f -> f.isAdmin) config)
+        relays = Maybe.withDefault [] (Maybe.map (\f -> f.relays) config)
         defaultInput = Maybe.map .defaultPeerRelayInput config
-        (emptyConnModel, cmd) = emptyConn isAdmin defaultInput
+        (emptyConnModel, cmd) = emptyConn isAdmin defaultInput relays
     in
         ( { connectivity = emptyConnModel
         , addFile = emptyAddFile

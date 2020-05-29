@@ -67,14 +67,14 @@ export async function establishConnection(app, target) {
             }
 
             let peerId;
-            let seed;
-            if (target.seed) {
-                peerId = await seedToPeerId(target.seed);
-                seed = target.seed;
+            let privateKey;
+            if (target.privateKey) {
+                peerId = await seedToPeerId(target.privateKey);
+                privateKey = target.privateKey;
             } else {
                 peerId = await Fluence.generatePeerId();
-                seed = peerIdToSeed(peerId);
-                console.log("SEED GENERATED: " + seed)
+                privateKey = peerIdToSeed(peerId);
+                console.log("PRIVATE KEY GENERATED: " + privateKey)
             }
 
             relayEvent(app, "relay_connecting");
@@ -88,7 +88,7 @@ export async function establishConnection(app, target) {
             let relay = {
                 host: host,
                 pport: port,
-                peer: { id: target.peerId, seed: null },
+                peer: { id: target.peerId, privateKey: null },
                 dns: dns
             }
             addRelay(app, relay);
@@ -98,7 +98,7 @@ export async function establishConnection(app, target) {
                 con.connect(to_multiaddr(relay), relay.peer.id);
             } else {
                 setCurrentPeerId(peerId);
-                peerEvent(app, "set_peer", {id: peerId.toB58String(), seed});
+                peerEvent(app, "set_peer", {id: peerId.toB58String(), privateKey: privateKey});
 
                 let conn = await Fluence.connect(to_multiaddr(relay), peerId);
                 setConnection(app, conn);

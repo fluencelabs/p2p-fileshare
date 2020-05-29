@@ -18,7 +18,7 @@ import './main.css';
 import {Elm} from './Main.elm';
 import * as serviceWorker from './serviceWorker';
 
-import ports from './ports';
+import ports, {convertRelayForELM, getRelays} from './ports';
 
 let path = window.location.pathname;
 
@@ -29,13 +29,12 @@ let flags = {
         host: "relay01.fluence.dev",
         pport: "19001",
         peerId: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9",
-        seed: ""
-    }
+        privateKey: ""
+    },
+    relays: getRelays().map(convertRelayForELM)
 };
 if (path === "/admin") {
     flags.isAdmin = true;
-} else {
-    flags = null
 }
 
 let app = Elm.Main.init({

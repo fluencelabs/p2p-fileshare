@@ -57,7 +57,7 @@ inputRowWithPlaceholder name onChange text placeholder =
 adminView : Model -> List (Element Msg)
 adminView conn =
     [ row [ fillWidth, centerX, F.red ] [ text conn.errorMsg ]
-    , inputRowWithPlaceholder "PRIVATE SEED" UpdateRelayPrivateKeyInput conn.relayInput.seed (Just <| text "will be generated if empty")
+    , inputRowWithPlaceholder "PRIVATE SEED" UpdateRelayPrivateKeyInput conn.relayInput.privateKey (Just <| text "will be generated if empty")
     , inputRow "RELAY PEER ID" UpdatePeerInput conn.relayInput.peerId
     , inputRow "RELAY HOST" UpdateRelayHostInput conn.relayInput.host
     , inputRow "RELAY PORT" UpdateRelayPortInput conn.relayInput.pport
