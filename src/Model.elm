@@ -43,5 +43,5 @@ emptyModel config =
         ( { connectivity = emptyConnModel
         , addFile = emptyAddFile
         , filesList = emptyFilesList
-        , networkMap = emptyNetwork
+        , networkMap = emptyNetwork isAdmin
         }, Cmd.map ConnMsg cmd)

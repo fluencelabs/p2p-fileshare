@@ -26,15 +26,19 @@ update msg model =
     case msg of
         PeerAppeared peer peerType date ->
             let
-                entry =
+                updatedPeer = Maybe.map (\p -> { p | date = date, appearencesNumber = p.appearencesNumber + 1 })
+                    (Dict.get peer.id model.network)
+
+                record =
+                    Maybe.withDefault
                     { peer = peer
                     , peerType = peerType
                     , date = date
+                    , appearencesNumber = 0
                     }
-                peers = Dict.insert entry.peer.id entry model.network
+                    updatedPeer
+                peers = Dict.insert record.peer.id record model.network
             in
                 ( { model | network = peers }, Cmd.none )
-        ShowHide ->
-            ( { model | show = not model.show }, Cmd.none )
         NoOp ->
             ( model, Cmd.none )

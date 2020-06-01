@@ -29,6 +29,7 @@ type alias NodeEntry =
     { peer: Peer
     , peerType: PeerType
     , date: String
+    , appearencesNumber: Int
     }
 
 type alias Model =
@@ -37,8 +38,8 @@ type alias Model =
     }
 
 
-emptyNetwork : Model
-emptyNetwork =
+emptyNetwork : Bool -> Model
+emptyNetwork isAdmin =
     { network = Dict.empty
-    , show = False
+    , show = isAdmin
     }

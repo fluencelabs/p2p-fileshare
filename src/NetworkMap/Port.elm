@@ -48,8 +48,6 @@ eventToMsg event =
                 event.peerAppeared
                     |> andThen (\peerAppeared -> stringToPeerType peerAppeared.peerType
                     |> andThen (\peerType -> Just (PeerAppeared peerAppeared.peer peerType peerAppeared.updateDate)))
-            "show-hide" ->
-                Just ShowHide
             _ ->
                 Nothing
 
