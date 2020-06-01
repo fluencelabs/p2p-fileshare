@@ -40,7 +40,5 @@ update msg model =
                 peers = Dict.insert record.peer.id record model.network
             in
                 ( { model | network = peers }, Cmd.none )
-        ShowHide ->
-            ( { model | show = not model.show }, Cmd.none )
         NoOp ->
             ( model, Cmd.none )

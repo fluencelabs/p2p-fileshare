@@ -360,14 +360,4 @@ export default async function ports(app) {
         }
 
     });
-
-    // call to show or hide network map
-    let showHideEvent = () => {
-        app.ports.networkMapReceiver.send({event: "show-hide", peerAppeared: null});
-    };
-
-    // call it to open the field with appeared peers and clients
-    window.networkMap = () => {
-        showHideEvent()
-    }
 }
