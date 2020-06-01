@@ -29,7 +29,7 @@ type alias NodeEntry =
     { peer: Peer
     , peerType: PeerType
     , date: String
-    , counter: Int
+    , appearencesNumber: Int
     }
 
 type alias Model =

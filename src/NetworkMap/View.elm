@@ -57,7 +57,7 @@ showNode nodeEntry =
                       , centerY
                       , alignLeft
                       ] <| text nodeEntry.date
-                , el [ centerX, padding 10 ] <| text (String.fromInt nodeEntry.counter)
+                , el [ centerX, padding 10 ] <| text (String.fromInt nodeEntry.appearencesNumber)
                 , el [ centerX, padding 10 ] <| text (peerTypeToString nodeEntry.peerType)
                 , el [ alignRight, padding 10 ] <| text nodeEntry.peer.id
                 ]
