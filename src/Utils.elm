@@ -1,4 +1,4 @@
-module FilesList.Msg exposing (Msg(..))
+module Utils exposing (..)
 
 {-|
   Copyright 2020 Fluence Labs Limited
@@ -16,19 +16,8 @@ module FilesList.Msg exposing (Msg(..))
   limitations under the License.
 -}
 
-type Msg
-    = NoOp
-    | FileUploading String
-    | FileUploaded String
-    | FileDownloading String
-    | FileAdvertised String (Maybe String)
-    | FileLog String String
-    | FileAsked String
-    | ResetEntries
-    | FileRequested String
-    | FileLoaded String (Maybe String)
-    | DownloadFile String
-    | Copy String
-    | Copied String
-    | ReplaceCopyMessage String
-    | SetLogsVisible String Bool
+import Task
+
+run : msg -> Cmd msg
+run m =
+    Task.perform (always m) (Task.succeed ())

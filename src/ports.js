@@ -4,21 +4,58 @@ import bs58 from 'bs58';
 
 import Fluence from 'fluence';
 import {genUUID} from "fluence/dist/function_call";
+import {establishConnection} from "./admin"
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
 
-
 let relays = [
-    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"}, dns: "relay01.fluence.dev", pport: 19001},
-    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er"}, dns: "relay01.fluence.dev", pport: 19002},
-    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb"}, dns: "relay01.fluence.dev", pport: 19003},
-    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB"}, dns: "relay01.fluence.dev", pport: 19004},
-    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb"}, dns: "relay01.fluence.dev", pport: 19005},
-    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz"}, dns: "relay01.fluence.dev", pport: 19990},
-    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM"}, dns: "relay01.fluence.dev", pport: 19100},
+    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", privateKey: null}, dns: "relay01.fluence.dev", pport: 19001},
+    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er", privateKey: null}, dns: "relay01.fluence.dev", pport: 19002},
+    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", privateKey: null}, dns: "relay01.fluence.dev", pport: 19003},
+    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB", privateKey: null}, dns: "relay01.fluence.dev", pport: 19004},
+    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", privateKey: null}, dns: "relay01.fluence.dev", pport: 19005},
+    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", privateKey: null}, dns: "relay01.fluence.dev", pport: 19990},
+    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", privateKey: null}, dns: "relay01.fluence.dev", pport: 19100},
 ];
 
-function to_multiaddr(relay) {
+export function getRelays() {
+    return relays;
+}
+
+// current state is here
+// TODO: maybe move it to a class?
+let currentPeerId;
+let conn;
+let knownFiles = {};
+
+export function addRelay(app, relay) {
+    // TODO: if the same peerId with different ip addresses?
+    if (!relays.find(r => r.peer.id === relay.peer.id)) {
+        relayEvent(app, "relay_discovered", relay)
+        relays.push(relay)
+    }
+}
+
+export function getCurrentPeerId() {
+    return currentPeerId
+}
+
+export function setCurrentPeerId(peerId) {
+    currentPeerId = peerId;
+}
+
+export function setConnection(app, connection) {
+    // if we create new connection - reset all old file entries
+    resetEntries(app);
+    knownFiles = {};
+    conn = connection;
+}
+
+export function getConnection() {
+    return conn
+}
+
+export function to_multiaddr(relay) {
     let host;
     let protocol;
     if (relay.host) {
@@ -31,75 +68,151 @@ function to_multiaddr(relay) {
     return `${host}/tcp/${relay.pport}/${protocol}/p2p/${relay.peer.id}`;
 }
 
-export default async function ports(app) {
-
-    // new peer is generated
-    let peerEvent = (name, peer) =>
-        app.ports.connReceiver.send({event: name, relay: null, peer});
-
-    let emptyRelay = {
-        dns: null,
-        host: null
-    };
-    // new relay connection established
-    let relayEvent = (name, relay) => {
-        let relayToSend = null;
-        if (relay) relayToSend = {...emptyRelay, ...relay};
-        let ev = {event: name, peer: null, relay: relayToSend};
-        app.ports.connReceiver.send(ev);
-    };
-
-    relays.map(d => relayEvent("relay_discovered", d));
-
-    let peerId = await Fluence.generatePeerId();
-    let peerIdStr = peerId.toB58String();
-    peerEvent("set_peer", {id: peerIdStr});
-
-    // connect to a random node
-    let randomNodeNum = Math.floor(Math.random() * relays.length);
-    let randomRelay = relays[randomNodeNum];
-
-    relayEvent("relay_connecting");
-    let conn = await Fluence.connect(to_multiaddr(randomRelay), peerId);
-    relayEvent("relay_connected", randomRelay);
-
-    // call if we found out about any peers or relays in Fluence network
-    let peerAppearedEvent = (peer, peerType, updateDate) => {
-        let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-        app.ports.networkMapReceiver.send({event: "peer_appeared", peerAppeared});
-    };
-
-    // add all relays from list as appeared
-    let date = new Date().toISOString();
-    for (const relay of relays) {
-        peerAppearedEvent(relay.peer.id, "peer", date)
-    }
-
+function subsribeToApper(app, conn, peerIdStr) {
     // subscribe for all outgoing calls to watch for all Fluence network members
     conn.subscribe((args, target, replyTo) => {
         let date = new Date().toISOString();
         if (!!replyTo) {
             for (const protocol of replyTo.protocols) {
                 if (protocol.protocol !== 'signature' && protocol.value !== peerIdStr) {
-                    peerAppearedEvent(protocol.value, protocol.protocol, date)
+                    peerAppearedEvent(app, protocol.value, protocol.protocol, date)
                 }
             }
         }
     });
+}
+
+// event with an error message
+export function peerErrorEvent(app, errorMsg) {
+    app.ports.connReceiver.send({event: "error", relay: null, peer: null, errorMsg});
+}
+
+// new peer is generated
+export function peerEvent(app, name, peer) {
+    let peerToSend = {privateKey: null, ...peer};
+    app.ports.connReceiver.send({event: name, relay: null, errorMsg: null, peer: peerToSend});
+}
+
+export function convertRelayForELM(relay) {
+    let host;
+    if (relay.host) {
+        host = relay.host;
+    } else {
+        host = relay.dns;
+    }
+    return {host: host, peer: relay.peer, pport: relay.pport};
+}
+
+// new relay connection established
+export function relayEvent(app, name, relay) {
+    let relayToSend = null;
+    if (relay) {
+        relayToSend = convertRelayForELM(relay)
+    }
+    let ev = {event: name, peer: null, errorMsg: null, relay: relayToSend};
+    app.ports.connReceiver.send(ev);
+}
+
+// call if we found out about any peers or relays in Fluence network
+export function peerAppearedEvent(app, peer, peerType, updateDate) {
+    let peerAppeared = { peer: {id: peer}, peerType, updateDate};
+    app.ports.networkMapReceiver.send({event: "peer_appeared", peerAppeared});
+}
+
+/**
+ * Handle file commands, sending events
+ */
+let emptyFileEvent = {hash: null, log: null, preview: null};
+export function sendToFileReceiver(app, ev) {
+    app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
+}
+
+export function fileAdvertised(app, hash, preview) {
+    sendToFileReceiver(app,{event: "advertised", hash, preview});
+}
+export function fileUploading(app, hash) {
+    sendToFileReceiver(app, {event: "uploading", hash});
+}
+export function fileUploaded(app, hash) {
+    sendToFileReceiver(app, {event: "uploaded", hash});
+}
+export function fileDownloading(app, hash) {
+    sendToFileReceiver(app, {event: "downloading", hash});
+}
+export function fileAsked(app, hash) {
+    sendToFileReceiver(app, {event: "asked", hash});
+}
+export function fileRequested(app, hash) {
+    sendToFileReceiver(app, {event: "requested", hash});
+}
+export function fileLoaded(app, hash, preview) {
+    sendToFileReceiver(app, {event: "loaded", hash, preview});
+}
+export function hashCopied(app, hash) {
+    sendToFileReceiver(app, {event: "copied", hash});
+}
+export function fileLog(app, hash, log) {
+    sendToFileReceiver(app,{event: "log", hash, log});
+}
+export function resetEntries(app) {
+    sendToFileReceiver(app,{event: "reset_entries"});
+}
+
+function validateHash(hash) {
+    if (typeof hash === "string" && hash.length === 46 && hash.substring(0, 2) === "Qm") {
+        try {
+            bs58.decode(hash);
+            return true;
+        } catch (e) {
+            console.error(`Cannot decode hash '${hash}': ${e}`)
+        }
+    }
+
+    return false;
+}
+
+export default async function ports(app) {
+    // add all relays from list as appeared
+    let date = new Date().toISOString();
+    for (const relay of relays) {
+        peerAppearedEvent(app, relay.peer.id, "peer", date)
+    }
 
     /**
      * Handle connection commands
      */
-    app.ports.connRequest.subscribe(async ({command, id}) => {
+    app.ports.connRequest.subscribe(async ({command, id, connectTo}) => {
         switch (command) {
             case "set_relay":
                 let relay = relays.find(r => r.peer.id === id);
                 if (relay) {
-                    relayEvent("relay_connecting");
+                    if (!getCurrentPeerId()) {
+                        break;
+                    }
+
+                    relayEvent(app, "relay_connecting");
                     // if the connection already established, connect to another node and save previous services and subscriptions
-                    await conn.connect(to_multiaddr(relay), relay.peer.id);
-                    relayEvent("relay_connected", relay);
+                    if (conn) {
+                        conn.connect(to_multiaddr(relay));
+                    } else {
+                        conn = await Fluence.connect(to_multiaddr(relay), getCurrentPeerId());
+                    }
+
+                    relayEvent(app, "relay_connected", relay);
                 }
+
+                break;
+
+            case "generate_peer":
+                console.log("generate peer")
+                let peerId = await Fluence.generatePeerId();
+                currentPeerId = peerId;
+                let peerIdStr = peerId.toB58String();
+                peerEvent(app, "set_peer", {id: peerIdStr});
+                break;
+
+            case "connect_to":
+                await establishConnection(app, connectTo);
 
                 break;
 
@@ -108,40 +221,17 @@ export default async function ports(app) {
         }
     });
 
-    /**
-     * Handle file commands, sending events
-     */
-    let emptyFileEvent = {log: null, preview: null};
-    let sendToFileReceiver = ev => {
-        app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
-    };
-
-    let fileAdvertised = (hash, preview) =>
-        sendToFileReceiver({event: "advertised", hash, preview});
-    let fileUploading = (hash) =>
-        sendToFileReceiver({event: "uploading", hash});
-    let fileUploaded = (hash) =>
-        sendToFileReceiver({event: "uploaded", hash});
-    let fileDownloading = (hash) =>
-        sendToFileReceiver({event: "downloading", hash});
-    let fileAsked = (hash) =>
-        sendToFileReceiver({event: "asked", hash});
-    let fileRequested = (hash) =>
-        sendToFileReceiver({event: "requested", hash});
-    let fileLoaded = (hash, preview) =>
-        sendToFileReceiver({event: "loaded", hash, preview});
-    let hashCopied = (hash) =>
-        sendToFileReceiver({event: "copied", hash});
-    let fileLog = (hash, log) =>
-        sendToFileReceiver({event: "log", hash, log});
-
     let multiaddrService = "IPFS.multiaddr";
-
-    let knownFiles = {};
 
     // callback to add a local file in Fluence network
     app.ports.selectFile.subscribe(async () => {
-        var input = document.createElement('input');
+
+        if (!getConnection()) {
+            console.error("Establish connection before adding files.")
+            return;
+        }
+
+        let input = document.createElement('input');
         input.type = 'file';
 
         input.onchange = async e => {
@@ -153,7 +243,7 @@ export default async function ports(app) {
 
             if (!knownFiles[hash]) {
 
-                fileRequested(hash);
+                fileRequested(app, hash);
 
                 let previewStr = getPreview(array);
 
@@ -161,10 +251,10 @@ export default async function ports(app) {
 
                 let serviceName = "IPFS.get_" + hash;
 
-                fileLog(hash, "Going to advertise");
-                fileLoaded(hash, previewStr);
+                fileLog(app, hash, "Going to advertise");
+                fileLoaded(app, hash, previewStr);
                 await conn.registerService(serviceName, async fc => {
-                    fileLog(hash, "File asked");
+                    fileLog(app, hash, "File asked");
 
                     let replyWithMultiaddr = async (multiaddr) =>
                         await conn.sendCall(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
@@ -181,25 +271,25 @@ export default async function ports(app) {
                         let multiaddr = multiaddrResult.multiaddr;
                         // upload a file
                         console.log("going to upload");
-                        fileUploading(hash);
+                        fileUploading(app, hash);
                         await ipfsAdd(multiaddr, knownFiles[hash].bytes);
-                        fileUploaded(hash);
-                        fileLog(hash, "File uploaded to " + multiaddr);
+                        fileUploaded(app, hash);
+                        fileLog(app, hash, "File uploaded to " + multiaddr);
                         knownFiles[hash].multiaddr = multiaddr;
                         // send back multiaddr
                         await replyWithMultiaddr(multiaddr);
                     }
 
-                    fileAsked(hash);
+                    fileAsked(app, hash);
 
                 });
-                fileLog(hash, "File advertised on Fluence network");
+                fileLog(app, hash, "File advertised on Fluence network");
 
-                fileAdvertised(hash, previewStr);
+                fileAdvertised(app, hash, previewStr);
 
             } else {
                 console.log("This file is already advertised.");
-                fileLog(hash, "Trying to advertise this file, but the file is already advertised.");
+                fileLog(app, hash, "Trying to advertise this file, but the file is already advertised.");
             }
         };
 
@@ -223,7 +313,7 @@ export default async function ports(app) {
                     el.select();
                     document.execCommand('copy');
                     document.body.removeChild(el);
-                    hashCopied(hash);
+                    hashCopied(app, hash);
                     break;
                 default:
                     console.error("Received unknown fileRequest from the Elm app", command);
@@ -231,50 +321,37 @@ export default async function ports(app) {
             }
     });
 
-    function validateHash(hash) {
-        if (typeof hash === "string" && hash.length === 46 && hash.substring(0, 2) === "Qm") {
-            try {
-                bs58.decode(hash);
-                return true;
-            } catch (e) {
-                console.error(`Cannot decode hash '${hash}': ${e}`)
-            }
-        }
-
-        return false;
-    }
-
     // callback to add a file from Fluence network by hash
     app.ports.addFileByHash.subscribe(async (hash) => {
 
         if (!validateHash(hash)) {
             console.error(`Hash '${hash}' is not valid.`);
-            fileLog(hash, `Hash is not valid.`);
+            fileLog(app, hash, `Hash is not valid.`);
             return;
         }
 
-        fileRequested(hash);
+        fileRequested(app, hash);
 
         let file = knownFiles[hash];
         if (!!file && file.bytes && file.bytes.length > 0) {
-            fileLog(hash, "This file is already known");
+            fileLog(app, hash, "This file is already known");
         } else {
             let msgId = genUUID();
             let serviceName = "IPFS.get_" + hash;
 
-            fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
+            fileLog(app, hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
             let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
             let multiaddr = multiaddrResult.multiaddr;
 
-            fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
+            fileLog(app, hash, "Got multiaddr: " + multiaddr + ", going to download the file");
 
-            fileDownloading(hash);
+            fileDownloading(app, hash);
             let data = await ipfsGet(multiaddr, hash);
-            fileLog(hash, "File downloaded from " + multiaddr);
+            fileLog(app, hash, "File downloaded from " + multiaddr);
 
             let preview = getPreview(data);
 
-            fileLoaded(hash, preview);
+            fileLoaded(app, hash, preview);
             knownFiles[hash] = {
                 bytes: data,
                 multiaddr,
@@ -289,6 +366,7 @@ export default async function ports(app) {
         app.ports.networkMapReceiver.send({event: "show-hide", peerAppeared: null});
     };
 
+    // call it to open the field with appeared peers and clients
     window.networkMap = () => {
         showHideEvent()
     }
