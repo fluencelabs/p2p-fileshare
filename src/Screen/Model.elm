@@ -9,8 +9,8 @@ type alias Model =
 
 isMedium : Model -> Bool
 isMedium screen =
-    (screen.device.class == Element.Phone || screen.device.class == Element.Tablet) && screen.device.orientation == Element.Portrait
+    screen.proportions.width < 860
 
 isNarrow : Model -> Bool
 isNarrow screen =
-    screen.device.class == Element.Phone && screen.device.orientation == Element.Portrait
+    screen.proportions.width < 500
