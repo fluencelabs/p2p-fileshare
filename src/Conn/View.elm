@@ -18,7 +18,8 @@ module Conn.View exposing (view)
 
 import Conn.Model exposing (Model, Status(..))
 import Conn.Msg exposing (Msg(..))
-import Element exposing (Element, below, centerX, column, el, fillPortion, mouseOver, none, padding, paddingXY, row, spacing, text, width)
+import Conn.Relay exposing (Peer)
+import Element exposing (DeviceClass, Element, below, centerX, column, el, fillPortion, mouseOver, none, padding, paddingXY, row, spacing, text, width)
 import Element.Events as Events
 import Element.Font as Font
 import Ions.Background as BG
@@ -81,8 +82,12 @@ valn : Element Msg -> Element Msg
 valn t =
     el [ width (fillPortion 5) ] <| t
 
-demoView : Model -> List (Element Msg)
-demoView conn =
+phonePortrait : ScreenInfo.Model -> Bool
+phonePortrait screenInfo =
+    screenInfo.device.class == Element.Phone && screenInfo.device.orientation == Element.Portrait
+
+demoView : Model -> ScreenInfo.Model -> List (Element Msg)
+demoView conn screenInfo =
     let
         peer =
             conn.peer
@@ -93,10 +98,12 @@ demoView conn =
         discovered =
             String.fromInt <| List.length conn.discovered
 
+        isPhonePortrait = phonePortrait screenInfo
+
         relayId =
             el [ Element.width (Element.fillPortion 4), Font.alignLeft ] <|
                 Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text (statusToString conn.status)) <|
-                    Maybe.map (.peer >> .id >> showHash) relay
+                    Maybe.map (.peer >> .id >> if (isPhonePortrait) then shortHash else showHash) relay
 
         relaysSelect =
             if conn.choosing then
@@ -137,15 +144,34 @@ demoView conn =
                 )
                 (Element.text "Change")
     in
-        [ row [ fillWidth, centerX ] [ defn "PEER ID", valn <| showHash peer.id ]
-        , row [ fillWidth, centerX ]
-            [ defn "CONNECTED RELAY ID"
-            , relayId
-            , changeRelay
-            ]
-        , row [ fillWidth, centerX ] [ defn "PEERS", valn <| Element.text discovered ]
-        , el [] none
+        if (isPhonePortrait) then
+            narrowView peer relayId changeRelay discovered
+        else
+            wideView peer relayId changeRelay discovered
+
+wideView : Peer -> Element Msg -> Element Msg -> String -> List (Element Msg)
+wideView peer relayId changeRelay discovered =
+    [ row [ fillWidth, centerX ] [ defn "PEER ID", valn <| showHash peer.id ]
+    , row [ fillWidth, centerX ]
+        [ defn "CONNECTED RELAY ID"
+        , relayId
+        , changeRelay
         ]
+    , row [ fillWidth, centerX ] [ defn "PEERS", valn <| Element.text discovered ]
+    , el [] none
+    ]
+
+narrowView : Peer -> Element Msg -> Element Msg -> String -> List (Element Msg)
+narrowView peer relayId changeRelay discovered =
+    [ row [ fillWidth, centerX ] [ defn "PEER ID" ]
+    , row [ fillWidth, centerX ] [ valn <| shortHash peer.id ]
+    , row [ fillWidth, centerX ] [ defn "CONNECTED RELAY ID" ]
+    , row [ fillWidth, centerX ] [ relayId ]
+    , row [ fillWidth, centerX ] [ changeRelay ]
+    , row [ fillWidth, centerX ] [ defn "PEERS" ]
+    , row [ fillWidth, centerX ] [ valn <| Element.text discovered ]
+    , el [] none
+    ]
 
 view : ScreenInfo.Model -> Model -> Element Msg
 view screenInfo conn  =
@@ -157,5 +183,5 @@ view screenInfo conn  =
                 []
     in
         column (layoutBlock ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
-            ([ blockTitle <| text "NETWORK INFO" ] ++ elements ++ demoView conn)
+            ([ blockTitle <| text "NETWORK INFO" ] ++ elements ++ demoView conn screenInfo)
 

@@ -88,7 +88,7 @@ header =
     [ column (layoutBlock ++ [ spacing (S.baseRem 1.125) ])
         [ row
             [ fillWidth ]
-            [ h1 "P2P Application Fluence Demo" ]
+            [ paragraph [] [h1 "P2P Application Fluence Demo"] ]
         , row
             [ fillWidth ]
             [ paragraph [ Font.italic, F.gray, pSpacing ] <|
