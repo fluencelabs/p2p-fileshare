@@ -80,7 +80,7 @@ addFileBlock screen model =
                 { onPress = Just DownloadIpfs, label = text "Download" }
 
         ipfsInput =
-            Element.el [width (fillPortion 5), fillWidth] <| Input.text [ centerX, fillWidth ]
+            Element.el [width (fillPortion 5)] <| Input.text [ centerX, fillWidth ]
                 { onChange = ChangeIpfsHash
                 , text = model.ipfsHash
                 , placeholder = Just <| Input.placeholder [] <| text "Enter IPFS hash"
