@@ -32,7 +32,7 @@ let flags = {
         privateKey: ""
     },
     relays: getRelays().map(convertRelayForELM),
-    proportions: {
+    windowSize: {
         width: window.innerWidth,
         height: window.innerHeight,
     }

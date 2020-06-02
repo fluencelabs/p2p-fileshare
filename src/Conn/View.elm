@@ -27,7 +27,7 @@ import Ions.Font as F
 import Ions.Size as S
 import Palette exposing (accentButton, blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)
 import Element.Input as Input
-import ScreenInfo.Model as ScreenInfo exposing (isMedium, isNarrow)
+import Screen.Model as Screen exposing (isMedium, isNarrow)
 
 statusToString : Status -> String
 statusToString status =
@@ -82,8 +82,8 @@ valn : Element Msg -> Element Msg
 valn t =
     el [ width (fillPortion 5) ] <| t
 
-demoView : Model -> ScreenInfo.Model -> List (Element Msg)
-demoView conn screenInfo =
+demoView : Screen.Model -> Model -> List (Element Msg)
+demoView screen conn =
     let
         peer =
             conn.peer
@@ -94,8 +94,8 @@ demoView conn screenInfo =
         discovered =
             String.fromInt <| List.length conn.discovered
 
-        isMediumSize = isMedium screenInfo
-        isNarrowSize = isNarrow screenInfo
+        isMediumSize = isMedium screen
+        isNarrowSize = isNarrow screen
 
         relayId =
             el [ Element.width (Element.fillPortion 4), Font.alignLeft ] <|
@@ -170,8 +170,8 @@ narrowView isPhoneSize peer relayId changeRelay discovered =
     , el [] none
     ]
 
-view : ScreenInfo.Model -> Model -> Element Msg
-view screenInfo conn  =
+view : Screen.Model -> Model -> Element Msg
+view screen conn  =
     let
         elements =
             if (conn.isAdmin) then
@@ -179,6 +179,6 @@ view screenInfo conn  =
             else
                 []
     in
-        column (layoutBlock screenInfo ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
-            ([ blockTitle <| text "NETWORK INFO" ] ++ elements ++ demoView conn screenInfo)
+        column (layoutBlock screen ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
+            ([ blockTitle <| text "NETWORK INFO" ] ++ elements ++ demoView screen conn)
 

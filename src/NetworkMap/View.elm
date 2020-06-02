@@ -25,14 +25,14 @@ import Ions.Font as F
 import Ions.Background as Background
 import Ions.Border as Border
 import Palette exposing (blockBackground, fillWidth, layoutBlock, limitLayoutWidth)
-import ScreenInfo.Model as ScreenInfo
+import Screen.Model as Screen
 
-view : ScreenInfo.Model -> Model -> Element Msg
-view screenInfo networkModel =
+view : Screen.Model -> Model -> Element Msg
+view screen networkModel =
     if networkModel.show then
         let sortedEntries = List.sortBy .date (Dict.values networkModel.network)
         in
-        column (layoutBlock screenInfo ++ [ blockBackground ]) <|
+        column (layoutBlock screen ++ [ blockBackground ]) <|
             [ row [ fillWidth, F.white, F.size2, Background.gray, padding 10 ]
                 [ el [ centerX ] <| text "Network map"
                 ]

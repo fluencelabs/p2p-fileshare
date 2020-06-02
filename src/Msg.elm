@@ -18,15 +18,15 @@ module Msg exposing (Msg(..))
 
 import AddFile.Msg
 import Conn.Msg
-import Element exposing (Device)
 import FilesList.Msg
 import NetworkMap.Msg
+import Screen.Msg
 
 
 type Msg
     = NoOp
-    | DeviceClassified Device Int Int
     | ConnMsg Conn.Msg.Msg
     | AddFileMsg AddFile.Msg.Msg
     | FilesListMsg FilesList.Msg.Msg
     | NetworkMapMsg NetworkMap.Msg.Msg
+    | ScreenMsg Screen.Msg.Msg

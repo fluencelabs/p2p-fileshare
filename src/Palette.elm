@@ -25,7 +25,7 @@ import Ions.Border as B
 import Ions.Color as C
 import Ions.Font as F
 import Ions.Size as S
-import ScreenInfo.Model exposing (isNarrow)
+import Screen.Model exposing (isNarrow)
 
 
 accentFontColor =
@@ -86,8 +86,8 @@ limitLayoutWidth =
     Element.width (Element.fill |> Element.maximum (S.baseRem 64))
 
 
-layoutBlock screenInfo =
-    [ Element.centerX, limitLayoutWidth, Element.paddingXY (S.baseRem (if (isNarrow screenInfo) then 2 else 4)) (S.baseRem 1) ]
+layoutBlock screen =
+    [ Element.centerX, limitLayoutWidth, Element.paddingXY (S.baseRem (if (isNarrow screen) then 2 else 4)) (S.baseRem 1) ]
 
 
 pSpacing =

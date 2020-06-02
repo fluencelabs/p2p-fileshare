@@ -23,7 +23,7 @@ import AddFile.Model exposing (emptyAddFile)
 import Conn.Model exposing (emptyConn)
 import FilesList.Model exposing (emptyFilesList)
 import NetworkMap.Model exposing (emptyNetwork)
-import ScreenInfo.Model as ScreenInfo
+import Screen.Model as Screen
 
 
 type alias Model =
@@ -31,7 +31,7 @@ type alias Model =
     , addFile : AddFile.Model.Model
     , filesList : FilesList.Model.Model
     , networkMap : NetworkMap.Model.Model
-    , screenInfo: ScreenInfo.Model
+    , screen: Screen.Model
     }
 
 
@@ -39,11 +39,11 @@ emptyModel : Config -> ( Model, Cmd Msg )
 emptyModel config =
     let
         (emptyConnModel, cmd) = emptyConn config.isAdmin config.defaultPeerRelayInput config.relays
-        device = Element.classifyDevice config.proportions
+        device = Element.classifyDevice config.windowSize
     in
         ( { connectivity = emptyConnModel
         , addFile = emptyAddFile
         , filesList = emptyFilesList
         , networkMap = emptyNetwork config.isAdmin
-        , screenInfo = { device = device, proportions = config.proportions}
+        , screen = { device = device, proportions = config.windowSize}
         }, Cmd.map ConnMsg cmd)

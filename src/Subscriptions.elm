@@ -17,12 +17,11 @@ module Subscriptions exposing (subscriptions)
 -}
 
 import Conn.Port
-import Element
 import FilesList.Port
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import NetworkMap.Port
-import Browser.Events exposing (onResize)
+import Screen.Subscriptions
 
 
 subscriptions : Model -> Sub Msg
@@ -31,7 +30,5 @@ subscriptions model =
         [ Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
         , FilesList.Port.subscriptions model.filesList |> Sub.map FilesListMsg
         , NetworkMap.Port.subscriptions model.networkMap |> Sub.map NetworkMapMsg
-        , onResize <|
-            \width height ->
-                DeviceClassified (Element.classifyDevice { width = width, height = height }) width height
+        , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
         ]

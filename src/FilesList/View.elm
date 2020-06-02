@@ -28,18 +28,18 @@ import Ions.Background as BG
 import Ions.Border as B
 import Ions.Font as F
 import Palette exposing (blockBackground, fillWidth, layoutBlock, limitLayoutWidth, shortHash, showHash)
-import ScreenInfo.Model as ScreenInfo exposing (isMedium, isNarrow)
+import Screen.Model as Screen exposing (isMedium, isNarrow)
 
 
-view : ScreenInfo.Model -> Model -> Element Msg
-view screenInfo { files } =
+view : Screen.Model -> Model -> Element Msg
+view screen { files } =
     let
-        isMediumSize = isMedium screenInfo
+        isMediumSize = isMedium screen
         table = if List.isEmpty files then
                     [ el [ limitLayoutWidth, padding (if isMediumSize then 30 else 60), F.size6, Font.italic, Font.center, centerX, B.black, B.width1 B.Bottom ]
                         <| text "Please add a file to be shown" ]
                 else if (isMediumSize) then
-                    (files |> List.map (showFileLazy screenInfo))
+                    (files |> List.map (showFileLazy screen))
                 else
                     [ row [ limitLayoutWidth, spacing 15, F.gray, Font.bold ]
                         [ el [ alignLeft, width <| fillPortion 1 ] <| text "PREVIEW"
@@ -47,9 +47,9 @@ view screenInfo { files } =
                         , el [ centerX, width <| fillPortion 1 ] <| text "STATUS"
                         , el [ alignRight, width <| fillPortion 1 ] <| text "LOGS"
                         ]
-                    ] ++ (files |> List.map (showFileLazy screenInfo))
+                    ] ++ (files |> List.map (showFileLazy screen))
     in
-        column (layoutBlock screenInfo ++ [ blockBackground ]) <| table
+        column (layoutBlock screen ++ [ blockBackground ]) <| table
 
 
 
@@ -114,16 +114,16 @@ showStatus s =
                 text "Downloading..."
 
 
-showFileLazy : ScreenInfo.Model -> FileEntry -> Element Msg
-showFileLazy screenInfo =
-    lazy (showFile screenInfo)
+showFileLazy : Screen.Model -> FileEntry -> Element Msg
+showFileLazy screen =
+    lazy (showFile screen)
 
 
-showFile : ScreenInfo.Model -> FileEntry -> Element Msg
-showFile screenInfo fileEntry =
+showFile : Screen.Model -> FileEntry -> Element Msg
+showFile screen fileEntry =
     let
-        isMediumSize = isMedium screenInfo
-        isNarrowSize = isNarrow screenInfo
+        isMediumSize = isMedium screen
+        isNarrowSize = isNarrow screen
         hashView =
             el [ alignLeft ] <| (if (isNarrowSize) then shortHash else showHash) fileEntry.hash
 

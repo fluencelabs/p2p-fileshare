@@ -75,8 +75,5 @@ update msg model =
         NetworkMapMsg m ->
             updateNetworkMap m model
 
-        DeviceClassified dc width height ->
-            ( { model | screenInfo = { device = dc, proportions = { width = width, height = height } } }, Cmd.none )
-
         _ ->
             ( model, Cmd.none )
