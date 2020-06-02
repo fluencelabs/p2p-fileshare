@@ -25,7 +25,7 @@ import Element.Font as Font
 import Ions.Background as BG
 import Ions.Font as F
 import Ions.Size as S
-import Palette exposing (accentButton, blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)
+import Palette exposing (accentButton, blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, mediumHash, shortHash, showHash)
 import Element.Input as Input
 import Screen.Model as Screen exposing (isMedium, isNarrow)
 
@@ -100,7 +100,7 @@ demoView screen conn =
         relayId =
             el [ Element.width (Element.fillPortion 4), Font.alignLeft ] <|
                 Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text (statusToString conn.status)) <|
-                    Maybe.map (.peer >> .id >> if (isNarrowSize) then shortHash else showHash) relay
+                    Maybe.map (.peer >> .id >> if (isNarrowSize) then mediumHash else showHash) relay
 
         relaysSelect =
             if conn.choosing then
@@ -161,7 +161,7 @@ wideView peer relayId changeRelay discovered =
 narrowView : Bool -> Peer -> Element Msg -> Element Msg -> String -> List (Element Msg)
 narrowView isPhoneSize peer relayId changeRelay discovered =
     [ row [ fillWidth, centerX ] [ defn "PEER ID" ]
-    , row [ fillWidth, centerX ] [ valn <| (if (isPhoneSize) then shortHash else showHash) peer.id ]
+    , row [ fillWidth, centerX ] [ valn <| (if (isPhoneSize) then mediumHash else showHash) peer.id ]
     , row [ fillWidth, centerX ] [ defn "CONNECTED RELAY ID" ]
     , row [ fillWidth, centerX ] [ relayId ]
     , row [ fillWidth, centerX ] [ changeRelay ]
