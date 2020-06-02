@@ -33,5 +33,5 @@ subscriptions model =
         , NetworkMap.Port.subscriptions model.networkMap |> Sub.map NetworkMapMsg
         , onResize <|
             \width height ->
-                DeviceClassified (Element.classifyDevice { width = width, height = height })
+                DeviceClassified (Element.classifyDevice { width = width, height = height }) width height
         ]

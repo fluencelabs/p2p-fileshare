@@ -16,9 +16,7 @@ module Palette exposing (..)
   limitations under the License.
 -}
 
-import Element exposing (Element, el, mouseOver)
-import Element.Background as Background
-import Element.Border
+import Element exposing (Element, el)
 import Element.Font as Font
 import Element.Region as Region
 import Html exposing (Html)
@@ -27,6 +25,7 @@ import Ions.Border as B
 import Ions.Color as C
 import Ions.Font as F
 import Ions.Size as S
+import ScreenInfo.Model exposing (isNarrow)
 
 
 accentFontColor =
@@ -87,21 +86,21 @@ limitLayoutWidth =
     Element.width (Element.fill |> Element.maximum (S.baseRem 64))
 
 
-layoutBlock =
-    [ Element.centerX, limitLayoutWidth, Element.paddingXY (S.baseRem 4) (S.baseRem 1) ]
+layoutBlock screenInfo =
+    [ Element.centerX, limitLayoutWidth, Element.paddingXY (S.baseRem (if (isNarrow screenInfo) then 2 else 4)) (S.baseRem 1) ]
 
 
 pSpacing =
     Element.spacing <| S.baseRem 0.5
 
 
-shortHash hash =
+shortHashEl size hash =
     let
         sh =
             String.concat
-                [ String.left 6 hash
+                [ String.left size hash
                 , "..."
-                , String.right 5 hash
+                , String.right (size - 1) hash
                 ]
     in
     Element.el
@@ -111,6 +110,11 @@ shortHash hash =
     <|
         Element.text sh
 
+shortHash hash =
+    shortHashEl 6 hash
+
+mediumHash hash =
+    shortHashEl 12 hash
 
 showHash hash =
     Element.el

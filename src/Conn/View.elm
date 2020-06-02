@@ -27,7 +27,7 @@ import Ions.Font as F
 import Ions.Size as S
 import Palette exposing (accentButton, blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)
 import Element.Input as Input
-import ScreenInfo.Model as ScreenInfo exposing (phonePortrait)
+import ScreenInfo.Model as ScreenInfo exposing (isMedium, isNarrow)
 
 statusToString : Status -> String
 statusToString status =
@@ -94,12 +94,13 @@ demoView conn screenInfo =
         discovered =
             String.fromInt <| List.length conn.discovered
 
-        isPhonePortrait = phonePortrait screenInfo
+        isMediumSize = isMedium screenInfo
+        isNarrowSize = isNarrow screenInfo
 
         relayId =
             el [ Element.width (Element.fillPortion 4), Font.alignLeft ] <|
                 Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text (statusToString conn.status)) <|
-                    Maybe.map (.peer >> .id >> if (isPhonePortrait) then shortHash else showHash) relay
+                    Maybe.map (.peer >> .id >> if (isNarrowSize) then shortHash else showHash) relay
 
         relaysSelect =
             if conn.choosing then
@@ -140,8 +141,8 @@ demoView conn screenInfo =
                 )
                 (Element.text "Change")
     in
-        if (isPhonePortrait) then
-            narrowView peer relayId changeRelay discovered
+        if (isMediumSize) then
+            narrowView isNarrowSize peer relayId changeRelay discovered
         else
             wideView peer relayId changeRelay discovered
 
@@ -157,10 +158,10 @@ wideView peer relayId changeRelay discovered =
     , el [] none
     ]
 
-narrowView : Peer -> Element Msg -> Element Msg -> String -> List (Element Msg)
-narrowView peer relayId changeRelay discovered =
+narrowView : Bool -> Peer -> Element Msg -> Element Msg -> String -> List (Element Msg)
+narrowView isPhoneSize peer relayId changeRelay discovered =
     [ row [ fillWidth, centerX ] [ defn "PEER ID" ]
-    , row [ fillWidth, centerX ] [ valn <| shortHash peer.id ]
+    , row [ fillWidth, centerX ] [ valn <| (if (isPhoneSize) then shortHash else showHash) peer.id ]
     , row [ fillWidth, centerX ] [ defn "CONNECTED RELAY ID" ]
     , row [ fillWidth, centerX ] [ relayId ]
     , row [ fillWidth, centerX ] [ changeRelay ]
@@ -178,6 +179,6 @@ view screenInfo conn  =
             else
                 []
     in
-        column (layoutBlock ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
+        column (layoutBlock screenInfo ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
             ([ blockTitle <| text "NETWORK INFO" ] ++ elements ++ demoView conn screenInfo)
 

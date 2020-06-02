@@ -40,7 +40,7 @@ import Ions.Size as S
 import Model exposing (Model)
 import Msg exposing (..)
 import NetworkMap.View
-import Palette exposing (fillWidth, h1, layout, layoutBlock, link, newTabLink, pSpacing)
+import Palette exposing (fillWidth, h1, layout, layoutBlock, newTabLink, pSpacing)
 import ScreenInfo.Model as ScreenInfo
 
 
@@ -56,7 +56,7 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header, [ connectivity model, addFile model, filesList model, networkMap model ] ]
+    layout <| List.concat [ header model.screenInfo, [ connectivity model, addFile model, filesList model, networkMap model ] ]
 
 
 liftView :
@@ -83,9 +83,9 @@ longDescriptionText =
         ++ "The device uploads the file and then replies with an IPFS multiaddress of the node holding the file."
 
 
-header : List (Element Msg)
-header =
-    [ column (layoutBlock ++ [ spacing (S.baseRem 1.125) ])
+header : ScreenInfo.Model -> List (Element Msg)
+header screenInfo =
+    [ column (layoutBlock screenInfo ++ [ spacing (S.baseRem 1.125) ])
         [ row
             [ fillWidth ]
             [ paragraph [] [h1 "P2P Application Fluence Demo"] ]
@@ -120,8 +120,8 @@ addFile model =
 
 filesList : Model -> Element Msg
 filesList model =
-    liftView .filesList FilesListMsg FilesList.View.view <| model
+    liftView .filesList FilesListMsg (FilesList.View.view model.screenInfo) <| model
 
 networkMap : Model -> Element Msg
 networkMap model =
-    liftView .networkMap NetworkMapMsg NetworkMap.View.view <| model
+    liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screenInfo) <| model

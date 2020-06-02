@@ -45,5 +45,5 @@ emptyModel config =
         , addFile = emptyAddFile
         , filesList = emptyFilesList
         , networkMap = emptyNetwork config.isAdmin
-        , screenInfo = { device = device }
+        , screenInfo = { device = device, proportions = config.proportions}
         }, Cmd.map ConnMsg cmd)

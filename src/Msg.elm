@@ -25,7 +25,7 @@ import NetworkMap.Msg
 
 type Msg
     = NoOp
-    | DeviceClassified Device
+    | DeviceClassified Device Int Int
     | ConnMsg Conn.Msg.Msg
     | AddFileMsg AddFile.Msg.Msg
     | FilesListMsg FilesList.Msg.Msg

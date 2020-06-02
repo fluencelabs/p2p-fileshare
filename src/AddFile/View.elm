@@ -18,18 +18,17 @@ module AddFile.View exposing (view)
 
 import AddFile.Model exposing (Model)
 import AddFile.Msg exposing (Msg(..))
-import Element exposing (Element, centerX, column, el, fillPortion, mouseOver, padding, paddingXY, paragraph, pointer, row, spacing, text, width)
+import Element exposing (Element, centerX, column, el, fillPortion, padding, paddingXY, paragraph, pointer, row, spacing, text, width)
 import Element.Border exposing (dotted)
 import Element.Events exposing (onClick)
 import Element.Font as Font
 import Element.Input as Input
 import Ions.Background as BG
 import Ions.Border as B
-import Ions.Color as C
 import Ions.Font as F
 import Ions.Size as S
 import Palette exposing (accentButton, blockTitle, fillWidth, layoutBlock)
-import ScreenInfo.Model as ScreenInfo exposing (phonePortrait)
+import ScreenInfo.Model as ScreenInfo exposing (isMedium)
 
 
 view : ScreenInfo.Model -> Model -> Element Msg
@@ -52,7 +51,7 @@ view screenInfo addFile =
                 { onPress = Just <| SetVisible <| not addFile.visible, label = text "Add File +" }
     in
     column [ fillWidth ]
-        [ row layoutBlock [ addFileButton ]
+        [ row (layoutBlock screenInfo) [ addFileButton ]
         , block
         ]
 
@@ -81,15 +80,15 @@ addFileBlock screenInfo model =
                 { onPress = Just DownloadIpfs, label = text "Download" }
 
         ipfsInput =
-            Element.el [width (fillPortion 5)] <| Input.text [ centerX, fillWidth ]
+            Element.el [width (fillPortion 5), fillWidth] <| Input.text [ centerX, fillWidth ]
                 { onChange = ChangeIpfsHash
                 , text = model.ipfsHash
                 , placeholder = Just <| Input.placeholder [] <| text "Enter IPFS hash"
                 , label = Input.labelHidden "Enter IPFS hash"
                 }
     in
-        if (phonePortrait screenInfo) then
-            column (layoutBlock ++ [ B.width1 B.AllSides, B.radius2, B.blackAlpha 100 ])
+        if (isMedium screenInfo) then
+            column (layoutBlock screenInfo ++ [ B.width1 B.AllSides, B.radius2, B.blackAlpha 100 ])
                 [ blockTitle <| text "ADD FILE"
                 , intro
                 , row rowAttrs [ addDownload ]
@@ -100,7 +99,7 @@ addFileBlock screenInfo model =
                 , el [ Element.height <| Element.px 0 ] <| Element.none
                 ]
         else
-            column (layoutBlock ++ [ B.width1 B.AllSides, B.radius2, B.blackAlpha 100 ])
+            column (layoutBlock screenInfo ++ [ B.width1 B.AllSides, B.radius2, B.blackAlpha 100 ])
                 [ blockTitle <| text "ADD FILE"
                 , intro
                 , row rowAttrs [ addDownload, addInput, emptyColumn ]

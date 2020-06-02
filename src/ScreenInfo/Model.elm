@@ -4,8 +4,13 @@ import Element exposing (Device)
 
 type alias Model =
     { device: Device
+    , proportions: { width: Int, height: Int }
     }
 
-phonePortrait : Model -> Bool
-phonePortrait screenInfo =
+isMedium : Model -> Bool
+isMedium screenInfo =
+    (screenInfo.device.class == Element.Phone || screenInfo.device.class == Element.Tablet) && screenInfo.device.orientation == Element.Portrait
+
+isNarrow : Model -> Bool
+isNarrow screenInfo =
     screenInfo.device.class == Element.Phone && screenInfo.device.orientation == Element.Portrait
