@@ -41,6 +41,7 @@ import Model exposing (Model)
 import Msg exposing (..)
 import NetworkMap.View
 import Palette exposing (fillWidth, h1, layout, layoutBlock, link, newTabLink, pSpacing)
+import ScreenInfo.Model as ScreenInfo
 
 
 view : Model -> Document Msg
@@ -109,7 +110,7 @@ header =
 
 connectivity : Model -> Element Msg
 connectivity model =
-    liftView .connectivity ConnMsg Conn.View.view <| model
+    liftView .connectivity ConnMsg (Conn.View.view model.screenInfo) <| model
 
 
 addFile : Model -> Element Msg

@@ -26,6 +26,7 @@ import Ions.Font as F
 import Ions.Size as S
 import Palette exposing (accentButton, blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)
 import Element.Input as Input
+import ScreenInfo.Model as ScreenInfo
 
 statusToString : Status -> String
 statusToString status =
@@ -146,8 +147,8 @@ demoView conn =
         , el [] none
         ]
 
-view : Model -> Element Msg
-view conn =
+view : ScreenInfo.Model -> Model -> Element Msg
+view screenInfo conn  =
     let
         elements =
             if (conn.isAdmin) then

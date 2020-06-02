@@ -17,11 +17,13 @@ module Model exposing (Model, emptyModel)
 -}
 
 import Config exposing (Config)
+import Element
 import Msg exposing (Msg(..))
 import AddFile.Model exposing (emptyAddFile)
 import Conn.Model exposing (emptyConn)
 import FilesList.Model exposing (emptyFilesList)
 import NetworkMap.Model exposing (emptyNetwork)
+import ScreenInfo.Model as ScreenInfo
 
 
 type alias Model =
@@ -29,19 +31,19 @@ type alias Model =
     , addFile : AddFile.Model.Model
     , filesList : FilesList.Model.Model
     , networkMap : NetworkMap.Model.Model
+    , screenInfo: ScreenInfo.Model
     }
 
 
-emptyModel : Maybe Config -> ( Model, Cmd Msg )
+emptyModel : Config -> ( Model, Cmd Msg )
 emptyModel config =
     let
-        isAdmin = Maybe.withDefault False (Maybe.map (\f -> f.isAdmin) config)
-        relays = Maybe.withDefault [] (Maybe.map (\f -> f.relays) config)
-        defaultInput = Maybe.map .defaultPeerRelayInput config
-        (emptyConnModel, cmd) = emptyConn isAdmin defaultInput relays
+        (emptyConnModel, cmd) = emptyConn config.isAdmin config.defaultPeerRelayInput config.relays
+        device = Element.classifyDevice config.proportions
     in
         ( { connectivity = emptyConnModel
         , addFile = emptyAddFile
         , filesList = emptyFilesList
-        , networkMap = emptyNetwork isAdmin
+        , networkMap = emptyNetwork config.isAdmin
+        , screenInfo = { device = device }
         }, Cmd.map ConnMsg cmd)

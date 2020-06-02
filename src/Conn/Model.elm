@@ -17,7 +17,7 @@ module Conn.Model exposing (..)
 -}
 
 import Conn.Msg exposing (Msg(..))
-import Conn.Relay exposing (Peer, Relay, RelayInput, emptyRelayInput)
+import Conn.Relay exposing (Peer, Relay, RelayInput)
 import Utils exposing (run)
 
 type Status
@@ -37,11 +37,9 @@ type alias Model =
     }
 
 
-emptyConn : Bool -> Maybe RelayInput -> List Relay -> ( Model, Cmd Msg )
+emptyConn : Bool -> RelayInput -> List Relay -> ( Model, Cmd Msg )
 emptyConn isAdmin defaultRelayInput relays =
     let
-        emptyInput =
-            Maybe.withDefault emptyRelayInput defaultRelayInput
         emptyModel =
             { peer = { id = "-----", privateKey = Nothing }
             , relay = Nothing
@@ -49,7 +47,7 @@ emptyConn isAdmin defaultRelayInput relays =
             , discovered = relays
             , choosing = False
             , isAdmin = isAdmin
-            , relayInput = emptyInput
+            , relayInput = defaultRelayInput
             , errorMsg = ""
             }
         cmd = if (isAdmin) then
