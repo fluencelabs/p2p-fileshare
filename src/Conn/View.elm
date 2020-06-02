@@ -27,7 +27,7 @@ import Ions.Font as F
 import Ions.Size as S
 import Palette exposing (accentButton, blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)
 import Element.Input as Input
-import ScreenInfo.Model as ScreenInfo
+import ScreenInfo.Model as ScreenInfo exposing (phonePortrait)
 
 statusToString : Status -> String
 statusToString status =
@@ -81,10 +81,6 @@ defn t =
 valn : Element Msg -> Element Msg
 valn t =
     el [ width (fillPortion 5) ] <| t
-
-phonePortrait : ScreenInfo.Model -> Bool
-phonePortrait screenInfo =
-    screenInfo.device.class == Element.Phone && screenInfo.device.orientation == Element.Portrait
 
 demoView : Model -> ScreenInfo.Model -> List (Element Msg)
 demoView conn screenInfo =

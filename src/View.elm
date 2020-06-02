@@ -115,7 +115,7 @@ connectivity model =
 
 addFile : Model -> Element Msg
 addFile model =
-    liftView .addFile AddFileMsg AddFile.View.view <| model
+    liftView .addFile AddFileMsg (AddFile.View.view model.screenInfo) <| model
 
 
 filesList : Model -> Element Msg
