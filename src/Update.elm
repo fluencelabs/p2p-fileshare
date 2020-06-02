@@ -22,6 +22,7 @@ import FilesList.Update
 import Model exposing (Model)
 import Msg exposing (..)
 import NetworkMap.Update
+import Screen.Update
 
 
 liftUpdate :
@@ -59,6 +60,9 @@ updateFilesList =
 updateNetworkMap =
     liftUpdate .networkMap (\c -> \m -> { m | networkMap = c }) NetworkMapMsg NetworkMap.Update.update
 
+updateScreen =
+    liftUpdate .screen (\s -> \m -> { m | screen = s }) ScreenMsg Screen.Update.update
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -74,6 +78,9 @@ update msg model =
 
         NetworkMapMsg m ->
             updateNetworkMap m model
+
+        ScreenMsg m ->
+            updateScreen m model
 
         _ ->
             ( model, Cmd.none )

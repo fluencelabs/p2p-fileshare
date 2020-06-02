@@ -56,7 +56,7 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header model.screen, [ connectivity model, addFile model, filesList model, networkMap model, screen model ] ]
+    layout <| List.concat [ header model.screen, [ connectivity model, addFile model, filesList model, networkMap model ] ]
 
 
 liftView :
@@ -125,7 +125,3 @@ filesList model =
 networkMap : Model -> Element Msg
 networkMap model =
     liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screen) <| model
-
-screen : Model -> Element Msg
-screen model =
-    liftView .screen ScreenMsg (\_ -> Element.none) <| model
