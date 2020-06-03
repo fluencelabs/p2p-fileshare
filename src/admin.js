@@ -37,18 +37,38 @@ let rootCert;
 let trustGraph;
 let app;
 
+function sendCerts(id, certs) {
+    let decoded = certs.map((cert) => {
+        cert.chain = cert.chain.map((t) => {
+            t.issuedFor = t.issuedFor.toB58String();
+            return t;
+        })
+
+        return cert;
+    })
+    console.log("DECODED");
+    console.log(id);
+    console.log(decoded);
+    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, id: id, peerAppeared: null});
+}
+
 export function initAdmin(adminApp) {
     app = adminApp;
 
     app.ports.networkMapRequest.subscribe(async ({command, id}) => {
+        let cert;
         if (!getConnection()) console.error("Cannot handle networkMapRequest when not connected");
         else
             switch (command) {
                 case "issue":
-                    await addCertificate(id);
+                    cert = await addCertificate(id);
+                    console.log(cert)
+                    sendCerts(id, [cert])
                     break;
                 case "get_cert":
-                    let cert = await addCertificate(id);
+                    let certs = await getCertificates(id);
+                    console.log(certs)
+                    sendCerts(id, certs)
                     break;
                 default:
                     console.error("Received unknown fileRequest from the Elm app", command);
@@ -88,6 +108,7 @@ export async function addCertificate(peerId) {
 
     let issuedCert = await issue(conn.selfPeerInfo.id, PeerId.createFromB58String(peerId), rootCert, expiresAt.getTime(), issuedAt.getTime());
     await trustGraph.publishCertificates(peerId, [issuedCert]);
+    return issuedCert;
 }
 
 export async function establishConnection(app, target) {

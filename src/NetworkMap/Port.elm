@@ -26,7 +26,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, cert: Maybe (String, Certificate), peerAppeared: Maybe { peer: Peer, peerType: String, updateDate: String } }
+    { event : String, certs: Maybe (List Certificate), id: Maybe String, peerAppeared: Maybe { peer: Peer, peerType: String, updateDate: String } }
 
 port networkMapReceiver : (Event -> msg) -> Sub msg
 
@@ -49,8 +49,9 @@ eventToMsg event =
                     |> andThen (\peerAppeared -> stringToPeerType peerAppeared.peerType
                     |> andThen (\peerType -> Just (PeerAppeared peerAppeared.peer peerType peerAppeared.updateDate)))
             "add_cert" ->
-                event.cert
-                    |> Maybe.map (\(id, cert) -> CertificateAdded id cert)
+                event.certs
+                    |> andThen (\certs -> event.id
+                    |> andThen (\id -> Just (CertificateAdded id certs)))
             _ ->
                 Nothing
 

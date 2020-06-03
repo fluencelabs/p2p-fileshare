@@ -4,7 +4,7 @@ import bs58 from 'bs58';
 
 import Fluence from 'fluence';
 import {genUUID} from "fluence/dist/function_call";
-import {establishConnection} from "./admin"
+import {establishConnection, initAdmin} from "./admin"
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
 
@@ -49,6 +49,8 @@ export function setConnection(app, connection) {
     resetEntries(app);
     knownFiles = {};
     conn = connection;
+
+    subsribeToAppear(app, conn, getCurrentPeerId())
 }
 
 export function getConnection() {
@@ -68,7 +70,7 @@ export function to_multiaddr(relay) {
     return `${host}/tcp/${relay.pport}/${protocol}/p2p/${relay.peer.id}`;
 }
 
-function subsribeToApper(app, conn, peerIdStr) {
+function subsribeToAppear(app, conn, peerIdStr) {
     // subscribe for all outgoing calls to watch for all Fluence network members
     conn.subscribe((args, target, replyTo) => {
         let date = new Date().toISOString();
@@ -116,7 +118,8 @@ export function relayEvent(app, name, relay) {
 // call if we found out about any peers or relays in Fluence network
 export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    app.ports.networkMapReceiver.send({event: "peer_appeared", cert: null, peerAppeared});
+    console.log("peer appeared!!!!!");
+    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, id: null, peerAppeared});
 }
 
 /**
@@ -172,6 +175,9 @@ function validateHash(hash) {
 }
 
 export default async function ports(app) {
+
+    await initAdmin(app);
+
     // add all relays from list as appeared
     let date = new Date().toISOString();
     for (const relay of relays) {

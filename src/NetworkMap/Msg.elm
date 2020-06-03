@@ -20,5 +20,7 @@ import NetworkMap.Model exposing (Certificate, Peer, PeerType)
 
 type Msg
     =  PeerAppeared Peer PeerType String
-    | CertificateAdded String Certificate
+    | CertificateAdded String (List Certificate)
+    | AddCertificate String
+    | GetCertificate String
     | NoOp

@@ -19,6 +19,7 @@ module NetworkMap.Update exposing (update)
 import Dict
 import NetworkMap.Model exposing (Model)
 import NetworkMap.Msg exposing (Msg(..))
+import NetworkMap.Port as Port
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -41,13 +42,19 @@ update msg model =
                 peers = Dict.insert record.peer.id record model.network
             in
                 ( { model | network = peers }, Cmd.none )
-        CertificateAdded id cert ->
+        CertificateAdded id certs ->
             let
+                _ = Debug.log "cert: " "alalal"
+                _ = Debug.log "cert: " certs
                 updated = Dict.update
                     id
-                    (\nm -> Maybe.map (\n -> { n | certificates = n.certificates ++ [ cert ] }) nm)
+                    (\nm -> Maybe.map (\n -> { n | certificates = n.certificates ++ certs }) nm)
                     model.network
             in
                 ( { model | network = updated }, Cmd.none )
+        AddCertificate id ->
+            ( model, Port.networkMapRequest { command = "issue", id = Just id } )
+        GetCertificate id ->
+            ( model, Port.networkMapRequest { command = "get_cert", id = Just id } )
         NoOp ->
             ( model, Cmd.none )

@@ -18,6 +18,7 @@ module NetworkMap.View exposing (view)
 
 import Dict
 import Element.Font as Font
+import Element.Input as Input
 import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 import Element exposing (Element, alignLeft, alignRight, centerX, centerY, column, el, padding, paddingXY, row, text)
@@ -30,14 +31,15 @@ import Screen.Model as Screen
 view : Screen.Model -> Model -> Element Msg
 view screen networkModel =
     if networkModel.show then
-        let sortedEntries = List.sortBy .date (Dict.values networkModel.network)
+        let
+            sortedEntries = List.sortBy .date (Dict.values networkModel.network)
         in
-        column (layoutBlock screen ++ [ blockBackground ]) <|
-            [ row [ fillWidth, F.white, F.size2, Background.gray, padding 10 ]
-                [ el [ centerX ] <| text "Network map"
+            column (layoutBlock screen ++ [ blockBackground ]) <|
+                [ row [ fillWidth, F.white, F.size2, Background.gray, padding 10 ]
+                    [ el [ centerX ] <| text "Network map"
+                    ]
                 ]
-            ]
-                ++ List.reverse (List.map showNode sortedEntries)
+                    ++ List.reverse (List.map showNode sortedEntries)
     else
         Element.none
 
@@ -51,9 +53,19 @@ peerTypeToString pt =
         Undefined ->
             "Undefined"
 
-showNode : NodeEntry -> Element msg
+showNode : NodeEntry -> Element Msg
 showNode nodeEntry =
-    column [ fillWidth, paddingXY 0 10, Border.width1 Border.Bottom, Border.nearBlack ]
+    let
+        addCertButton =
+            Input.button
+               []
+               { onPress = Just <| AddCertificate nodeEntry.peer.id, label = text "Add Cert" }
+        getCertButton =
+            Input.button
+                []
+                { onPress = Just <| GetCertificate nodeEntry.peer.id, label = text "Get Cert" }
+    in
+        column [ fillWidth, paddingXY 0 10, Border.width1 Border.Bottom, Border.nearBlack ]
             [ row [ limitLayoutWidth, Background.white, centerX ]
                 [ el
                       [ Font.center
@@ -63,5 +75,7 @@ showNode nodeEntry =
                 , el [ centerX, padding 10 ] <| text (String.fromInt nodeEntry.appearencesNumber)
                 , el [ centerX, padding 10 ] <| text (peerTypeToString nodeEntry.peerType)
                 , el [ alignRight, padding 10 ] <| text nodeEntry.peer.id
+                , el [ alignRight, padding 10 ] <| addCertButton
+                , el [ alignRight, padding 10 ] <| getCertButton
                 ]
             ]
