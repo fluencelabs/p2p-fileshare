@@ -6,4 +6,4 @@ import Screen.Msg exposing (Msg(..))
 subscriptions =
     onResize <|
         \width height ->
-            DeviceClassified (Element.classifyDevice { width = width, height = height }) width height
+            WindowResized (Element.classifyDevice { width = width, height = height }) width height

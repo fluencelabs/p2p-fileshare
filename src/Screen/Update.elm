@@ -5,6 +5,6 @@ import Screen.Msg exposing (Msg(..))
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        DeviceClassified dc width height ->
-                ( { model | device = dc, proportions = { width = width, height = height } }, Cmd.none )
+        WindowResized dc width height ->
+                ( { model | device = dc, screenSize = { width = width, height = height } }, Cmd.none )
         NoOp -> (model, Cmd.none)
