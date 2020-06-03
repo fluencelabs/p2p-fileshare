@@ -39,6 +39,7 @@ update msg model =
             ( { model | relayInput = setPeerId str model.relayInput }, Cmd.none)
         SetRelay relay ->
             ( { model | relay = Nothing,
+                        choosing = False,
                         relayInput =
                             { host = relay.host
                             , pport = String.fromInt relay.pport

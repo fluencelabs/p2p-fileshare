@@ -36,17 +36,17 @@ main =
 
 
 init : Flags -> ( Model, Cmd Msg )
-init maybeFlags =
+init flags =
     let
         (em, initCmd) =
-            emptyModel maybeFlags
+            emptyModel flags
 
         initConn =
             em.connectivity
 
         _ = Maybe.andThen
 
-        initPeerId = Maybe.andThen (\f -> f.peerId) maybeFlags
+        initPeerId = flags.peerId
 
         model =
             case initPeerId of

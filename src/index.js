@@ -31,7 +31,11 @@ let flags = {
         peerId: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9",
         privateKey: ""
     },
-    relays: getRelays().map(convertRelayForELM)
+    relays: getRelays().map(convertRelayForELM),
+    windowSize: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+    }
 };
 if (path === "/admin") {
     flags.isAdmin = true;

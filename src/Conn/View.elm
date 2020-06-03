@@ -18,14 +18,16 @@ module Conn.View exposing (view)
 
 import Conn.Model exposing (Model, Status(..))
 import Conn.Msg exposing (Msg(..))
-import Element exposing (Element, below, centerX, column, el, fillPortion, mouseOver, none, padding, paddingXY, row, spacing, text, width)
+import Conn.Relay exposing (Peer)
+import Element exposing (DeviceClass, Element, below, centerX, column, el, fillPortion, mouseOver, none, padding, paddingXY, row, spacing, text, width)
 import Element.Events as Events
 import Element.Font as Font
 import Ions.Background as BG
 import Ions.Font as F
 import Ions.Size as S
-import Palette exposing (accentButton, blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, shortHash, showHash)
+import Palette exposing (accentButton, blockBackground, blockTitle, fillWidth, layoutBlock, letterSpacing, linkStyle, mediumHash, shortHash, showHash)
 import Element.Input as Input
+import Screen.Model as Screen exposing (isMedium, isNarrow)
 
 statusToString : Status -> String
 statusToString status =
@@ -80,8 +82,8 @@ valn : Element Msg -> Element Msg
 valn t =
     el [ width (fillPortion 5) ] <| t
 
-demoView : Model -> List (Element Msg)
-demoView conn =
+demoView : Screen.Model -> Model -> List (Element Msg)
+demoView screen conn =
     let
         peer =
             conn.peer
@@ -92,10 +94,13 @@ demoView conn =
         discovered =
             String.fromInt <| List.length conn.discovered
 
+        isMediumSize = isMedium screen
+        isNarrowSize = isNarrow screen
+
         relayId =
             el [ Element.width (Element.fillPortion 4), Font.alignLeft ] <|
                 Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text (statusToString conn.status)) <|
-                    Maybe.map (.peer >> .id >> showHash) relay
+                    Maybe.map (.peer >> .id >> if (isNarrowSize) then mediumHash else showHash) relay
 
         relaysSelect =
             if conn.choosing then
@@ -136,18 +141,37 @@ demoView conn =
                 )
                 (Element.text "Change")
     in
-        [ row [ fillWidth, centerX ] [ defn "PEER ID", valn <| showHash peer.id ]
-        , row [ fillWidth, centerX ]
-            [ defn "CONNECTED RELAY ID"
-            , relayId
-            , changeRelay
-            ]
-        , row [ fillWidth, centerX ] [ defn "PEERS", valn <| Element.text discovered ]
-        , el [] none
-        ]
+        if (isMediumSize) then
+            narrowView isNarrowSize peer relayId changeRelay discovered
+        else
+            wideView peer relayId changeRelay discovered
 
-view : Model -> Element Msg
-view conn =
+wideView : Peer -> Element Msg -> Element Msg -> String -> List (Element Msg)
+wideView peer relayId changeRelay discovered =
+    [ row [ fillWidth, centerX ] [ defn "PEER ID", valn <| showHash peer.id ]
+    , row [ fillWidth, centerX ]
+        [ defn "CONNECTED RELAY ID"
+        , relayId
+        , changeRelay
+        ]
+    , row [ fillWidth, centerX ] [ defn "PEERS", valn <| Element.text discovered ]
+    , el [] none
+    ]
+
+narrowView : Bool -> Peer -> Element Msg -> Element Msg -> String -> List (Element Msg)
+narrowView isPhoneSize peer relayId changeRelay discovered =
+    [ row [ fillWidth, centerX ] [ defn "PEER ID" ]
+    , row [ fillWidth, centerX ] [ valn <| (if (isPhoneSize) then mediumHash else showHash) peer.id ]
+    , row [ fillWidth, centerX ] [ defn "CONNECTED RELAY ID" ]
+    , row [ fillWidth, centerX ] [ relayId ]
+    , row [ fillWidth, centerX ] [ changeRelay ]
+    , row [ fillWidth, centerX ] [ defn "PEERS" ]
+    , row [ fillWidth, centerX ] [ valn <| Element.text discovered ]
+    , el [] none
+    ]
+
+view : Screen.Model -> Model -> Element Msg
+view screen conn  =
     let
         elements =
             if (conn.isAdmin) then
@@ -155,6 +179,6 @@ view conn =
             else
                 []
     in
-        column (layoutBlock ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
-            ([ blockTitle <| text "NETWORK INFO" ] ++ elements ++ demoView conn)
+        column (layoutBlock screen ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
+            ([ blockTitle <| text "NETWORK INFO" ] ++ elements ++ demoView screen conn)
 

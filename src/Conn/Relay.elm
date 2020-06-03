@@ -33,14 +33,6 @@ type alias RelayInput =
     , privateKey : String
     }
 
-emptyRelayInput : RelayInput
-emptyRelayInput =
-    { host = ""
-    , pport = ""
-    , peerId = ""
-    , privateKey = ""
-    }
-
 setHost : String -> RelayInput -> RelayInput
 setHost host input =
     { input | host = host }

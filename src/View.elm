@@ -40,7 +40,8 @@ import Ions.Size as S
 import Model exposing (Model)
 import Msg exposing (..)
 import NetworkMap.View
-import Palette exposing (fillWidth, h1, layout, layoutBlock, link, newTabLink, pSpacing)
+import Palette exposing (fillWidth, h1, layout, layoutBlock, newTabLink, pSpacing)
+import Screen.Model as Screen
 
 
 view : Model -> Document Msg
@@ -55,7 +56,7 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header, [ connectivity model, addFile model, filesList model, networkMap model ] ]
+    layout <| List.concat [ header model.screen, [ connectivity model, addFile model, filesList model, networkMap model ] ]
 
 
 liftView :
@@ -82,12 +83,12 @@ longDescriptionText =
         ++ "The device uploads the file and then replies with an IPFS multiaddress of the node holding the file."
 
 
-header : List (Element Msg)
-header =
-    [ column (layoutBlock ++ [ spacing (S.baseRem 1.125) ])
+header : Screen.Model -> List (Element Msg)
+header screenI =
+    [ column (layoutBlock screenI ++ [ spacing (S.baseRem 1.125) ])
         [ row
             [ fillWidth ]
-            [ h1 "P2P Application Fluence Demo" ]
+            [ paragraph [] [h1 "P2P Application Fluence Demo"] ]
         , row
             [ fillWidth ]
             [ paragraph [ Font.italic, F.gray, pSpacing ] <|
@@ -109,18 +110,18 @@ header =
 
 connectivity : Model -> Element Msg
 connectivity model =
-    liftView .connectivity ConnMsg Conn.View.view <| model
+    liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
 
 
 addFile : Model -> Element Msg
 addFile model =
-    liftView .addFile AddFileMsg AddFile.View.view <| model
+    liftView .addFile AddFileMsg (AddFile.View.view model.screen) <| model
 
 
 filesList : Model -> Element Msg
 filesList model =
-    liftView .filesList FilesListMsg FilesList.View.view <| model
+    liftView .filesList FilesListMsg (FilesList.View.view model.screen) <| model
 
 networkMap : Model -> Element Msg
 networkMap model =
-    liftView .networkMap NetworkMapMsg NetworkMap.View.view <| model
+    liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screen) <| model

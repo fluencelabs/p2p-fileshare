@@ -21,6 +21,7 @@ import FilesList.Port
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import NetworkMap.Port
+import Screen.Subscriptions
 
 
 subscriptions : Model -> Sub Msg
@@ -29,4 +30,5 @@ subscriptions model =
         [ Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
         , FilesList.Port.subscriptions model.filesList |> Sub.map FilesListMsg
         , NetworkMap.Port.subscriptions model.networkMap |> Sub.map NetworkMapMsg
+        , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
         ]
