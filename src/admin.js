@@ -27,8 +27,47 @@ import {
     setCurrentPeerId,
     to_multiaddr
 } from "./ports";
+import {TrustGraph} from "fluence/dist/trust/trust_graph";
+import {nodeRootCert} from "fluence/dist/trust/misc";
+import {issue} from "fluence/dist/trust/certificate";
 
 let Address4 = require('ip-address').Address4;
+
+let rootCert;
+let trustGraph;
+
+window.getCertificates = getCertificates;
+window.addCertificate = addCertificate;
+
+export async function getCertificates(peerId) {
+    let conn = getConnection();
+
+    if (trustGraph) {
+        trustGraph = new TrustGraph(conn);
+    }
+
+    return await trustGraph.getCertificates(peerId);
+}
+
+export async function addCertificate(peerId) {
+    let conn = getConnection();
+
+    if (trustGraph) {
+        trustGraph = new TrustGraph(conn);
+    }
+
+    if (!rootCert) {
+        rootCert = await nodeRootCert(conn.selfPeerInfo.id);
+        await trustGraph.publishCertificates(peerId, [rootCert]);
+    }
+
+    let issuedAt = new Date();
+    let expiresAt = new Date();
+    expiresAt.setMonth(expiresAt.getMonth() + 1);
+
+    let issuedCert = await issue(conn.selfPeerInfo.id, PeerId.createFromB58String(peerId), rootCert, expiresAt.getTime(), issuedAt.getTime());
+    await trustGraph.publishCertificates(peerId, [issuedCert]);
+}
 
 export async function establishConnection(app, target) {
     let errorMsg = "";
