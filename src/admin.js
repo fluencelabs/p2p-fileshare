@@ -35,6 +35,27 @@ let Address4 = require('ip-address').Address4;
 
 let rootCert;
 let trustGraph;
+let app;
+
+export function initAdmin(adminApp) {
+    app = adminApp;
+
+    app.ports.networkMapRequest.subscribe(async ({command, id}) => {
+        if (!getConnection()) console.error("Cannot handle networkMapRequest when not connected");
+        else
+            switch (command) {
+                case "issue":
+                    await addCertificate(id);
+                    break;
+                case "get_cert":
+                    let cert = await addCertificate(id);
+                    break;
+                default:
+                    console.error("Received unknown fileRequest from the Elm app", command);
+
+            }
+    });
+}
 
 window.getCertificates = getCertificates;
 window.addCertificate = addCertificate;

@@ -48,6 +48,8 @@ peerTypeToString pt =
             "Relay"
         Client ->
             "Client"
+        Undefined ->
+            "Undefined"
 
 showNode : NodeEntry -> Element msg
 showNode nodeEntry =

@@ -17,7 +17,7 @@ port module NetworkMap.Port exposing (..)
 -}
 
 import Maybe exposing (andThen)
-import NetworkMap.Model exposing (Model, Peer, PeerType(..))
+import NetworkMap.Model exposing (Certificate, Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 
 
@@ -26,7 +26,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, peerAppeared: Maybe { peer: Peer, peerType: String, updateDate: String } }
+    { event : String, cert: Maybe (String, Certificate), peerAppeared: Maybe { peer: Peer, peerType: String, updateDate: String } }
 
 port networkMapReceiver : (Event -> msg) -> Sub msg
 
@@ -48,6 +48,9 @@ eventToMsg event =
                 event.peerAppeared
                     |> andThen (\peerAppeared -> stringToPeerType peerAppeared.peerType
                     |> andThen (\peerType -> Just (PeerAppeared peerAppeared.peer peerType peerAppeared.updateDate)))
+            "add_cert" ->
+                event.cert
+                    |> Maybe.map (\(id, cert) -> CertificateAdded id cert)
             _ ->
                 Nothing
 
@@ -55,3 +58,5 @@ eventToMsg event =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     networkMapReceiver eventToMsg
+
+port networkMapRequest : Command -> Cmd msg

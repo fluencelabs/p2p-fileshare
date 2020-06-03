@@ -16,8 +16,9 @@ module NetworkMap.Msg exposing (Msg(..))
   limitations under the License.
 -}
 
-import NetworkMap.Model exposing (Peer, PeerType)
+import NetworkMap.Model exposing (Certificate, Peer, PeerType)
 
 type Msg
     =  PeerAppeared Peer PeerType String
+    | CertificateAdded String Certificate
     | NoOp

@@ -116,7 +116,7 @@ export function relayEvent(app, name, relay) {
 // call if we found out about any peers or relays in Fluence network
 export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    app.ports.networkMapReceiver.send({event: "peer_appeared", peerAppeared});
+    app.ports.networkMapReceiver.send({event: "peer_appeared", cert: null, peerAppeared});
 }
 
 /**

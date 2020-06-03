@@ -21,6 +21,7 @@ import Dict exposing (Dict)
 type PeerType
     = Relay
     | Client
+    | Undefined
 
 type alias Peer =
     { id : String }
@@ -30,6 +31,19 @@ type alias NodeEntry =
     , peerType: PeerType
     , date: String
     , appearencesNumber: Int
+    , certificates: List Certificate
+    }
+
+type alias Trust =
+    { issuedFor: String
+    , expiresAt: Int
+    , signature: String
+    , issuedAt: Int
+    }
+
+type alias Certificate =
+    {
+        chain: List Trust
     }
 
 type alias Model =

@@ -35,10 +35,19 @@ update msg model =
                     , peerType = peerType
                     , date = date
                     , appearencesNumber = 0
+                    , certificates = []
                     }
                     updatedPeer
                 peers = Dict.insert record.peer.id record model.network
             in
                 ( { model | network = peers }, Cmd.none )
+        CertificateAdded id cert ->
+            let
+                updated = Dict.update
+                    id
+                    (\nm -> Maybe.map (\n -> { n | certificates = n.certificates ++ [ cert ] }) nm)
+                    model.network
+            in
+                ( { model | network = updated }, Cmd.none )
         NoOp ->
             ( model, Cmd.none )
