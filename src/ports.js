@@ -195,7 +195,7 @@ export default async function ports(app) {
                     if (conn) {
                         conn.connect(to_multiaddr(relay));
                     } else {
-                        setConnection(await Fluence.connect(to_multiaddr(relay), getCurrentPeerId()));
+                        setConnection(app, await Fluence.connect(to_multiaddr(relay), getCurrentPeerId()));
                     }
 
                     relayEvent(app, "relay_connected", relay);

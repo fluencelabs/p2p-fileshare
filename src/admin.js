@@ -42,7 +42,7 @@ window.addCertificate = addCertificate;
 export async function getCertificates(peerId) {
     let conn = getConnection();
 
-    if (trustGraph) {
+    if (!trustGraph) {
         trustGraph = new TrustGraph(conn);
     }
 
@@ -52,7 +52,7 @@ export async function getCertificates(peerId) {
 export async function addCertificate(peerId) {
     let conn = getConnection();
 
-    if (trustGraph) {
+    if (!trustGraph) {
         trustGraph = new TrustGraph(conn);
     }
 
