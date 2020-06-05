@@ -6,10 +6,10 @@
 
 ## What
 
-An example of a p2p application that shares files between browsers using the Fluence network as a distributed backend and IPFS as storage. Fluence is used by clients to announce and discover functions, and functions are in turn used to discover a file and mediate its storage. Upload and download interactions then happen directly between clients and IPFS.
+Example of a p2p application that shares files between browsers using the Fluence network as a distributed backend and IPFS as storage. Fluence is used by clients to announce and discover functions, and functions are in turn used to discover a file and mediate its storage. Upload and download interactions then happen directly between clients and IPFS.
 
 ## How?
-One client can advertize a file on the Fluence network, so another client can download it. To advertise a file with hash `QmFile`, the client announces to the network that a function `IPFS_QmFile` is now available. To download a file, another client calls that function and receives the address of an IPFS node as a result, it can then download the file from that IPFS node.
+One client can advertize a file on the Fluence network, so another client can download it. To advertise a file with hash `QmFile`, the client announces to the network that a function `IPFS_QmFile` is now available. To download file, another client calls that function and receives address of an IPFS node as a result, it can then download the file from that IPFS node.
 
 And that's basically what's conceptually happening. Under the hood, there's a DHT network, function routing (i.e, how to find the first client), and so on. What's interesting about that is there's nothing hard-coded, everything is just a function call.
 
