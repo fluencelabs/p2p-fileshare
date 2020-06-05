@@ -1,11 +1,13 @@
-# P2P Filesharing with Fluence
+# P2P file-sharing application over IPFS via Fluence
 
 ## Why
 <img align="right" width="350" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
-To demonstrate how Fluence can be used to develop a simple p2p applications. This demo shows how to compose and use complex backends (like IPFS) to make end-user p2p apps without a need of running your own nodes.
+To demonstrate how Fluence can be used to develop a simple p2p applications. This application shows how to compose and use complex backends (like IPFS) to make end-user p2p apps without a need of running your own nodes.
 
 ## What
+
+[Link to the app](https://relay01.fluence.dev)
 
 An example of p2p application that shares files between browsers using the Fluence network as a distributed backend and IPFS as a storage. Fluence is used by clients to announce and discover functions, and functions are in turn used to discover a file, and mediate its storage. Upload and download interactions then happen directly between clients and IPFS.
 
@@ -38,6 +40,7 @@ cd p2p-filesharing
 npm i
 npm run start
 ```
+
 
 ## Elm
 Did I say that the Elm is awesome? No?! Well, let me fix that: *it is awesome.* And being awesome, Elm gives you this little blue icon in the right bottom corner, and it's a... *Time Machine*. For real. You can use it to go back and forth in the application lifecycle, and see what was happening, why, see all the UI changes that usually happen in a blink of an eye. Have fun!
