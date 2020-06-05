@@ -6,7 +6,7 @@ To demonstrate how Fluence can be used to develop a simple serverless applicatio
 
 ## What
 
-Application to share files between two browsers utilizing external storage backend (IPFS). IPFS is orchestrated via functions that are called by clients, and no file transmission happens on the Fluence side. 
+Application to share files between two browsers utilizing external storage backend. That storage here is IPFS, and it is orchestrated via functions that are called by clients, and no file transmission happens on the Fluence side. 
 
 ## How?
 One client can advertize a file on the Fluence network, so another client can download it. To advertise a file with hash `QmFile`, the client announces to the network that a function `IPFS_QmFile` is now available. To download a file, another client calls that function and receives the address of an IPFS node as a result, it can then download the file from that IPFS node.
