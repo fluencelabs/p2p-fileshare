@@ -1,5 +1,5 @@
 # P2P Filesharing on Fluence FaaS
-<img src="p2p-fileshare.png" width="300"/>
+<img style="float: right;" src="p2p-fileshare.png" width="300"/>
 
 Demo of file sharing app done with p2p FaaS and IPFS. IPFS is orchestrated via functions called by clients, so no file transmission happens on the FaaS side. 
 
