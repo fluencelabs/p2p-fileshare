@@ -1,15 +1,21 @@
-# P2P file-sharing application over IPFS via Fluence
+# A P2P file-sharing application over IPFS via Fluence
 
 ## Why
-<img align="right" width="390" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
-To demonstrate how Fluence can be used to develop a simple p2p applications. This application shows how to compose and use complex backends (like IPFS) to make end-user p2p apps without a need of running your own nodes.
+<img align="right" width="350" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
+
+To demonstrate how Fluence can be used to develop simple p2p applications. This application shows how to compose and use complex backends (like IPFS) to make end-user p2p apps.
 
 ## What
 
-[Running application](https://relay01.fluence.dev)
+An example of a p2p application that shares files between browsers using the Fluence network as a distributed backend and IPFS as storage. Fluence is used by clients to announce and discover functions, and functions are in turn used to discover a file and mediate its storage. Upload and download interactions then happen directly between clients and IPFS.
 
-An example of p2p application that shares files between browsers using the Fluence network as a distributed backend and IPFS as a storage. Fluence is used by clients to announce and discover functions, and functions are in turn used to discover a file, and mediate its storage. Upload and download interactions then happen directly between clients and IPFS.
+<p align="right">
+    <a href="https://relay01.fluence.dev">
+        Link to the app
+    </a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
 
 ## How?
 One client can advertize a file on the Fluence network, so another client can download it. To advertise a file with hash `QmFile`, the client announces to the network that a function `IPFS_QmFile` is now available. To download a file, another client calls that function and receives the address of an IPFS node as a result, it can then download the file from that IPFS node.
