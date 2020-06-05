@@ -2,11 +2,7 @@
 
 <a href="https://relay01.fluence.dev">Link to the app</a>
 
-## Why
-
-<img align="right" width="35%" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
-
-To demonstrate how Fluence can be used to develop simple p2p applications. This application shows how to compose and use complex backends (like IPFS) to make end-user p2p apps.
+<img align="right" width="33%" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
 ## What
 
