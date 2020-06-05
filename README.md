@@ -13,6 +13,7 @@ And that's basically what's conceptually happening. Under the hood, there's a DH
 Clearly, the first client (let's call it "provider client") wants to share the file with someone. It's a lazy client, and its plan is simple: *if someone asks me a file, I'll upload it to some storage, and give back an address of that storage*. Since IPFS is awesome, we'll use it for file sharing and storage. Note that provider client doesn't transmit file directly, it barely uploads it to some IPFS node, and returns an address of that node. Laazy. 
 
 So, here are the steps:
+
 0. Announced function `IPFS_QmFile` to the network (it's not discoverable through DHT)
 *Then, someone called that function, asking for a file*
 1. Gosh, need to find where to upload the file: call `IPFS_multiaddr` function
