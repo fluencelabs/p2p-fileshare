@@ -3,7 +3,7 @@
 ## Why
 <img align="right" width="350" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
-To demonstrate how Fluence can be used to develop a simple p2p applications. It shows how to compose and use complex backends (like IPFS) to make end-user p2p apps without a need of running your own nodes.
+To demonstrate how Fluence can be used to develop a simple p2p applications. This demo shows how to compose and use complex backends (like IPFS) to make end-user p2p apps without a need of running your own nodes.
 
 ## What
 
