@@ -2,7 +2,8 @@
 <img align="right" width="350" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
 ## Why
-To demonstrate how Fluence can be used to develop a simple serverless application. It shows that even simple functions can manage complex backends like IPFS to make something useful to end-users. 
+
+To demonstrate how Fluence can be used to develop a simple p2p application. It shows how to compose complex backends (like IPFS) to make something useful to end-users.
 
 ## What
 
