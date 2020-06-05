@@ -1,3 +1,4 @@
+# P2P Filesharing on Fluence FaaS
 
 <img align="right" width="350" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
