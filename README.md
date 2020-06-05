@@ -32,4 +32,4 @@ npm run start
 ```
 
 ## Elm
-Did I say that the Elm is awesome? No?! Well, let me fix that: it is awesome. And being awesome, Elm gives you this little blue icon in the right bottom corner, and it's a... *Time Machine*. For real. You can use it to go back and forth in application lifecycle, and see what was happening, why, see all the UI changes that usually happen in a blink of an eye. Have fun!
+Did I say that the Elm is awesome? No?! Well, let me fix that: *it is awesome.* And being awesome, Elm gives you this little blue icon in the right bottom corner, and it's a... *Time Machine*. For real. You can use it to go back and forth in application lifecycle, and see what was happening, why, see all the UI changes that usually happen in a blink of an eye. Have fun!
