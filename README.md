@@ -1,7 +1,7 @@
 # P2P Filesharing on Fluence FaaS
-<img align="right" width="350" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
 ## Why
+<img align="right" width="350" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
 To demonstrate how Fluence can be used to develop a simple p2p application. It shows how to compose complex backends (like IPFS) to make something useful to end-users.
 
