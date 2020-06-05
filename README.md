@@ -1,11 +1,14 @@
 # P2P Filesharing on Fluence FaaS
-
 <img align="right" width="350" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
 
-File sharing app done with p2p FaaS and IPFS. IPFS is orchestrated via functions called by clients, so no file transmission happens on the FaaS side. 
-<br><br><br><br><br><br><br>
+## Why
+To demonstrate how Fluence can be used to develop a simple serverless application. It shows that even simple functions can manage complex backends like IPFS to make something useful to end-users. 
 
-## What's happening?
+## What
+
+Application to share files between two browsers utilizing external storage backend (IPFS). IPFS is orchestrated via functions that are called by clients, and no file transmission happens on the Fluence side. 
+
+## How?
 One client can advertize a file on the Fluence network, so another client can download it. To advertise a file with hash `QmFile`, the client announces to the network that a function `IPFS_QmFile` is now available. To download a file, another client calls that function and receives the address of an IPFS node as a result, it can then download the file from that IPFS node.
 
 And that's basically what's conceptually happening. Under the hood, there's a DHT network, function routing (i.e, how to find the first client), and so on. What's interesting about that is there's nothing hard-coded, everything is just a function call.
