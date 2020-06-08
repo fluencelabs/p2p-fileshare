@@ -93,15 +93,16 @@ layoutBlock screen =
 pSpacing =
     Element.spacing <| S.baseRem 0.5
 
+shortHashRaw size hash =
+    String.concat
+        [ String.left size hash
+        , "..."
+        , String.right (size - 1) hash
+        ]
 
 shortHashEl size hash =
     let
-        sh =
-            String.concat
-                [ String.left size hash
-                , "..."
-                , String.right (size - 1) hash
-                ]
+        sh = shortHashRaw size hash
     in
     Element.el
         [ B.nearBlack

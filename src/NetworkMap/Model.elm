@@ -17,6 +17,7 @@ module NetworkMap.Model exposing (..)
 -}
 
 
+import Array exposing (Array)
 import Dict exposing (Dict)
 type PeerType
     = Relay
@@ -26,12 +27,19 @@ type PeerType
 type alias Peer =
     { id : String }
 
+type alias ShowCertState =
+    { certIdx : Int
+    , trustIdx : Int
+    }
+
 type alias NodeEntry =
     { peer: Peer
     , peerType: PeerType
     , date: String
     , appearencesNumber: Int
-    , certificates: List Certificate
+    , certificates: Array Certificate
+    , actionsOpened: Bool
+    , showCertState : Maybe ShowCertState
     }
 
 type alias Trust =
@@ -43,11 +51,12 @@ type alias Trust =
 
 type alias Certificate =
     {
-        chain: List Trust
+        chain: Array Trust
     }
 
 type alias Model =
     { network : Dict String NodeEntry
+    , peerInput : String
     , show : Bool
     }
 
@@ -55,5 +64,6 @@ type alias Model =
 emptyNetwork : Bool -> Model
 emptyNetwork isAdmin =
     { network = Dict.empty
+    , peerInput = ""
     , show = isAdmin
     }

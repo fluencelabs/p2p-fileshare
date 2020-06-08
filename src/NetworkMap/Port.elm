@@ -16,6 +16,7 @@ port module NetworkMap.Port exposing (..)
   limitations under the License.
 -}
 
+import Array
 import Maybe exposing (andThen)
 import NetworkMap.Model exposing (Certificate, Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
@@ -51,7 +52,7 @@ eventToMsg event =
             "add_cert" ->
                 event.certs
                     |> andThen (\certs -> event.id
-                    |> andThen (\id -> Just (CertificateAdded id certs)))
+                    |> andThen (\id -> Just (CertificateAdded id <| Array.fromList certs)))
             _ ->
                 Nothing
 
