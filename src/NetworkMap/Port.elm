@@ -54,6 +54,7 @@ eventToMsg event =
             "add_cert" ->
                 event.certs
                     |> andThen (\certs -> event.id
+                    --TODO: handle certificate events in 'Certificates' module
                     |> andThen (\id -> Just (CertMsg id (CertificatesMsg.CertificatesAdded <| Array.fromList certs))))
             _ ->
                 Nothing

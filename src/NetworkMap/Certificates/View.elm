@@ -16,7 +16,8 @@ module NetworkMap.Certificates.View exposing (..)
   limitations under the License.
 -}
 
-import Element exposing (Element, alignRight, centerX, column, el, padding, row, text)
+import Element exposing (Element, alignRight, centerX, column, el, fillPortion, padding, paddingXY, paragraph, row, spacing, text, width)
+import Element.Font as Font
 import Element.Input as Input
 import Ions.Background as Background
 import Iso8601 exposing (fromTime)
@@ -24,50 +25,59 @@ import List exposing (head, sortBy)
 import Maybe exposing (andThen)
 import NetworkMap.Certificates.Model exposing (Certificate, Model, ShowCertState)
 import NetworkMap.Certificates.Msg exposing (Msg(..))
-import Palette exposing (limitLayoutWidth, shortHashRaw)
+import Palette exposing (fillWidth, limitLayoutWidth, shortHashRaw)
 import Screen.Model as Screen
+import List.FlatMap exposing (flatMap)
 import Array as A exposing (Array)
 import Time
 
 view : Screen.Model -> Model -> Element Msg
 view screen networkModel =
-    column []
+    column [ fillWidth ]
     (actionView networkModel.id networkModel.certificates networkModel.showCertState)
 
-showCertLink : Int -> Int -> String -> Bool -> Element Msg
-showCertLink certIdx trustIdx id sep =
+showCertLink : Int -> Int -> String -> Element Msg
+showCertLink certIdx trustIdx id =
     let
         txt = (shortHashRaw 6 id)
         showCertL =
             Input.button
-               []
-               { onPress = Just <| ShowTrust certIdx trustIdx, label = text (if (sep) then txt ++ " -> " else txt) }
+               [ Font.underline ]
+               { onPress = Just <| ShowTrust certIdx trustIdx, label = text txt }
     in
         showCertL
+
+millisToISO : Int -> String
+millisToISO millis =
+    fromTime <| Time.millisToPosix millis
 
 certViewAr : Int -> Certificate -> Maybe Int -> Element Msg
 certViewAr certIdx cert showTrust =
     let
         ar = cert.chain
-        all = A.indexedMap (\i -> \t ->
-            if (i == A.length ar - 1) then
-                showCertLink certIdx i t.issuedFor False
-            else
-                showCertLink certIdx i t.issuedFor True) ar
+        all = A.indexedMap
+                (\i -> \t ->
+                    -- without arrow on last element
+                    if (i == A.length ar - 1) then
+                        [ showCertLink certIdx i t.issuedFor ]
+                    else
+                        [ showCertLink certIdx i t.issuedFor, text " -> " ]
+                )
+                ar
         list = A.toList all
         until = head <| sortBy (\t -> t.expiresAt) <| A.toList cert.chain
         untilIso = fromTime <| Time.millisToPosix <| Maybe.withDefault 0 <| Maybe.map .expiresAt until
         trustToShow = showTrust
                           |> andThen (\st -> A.get st ar
-                          |> andThen (\t -> Just (column [] [
-                            row [] [text t.issuedFor],
-                            row [] [text <| String.fromInt t.expiresAt],
-                            row [] [text <| String.fromInt  t.issuedAt],
-                            row [] [text t.signature]
-                            ])))
+                          |> andThen (\t -> Just (column [ Background.blackAlpha 30, paddingXY 40 12 ] [
+                            row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text "issued for: "], text <| t.issuedFor],
+                            row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text "expires at: "], text <| millisToISO t.expiresAt],
+                            row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text "issued at: "], text <| millisToISO t.issuedAt],
+                            row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text "signature: "], text <| shortHashRaw 30 t.signature]
+                          ])))
     in
-        column []
-        [ row [] <| list ++ [text <| " - until " ++ untilIso]
+        column [ Background.blackAlpha 20, paddingXY 0 10 ]
+        [ row [] <| (flatMap (\e -> e) list) ++ [text <| " - until " ++ untilIso]
         , Maybe.withDefault Element.none trustToShow
         ]
 
@@ -76,11 +86,11 @@ actionView id certs showCertState =
     let
         addCertButton =
             Input.button
-               []
+               [ padding 10, Background.blackAlpha 60 ]
                { onPress = Just <| AddCertificate id, label = text "Add Cert" }
         getCertButton =
             Input.button
-                []
+                [ padding 10, Background.blackAlpha 60 ]
                 { onPress = Just <| GetCertificate id, label = text "Get Cert" }
         certsView =
             A.indexedMap
@@ -96,9 +106,9 @@ actionView id certs showCertState =
                 )
                 certs
     in [ row [ limitLayoutWidth, Background.white, centerX ]
-            [ el [ alignRight, padding 10 ] <| addCertButton
-            , el [ alignRight, padding 10 ] <| getCertButton
+            [ el [ alignRight, padding 5 ] <| addCertButton
+            , el [ alignRight, padding 5 ] <| getCertButton
             ]
-        ,  row [ limitLayoutWidth, Background.white, centerX ]
+        ,  column [ fillWidth, limitLayoutWidth, Background.blackAlpha 10, centerX, paddingXY 20 10 ]
             <| A.toList certsView
         ]

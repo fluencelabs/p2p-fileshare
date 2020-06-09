@@ -77,7 +77,7 @@ showNode screen nodeEntry =
     let
         actionButton =
             Input.button
-               []
+               [ padding 10, Background.blackAlpha 60 ]
                { onPress = Just <| OpenActions nodeEntry.peer.id, label = text "Actions" }
     in
         column [ fillWidth, paddingXY 0 10, B.width1 B.Bottom, B.nearBlack ]
@@ -96,7 +96,7 @@ showNode screen nodeEntry =
 
 certificates : Screen.Model -> NodeEntry -> Element Msg
 certificates screen node =
-    liftView .certificatesModel (CertMsg node.peer.id) (NetworkMap.Certificates.View.view screen) <| node
+    liftView .certificates (CertMsg node.peer.id) (NetworkMap.Certificates.View.view screen) <| node
 
 liftView :
     (NodeEntry -> model)

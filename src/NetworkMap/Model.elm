@@ -31,7 +31,7 @@ type alias NodeEntry =
     , peerType: PeerType
     , date: String
     , appearencesNumber: Int
-    , certificatesModel: Certificates.Model
+    , certificates: Certificates.Model
     , actionsOpened: Bool
     }
 
