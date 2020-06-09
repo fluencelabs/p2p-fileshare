@@ -2,7 +2,7 @@
 
 <a href="https://relay01.fluence.dev">Link to the app</a>
 
-<img align="right" width="33%" src="https://raw.githubusercontent.com/fluencelabs/p2p-fileshare/readme/p2p-fileshare.png"/>
+<img align="right" width="33%" src="p2p-fileshare.png"/>
 
 ## What
 
