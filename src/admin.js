@@ -55,7 +55,7 @@ function sendCerts(id, certs) {
 export function initAdmin(adminApp) {
     app = adminApp;
 
-    app.ports.networkMapRequest.subscribe(async ({command, id}) => {
+    app.ports.certificatesRequest.subscribe(async ({command, id}) => {
         let cert;
         if (!getConnection()) console.error("Cannot handle networkMapRequest when not connected");
         else

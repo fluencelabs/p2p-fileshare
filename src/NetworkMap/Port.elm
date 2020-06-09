@@ -18,7 +18,9 @@ port module NetworkMap.Port exposing (..)
 
 import Array
 import Maybe exposing (andThen)
-import NetworkMap.Model exposing (Certificate, Model, Peer, PeerType(..))
+import NetworkMap.Certificates.Model exposing (Certificate)
+import NetworkMap.Certificates.Msg as CertificatesMsg
+import NetworkMap.Model exposing (Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 
 
@@ -52,7 +54,7 @@ eventToMsg event =
             "add_cert" ->
                 event.certs
                     |> andThen (\certs -> event.id
-                    |> andThen (\id -> Just (CertificateAdded id <| Array.fromList certs)))
+                    |> andThen (\id -> Just (CertMsg id (CertificatesMsg.CertificatesAdded <| Array.fromList certs))))
             _ ->
                 Nothing
 
@@ -60,5 +62,3 @@ eventToMsg event =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     networkMapReceiver eventToMsg
-
-port networkMapRequest : Command -> Cmd msg

@@ -1,4 +1,4 @@
-module NetworkMap.Msg exposing (Msg(..))
+port module NetworkMap.Certificates.Port exposing (..)
 
 {-|
   Copyright 2020 Fluence Labs Limited
@@ -16,13 +16,7 @@ module NetworkMap.Msg exposing (Msg(..))
   limitations under the License.
 -}
 
-import NetworkMap.Certificates.Msg
-import NetworkMap.Model exposing (Peer, PeerType)
+type alias Command =
+    { command : String, id : Maybe String }
 
-type Msg
-    =  PeerAppeared Peer PeerType String
-    | OpenActions String
-    | CertMsg String NetworkMap.Certificates.Msg.Msg
-    | ChangePeerInput String
-    | AddPeerId
-    | NoOp
+port certificatesRequest : Command -> Cmd msg

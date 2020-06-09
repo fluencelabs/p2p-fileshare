@@ -16,9 +16,8 @@ module NetworkMap.Model exposing (..)
   limitations under the License.
 -}
 
-
-import Array exposing (Array)
 import Dict exposing (Dict)
+import NetworkMap.Certificates.Model as Certificates
 type PeerType
     = Relay
     | Client
@@ -27,31 +26,13 @@ type PeerType
 type alias Peer =
     { id : String }
 
-type alias ShowCertState =
-    { certIdx : Int
-    , trustIdx : Int
-    }
-
 type alias NodeEntry =
     { peer: Peer
     , peerType: PeerType
     , date: String
     , appearencesNumber: Int
-    , certificates: Array Certificate
+    , certificatesModel: Certificates.Model
     , actionsOpened: Bool
-    , showCertState : Maybe ShowCertState
-    }
-
-type alias Trust =
-    { issuedFor: String
-    , expiresAt: Int
-    , signature: String
-    , issuedAt: Int
-    }
-
-type alias Certificate =
-    {
-        chain: Array Trust
     }
 
 type alias Model =

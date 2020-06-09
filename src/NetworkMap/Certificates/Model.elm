@@ -1,4 +1,4 @@
-module NetworkMap.Msg exposing (Msg(..))
+module NetworkMap.Certificates.Model exposing (..)
 
 {-|
   Copyright 2020 Fluence Labs Limited
@@ -16,13 +16,27 @@ module NetworkMap.Msg exposing (Msg(..))
   limitations under the License.
 -}
 
-import NetworkMap.Certificates.Msg
-import NetworkMap.Model exposing (Peer, PeerType)
+import Array exposing (Array)
 
-type Msg
-    =  PeerAppeared Peer PeerType String
-    | OpenActions String
-    | CertMsg String NetworkMap.Certificates.Msg.Msg
-    | ChangePeerInput String
-    | AddPeerId
-    | NoOp
+type alias ShowCertState =
+    { certIdx : Int
+    , trustIdx : Int
+    }
+
+type alias Trust =
+    { issuedFor: String
+    , expiresAt: Int
+    , signature: String
+    , issuedAt: Int
+    }
+
+type alias Certificate =
+    {
+        chain: Array Trust
+    }
+
+type alias Model =
+    { id: String
+    , certificates: Array Certificate
+    , showCertState : Maybe ShowCertState
+    }
