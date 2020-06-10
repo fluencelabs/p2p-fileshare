@@ -16,14 +16,14 @@ module NetworkMap.Certificates.View exposing (..)
   limitations under the License.
 -}
 
-import Element exposing (Element, alignRight, centerX, column, el, fillPortion, padding, paddingXY, paragraph, row, spacing, text, width)
+import Element exposing (Element, alignRight, centerX, column, el, padding, paddingXY, paragraph, row, spacing, text)
 import Element.Font as Font
 import Element.Input as Input
 import Ions.Background as Background
 import Iso8601 exposing (fromTime)
 import List exposing (head, sortBy)
-import Maybe exposing (andThen)
-import NetworkMap.Certificates.Model exposing (Certificate, Model, ShowCertState)
+import Maybe exposing (andThen, withDefault, map)
+import NetworkMap.Certificates.Model exposing (Certificate, Model, ShowCertState, Trust)
 import NetworkMap.Certificates.Msg exposing (Msg(..))
 import Palette exposing (fillWidth, limitLayoutWidth, shortHashRaw)
 import Screen.Model as Screen
@@ -59,24 +59,31 @@ certAttrRow : String -> String -> Element Msg
 certAttrRow name value =
     certAttrRowEl name <| text value
 
+untilFromCert : Array Trust -> String
+untilFromCert chain =
+    let
+        until = head <| sortBy (\t -> t.expiresAt) <| A.toList chain
+        untilIso = fromTime <| Time.millisToPosix <| withDefault 0 <| map .expiresAt until
+    in
+        untilIso
+
 certView : Int -> Certificate -> Maybe Int -> Element Msg
 certView certIdx cert showTrust =
     let
-        ar = cert.chain
-        all = A.indexedMap
+        chain = cert.chain
+        certElements = A.indexedMap
                 (\i -> \t ->
                     -- last element without arrow
-                    if (i == A.length ar - 1) then
+                    if (i == A.length chain - 1) then
                         [ showCertLink certIdx i t.issuedFor ]
                     else
                         [ showCertLink certIdx i t.issuedFor, text " -> " ]
                 )
-                ar
-        list = A.toList all
-        until = head <| sortBy (\t -> t.expiresAt) <| A.toList cert.chain
-        untilIso = fromTime <| Time.millisToPosix <| Maybe.withDefault 0 <| Maybe.map .expiresAt until
+                chain
+        certElementsList = A.toList certElements
+        untilIso = untilFromCert chain
         trustToShow = showTrust
-                          |> andThen (\st -> A.get st ar
+                          |> andThen (\st -> A.get st chain
                           |> andThen (\t -> Just (column [ Background.blackAlpha 30, paddingXY 40 12 ] [
                             certAttrRow "issued for: " t.issuedFor,
                             certAttrRow "expires at: " <| millisToISO t.expiresAt,
@@ -85,8 +92,8 @@ certView certIdx cert showTrust =
                           ])))
     in
         column [ Background.blackAlpha 20, paddingXY 0 10 ]
-        [ row [ spacing 10 ] <| (flatMap (\e -> e) list) ++ [ paragraph [ Font.bold ] [text <| " - until " ++ untilIso]]
-        , Maybe.withDefault Element.none trustToShow
+        [ row [ spacing 10 ] <| (flatMap (\e -> e) certElementsList) ++ [ paragraph [ Font.bold ] [text <| " - until " ++ untilIso]]
+        , withDefault Element.none trustToShow
         ]
 
 actionView : String -> Array Certificate -> Maybe ShowCertState -> List (Element Msg)
@@ -103,8 +110,8 @@ actionView id certs showCertState =
         certsView =
             A.indexedMap
                 (\i -> \c ->
-                    Maybe.withDefault (certView i c Nothing)
-                        (Maybe.andThen
+                    withDefault (certView i c Nothing)
+                        (andThen
                             (\scs ->
                                 if (scs.certIdx == i) then
                                     Just (certView i c <| Just scs.trustIdx)
