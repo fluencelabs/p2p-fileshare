@@ -10,7 +10,8 @@
     "start": "elm-app start",
     "build": "elm-app build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "fix-typical-require": "replace-in-file \"const typical = require('typical')\" \"const typical = require('typical/dist/index')\" ./node_modules/ipld/src/index.js"
+    "fix-typical-require": "replace-in-file \"const typical = require('typical')\" \"const typical = require('typical/dist/index')\" ./node_modules/ipld/src/index.js",
+    "postinstall": "npm run fix-typical-require"
   },
   "repository": {
     "type": "git",
