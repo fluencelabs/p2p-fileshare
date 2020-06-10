@@ -84,6 +84,7 @@ function subsribeToAppear(app, conn, peerIdStr) {
     });
 }
 
+// TODO move all ports to different files
 // event with an error message
 export function peerErrorEvent(app, errorMsg) {
     app.ports.connReceiver.send({event: "error", relay: null, peer: null, errorMsg});

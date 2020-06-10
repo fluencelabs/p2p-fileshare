@@ -85,6 +85,7 @@ certView certIdx cert showTrust =
         trustToShow = showTrust
                           |> andThen (\st -> A.get st chain
                           |> andThen (\t -> Just (column [ Background.blackAlpha 30, paddingXY 40 12 ] [
+                            -- TODO focus on this peerId after clicking
                             certAttrRow "issued for: " t.issuedFor,
                             certAttrRow "expires at: " <| millisToISO t.expiresAt,
                             certAttrRow "issued at: "  <| millisToISO t.issuedAt,
