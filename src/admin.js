@@ -37,6 +37,18 @@ let rootCert;
 let trustGraph;
 let app;
 
+function getRootCert() {
+    console.log("get cert")
+    console.log(rootCert)
+    return rootCert;
+}
+
+function setRootCert(newCert) {
+    console.log("add new cert");
+    console.log(newCert);
+    rootCert = newCert
+}
+
 function sendCerts(id, certs) {
     let decoded = certs.map((cert) => {
         cert.chain = cert.chain.map((t) => {
@@ -98,7 +110,7 @@ export async function addCertificate(peerId) {
     }
 
     if (!rootCert) {
-        rootCert = await nodeRootCert(conn.selfPeerInfo.id);
+        setRootCert(await nodeRootCert(conn.selfPeerInfo.id));
         await trustGraph.publishCertificates(peerId, [rootCert]);
     }
 
@@ -106,8 +118,8 @@ export async function addCertificate(peerId) {
     let expiresAt = new Date();
     expiresAt.setMonth(expiresAt.getMonth() + 1);
 
-    let issuedCert = await issue(conn.selfPeerInfo.id, PeerId.createFromB58String(peerId), rootCert, expiresAt.getTime(), issuedAt.getTime());
-    await trustGraph.publishCertificates(peerId, [issuedCert]);
+    let issuedCert = await issue(conn.selfPeerInfo.id, PeerId.createFromB58String(peerId), getRootCert(), expiresAt.getTime(), issuedAt.getTime());
+    await trustGraph.publishCertificates(peerId, [getRootCert()]);
     return issuedCert;
 }
 
