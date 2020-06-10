@@ -16,7 +16,6 @@ port module Conn.Port exposing (..)
   limitations under the License.
 -}
 
-import Browser.Events exposing (onResize)
 import Conn.Model exposing (Model)
 import Conn.Msg exposing (Msg(..))
 import Conn.Relay exposing (Peer, Relay, RelayInput)

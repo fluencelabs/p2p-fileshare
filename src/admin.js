@@ -20,9 +20,6 @@ import Fluence from "fluence";
 import {
     addRelay, getConnection,
     getCurrentPeerId,
-    peerErrorEvent,
-    peerEvent,
-    relayEvent,
     setConnection,
     setCurrentPeerId,
     to_multiaddr
@@ -30,6 +27,7 @@ import {
 import {TrustGraph} from "fluence/dist/trust/trust_graph";
 import {nodeRootCert} from "fluence/dist/trust/misc";
 import {issue} from "fluence/dist/trust/certificate";
+import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
 
 let Address4 = require('ip-address').Address4;
 
@@ -148,7 +146,7 @@ export async function establishConnection(app, target) {
             }
 
             if (errorMsg) {
-                peerErrorEvent(app, errorMsg);
+                peerErrorEvent(errorMsg);
                 return;
             }
 
@@ -163,7 +161,7 @@ export async function establishConnection(app, target) {
                 console.log("PRIVATE KEY GENERATED: " + privateKey)
             }
 
-            relayEvent(app, "relay_connecting");
+            relayEvent("relay_connecting");
             let host = null;
             let dns = null;
             if (isIp) {
@@ -184,16 +182,16 @@ export async function establishConnection(app, target) {
                 con.connect(to_multiaddr(relay), relay.peer.id);
             } else {
                 setCurrentPeerId(peerId);
-                peerEvent(app, "set_peer", {id: peerId.toB58String(), privateKey: privateKey});
+                peerEvent("set_peer", {id: peerId.toB58String(), privateKey: privateKey});
 
                 let conn = await Fluence.connect(to_multiaddr(relay), peerId);
                 setConnection(app, conn);
             }
 
-            relayEvent(app,"relay_connected", relay);
+            relayEvent("relay_connected", relay);
         }
     } catch (e) {
         console.error(e);
-        peerErrorEvent(app,errorMsg + e.message);
+        peerErrorEvent(errorMsg + e.message);
     }
 }
