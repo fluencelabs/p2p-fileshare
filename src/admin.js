@@ -38,29 +38,24 @@ let trustGraph;
 let app;
 
 function getRootCert() {
-    console.log("get cert")
-    console.log(rootCert)
     return rootCert;
 }
 
 function setRootCert(newCert) {
-    console.log("add new cert");
-    console.log(newCert);
     rootCert = newCert
 }
 
 function sendCerts(id, certs) {
     let decoded = certs.map((cert) => {
         cert.chain = cert.chain.map((t) => {
-            t.issuedFor = t.issuedFor.toB58String();
-            return t;
+            let copied = {...t}
+            copied.issuedFor = t.issuedFor.toB58String();
+            return copied;
         })
 
         return cert;
     })
-    console.log("DECODED");
-    console.log(id);
-    console.log(decoded);
+
     app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, id: id, peerAppeared: null});
 }
 
@@ -74,12 +69,10 @@ export function initAdmin(adminApp) {
             switch (command) {
                 case "issue":
                     cert = await addCertificate(id);
-                    console.log(cert)
                     sendCerts(id, [cert])
                     break;
                 case "get_cert":
                     let certs = await getCertificates(id);
-                    console.log(certs)
                     sendCerts(id, certs)
                     break;
                 default:

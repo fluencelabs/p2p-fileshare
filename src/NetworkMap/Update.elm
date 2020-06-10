@@ -17,7 +17,7 @@ module NetworkMap.Update exposing (update)
 -}
 
 import Array
-import Dict exposing (Dict)
+import Dict exposing (Dict, get)
 import Iso8601 exposing (fromTime)
 import NetworkMap.Certificates.Model as Certificates
 import NetworkMap.Certificates.Update
@@ -25,7 +25,7 @@ import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 import Task exposing (perform)
 import Time
-import Maybe exposing (map)
+import Maybe exposing (map, withDefault)
 import Tuple exposing (first, second)
 
 
@@ -35,10 +35,11 @@ update msg model =
         PeerAppeared peer peerType date ->
             let
                 updatedPeer = map (\p -> { p | date = date, appearencesNumber = p.appearencesNumber + 1 })
-                    (Dict.get peer.id model.network)
+                    (get peer.id model.network)
 
                 record =
-                    Maybe.withDefault
+                    updatedPeer |>
+                    withDefault
                         { peer = peer
                         , peerType = peerType
                         , date = date
@@ -46,16 +47,17 @@ update msg model =
                         , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing }
                         , actionsOpened = False
                         }
-                        updatedPeer
+
                 peers = model.network |> Dict.insert record.peer.id record
             in
                 ( { model | network = peers }, Cmd.none )
         OpenActions id ->
             let
-                updated = Dict.update
-                    id
-                    (\nm -> map (\n -> { n | actionsOpened = not n.actionsOpened }) nm)
-                    model.network
+                updated = model.network |>
+                    Dict.update
+                        id
+                        (\nm -> map (\n -> { n | actionsOpened = not n.actionsOpened }) nm)
+
             in
                 ( { model | network = updated }, Cmd.none )
         ChangePeerInput peerId ->
@@ -68,12 +70,12 @@ update msg model =
                 ( { model | peerInput = "" }, cmd)
         CertMsg id certMsg ->
             let
-                node = model.network |> Dict.get id
+                node = model.network |> get id
                 result = node |> map (\n -> NetworkMap.Certificates.Update.update certMsg n.certificates)
                 updated = result |> map
                     (\tuple -> ( { model | network = updateDict id (first tuple) model.network }, Cmd.map (CertMsg id) (second tuple)))
             in
-                Maybe.withDefault ( model, Cmd.none ) updated
+                updated |> withDefault ( model, Cmd.none )
         NoOp ->
             ( model, Cmd.none )
 
