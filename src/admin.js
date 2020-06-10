@@ -193,7 +193,7 @@ export async function establishConnection(app, target) {
             relayEvent(app,"relay_connected", relay);
         }
     } catch (e) {
-        console.log(e);
+        console.error(e);
         peerErrorEvent(app,errorMsg + e.message);
     }
 }

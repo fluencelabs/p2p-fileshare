@@ -118,7 +118,6 @@ export function relayEvent(app, name, relay) {
 // call if we found out about any peers or relays in Fluence network
 export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    console.log("peer appeared!!!!!");
     app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, id: null, peerAppeared});
 }
 
@@ -210,7 +209,6 @@ export default async function ports(app) {
                 break;
 
             case "generate_peer":
-                console.log("generate peer")
                 let peerId = await Fluence.generatePeerId();
                 currentPeerId = peerId;
                 let peerIdStr = peerId.toB58String();
@@ -276,7 +274,6 @@ export default async function ports(app) {
                         let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
                         let multiaddr = multiaddrResult.multiaddr;
                         // upload a file
-                        console.log("going to upload");
                         fileUploading(app, hash);
                         await ipfsAdd(multiaddr, knownFiles[hash].bytes);
                         fileUploaded(app, hash);
@@ -294,7 +291,6 @@ export default async function ports(app) {
                 fileAdvertised(app, hash, previewStr);
 
             } else {
-                console.log("This file is already advertised.");
                 fileLog(app, hash, "Trying to advertise this file, but the file is already advertised.");
             }
         };
