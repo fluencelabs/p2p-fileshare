@@ -51,13 +51,21 @@ millisToISO : Int -> String
 millisToISO millis =
     fromTime <| Time.millisToPosix millis
 
-certViewAr : Int -> Certificate -> Maybe Int -> Element Msg
-certViewAr certIdx cert showTrust =
+certAttrRowEl : String -> Element Msg -> Element Msg
+certAttrRowEl name value =
+    row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text name], value]
+
+certAttrRow : String -> String -> Element Msg
+certAttrRow name value =
+    certAttrRowEl name <| text value
+
+certView : Int -> Certificate -> Maybe Int -> Element Msg
+certView certIdx cert showTrust =
     let
         ar = cert.chain
         all = A.indexedMap
                 (\i -> \t ->
-                    -- without arrow on last element
+                    -- last element without arrow
                     if (i == A.length ar - 1) then
                         [ showCertLink certIdx i t.issuedFor ]
                     else
@@ -70,14 +78,14 @@ certViewAr certIdx cert showTrust =
         trustToShow = showTrust
                           |> andThen (\st -> A.get st ar
                           |> andThen (\t -> Just (column [ Background.blackAlpha 30, paddingXY 40 12 ] [
-                            row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text "issued for: "], text <| t.issuedFor],
-                            row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text "expires at: "], text <| millisToISO t.expiresAt],
-                            row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text "issued at: "], text <| millisToISO t.issuedAt],
-                            row [ paddingXY 0 5, spacing 10 ] [paragraph [ Font.bold ] <| [text "signature: "], text <| shortHashRaw 30 t.signature]
+                            certAttrRow "issued for: " t.issuedFor,
+                            certAttrRow "expires at: " <| millisToISO t.expiresAt,
+                            certAttrRow "issued at: "  <| millisToISO t.issuedAt,
+                            certAttrRow "signature: " t.signature
                           ])))
     in
         column [ Background.blackAlpha 20, paddingXY 0 10 ]
-        [ row [] <| (flatMap (\e -> e) list) ++ [text <| " - until " ++ untilIso]
+        [ row [ spacing 10 ] <| (flatMap (\e -> e) list) ++ [ paragraph [ Font.bold ] [text <| " - until " ++ untilIso]]
         , Maybe.withDefault Element.none trustToShow
         ]
 
@@ -95,13 +103,13 @@ actionView id certs showCertState =
         certsView =
             A.indexedMap
                 (\i -> \c ->
-                    Maybe.withDefault (certViewAr i c Nothing)
+                    Maybe.withDefault (certView i c Nothing)
                         (Maybe.andThen
                             (\scs ->
                                 if (scs.certIdx == i) then
-                                    Just (certViewAr i c <| Just scs.trustIdx)
+                                    Just (certView i c <| Just scs.trustIdx)
                                 else
-                                    Just (certViewAr i c Nothing))
+                                    Just (certView i c Nothing))
                         showCertState)
                 )
                 certs
