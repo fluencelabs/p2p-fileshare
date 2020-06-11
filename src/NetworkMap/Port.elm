@@ -57,7 +57,7 @@ eventToMsg event =
                     |> andThen
                         (\peerAppeared ->
                             stringToPeerType peerAppeared.peerType
-                                |> andThen (\peerType -> Just (PeerAppeared peerAppeared.peer peerType peerAppeared.updateDate))
+                                |> andThen (\peerType -> Just (PeerAppeared peerAppeared.peer peerType peerAppeared.updateDate False))
                         )
 
             "add_cert" ->

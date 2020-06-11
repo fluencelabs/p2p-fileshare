@@ -21,7 +21,7 @@ import NetworkMap.Model exposing (Peer, PeerType)
 
 
 type Msg
-    = PeerAppeared Peer PeerType String
+    = PeerAppeared Peer PeerType String Bool
     | OpenActions String
     | CertMsg String NetworkMap.Certificates.Msg.Msg
     | ChangePeerInput String

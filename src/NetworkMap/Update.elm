@@ -21,6 +21,7 @@ import Dict exposing (Dict, get)
 import Iso8601 exposing (fromTime)
 import Maybe exposing (map, withDefault)
 import NetworkMap.Certificates.Model as Certificates
+import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Certificates.Update
 import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
@@ -32,7 +33,7 @@ import Tuple exposing (first, second)
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        PeerAppeared peer peerType date ->
+        PeerAppeared peer peerType date opened ->
             let
                 updatedPeer =
                     map (\p -> { p | date = date, appearencesNumber = p.appearencesNumber + 1 })
@@ -46,7 +47,7 @@ update msg model =
                             , date = date
                             , appearencesNumber = 0
                             , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing }
-                            , actionsOpened = False
+                            , actionsOpened = opened
                             }
 
                 peers =
@@ -58,9 +59,7 @@ update msg model =
             let
                 updated =
                     model.network
-                        |> Dict.update
-                            id
-                            (\nm -> map (\n -> { n | actionsOpened = not n.actionsOpened }) nm)
+                        |> Dict.map (openOnlyOne id)
             in
             ( { model | network = updated }, Cmd.none )
 
@@ -73,27 +72,71 @@ update msg model =
                     model.peerInput
 
                 cmd =
-                    Time.now |> perform (\t -> PeerAppeared { id = peerId } Undefined (fromTime t))
+                    Time.now |> perform (\t -> PeerAppeared { id = peerId } Undefined (fromTime t) True)
             in
             ( { model | peerInput = "" }, cmd )
 
         CertMsg id certMsg ->
-            let
-                node =
-                    model.network |> get id
+            case certMsg of
+                -- this message is from child to change focus on this level
+                CertificatesMsg.ChangeFocus idFor ->
+                    updateFocus model idFor
 
-                result =
-                    node |> map (\n -> NetworkMap.Certificates.Update.update certMsg n.certificates)
-
-                updated =
-                    result
-                        |> map
-                            (\tuple -> ( { model | network = updateDict id (first tuple) model.network }, Cmd.map (CertMsg id) (second tuple) ))
-            in
-            updated |> withDefault ( model, Cmd.none )
+                _ ->
+                    liftCertMsg model id certMsg
 
         NoOp ->
             ( model, Cmd.none )
+
+
+openOnlyOne : String -> String -> NodeEntry -> NodeEntry
+openOnlyOne id currentId nodeEntry =
+    let
+        opened =
+            if currentId == id then
+                True
+
+            else
+                False
+    in
+    { nodeEntry | actionsOpened = opened }
+
+
+
+-- should be moved with 'Certificates' model if necessary
+
+
+updateFocus : Model -> String -> ( Model, Cmd Msg )
+updateFocus model idFor =
+    let
+        updated =
+            model.network |> Dict.map (openOnlyOne idFor)
+
+        cmd =
+            if Dict.member idFor model.network then
+                Cmd.none
+
+            else
+                Time.now |> perform (\t -> PeerAppeared { id = idFor } Undefined (fromTime t) True)
+    in
+    ( { model | network = updated }, cmd )
+
+
+liftCertMsg : Model -> String -> CertificatesMsg.Msg -> ( Model, Cmd Msg )
+liftCertMsg model id msg =
+    let
+        node =
+            model.network |> get id
+
+        result =
+            node |> map (\n -> NetworkMap.Certificates.Update.update msg n.certificates)
+
+        updated =
+            result
+                |> map
+                    (\tuple -> ( { model | network = updateDict id (first tuple) model.network }, Cmd.map (CertMsg id) (second tuple) ))
+    in
+    updated |> withDefault ( model, Cmd.none )
 
 
 updateEntry : Certificates.Model -> NodeEntry -> NodeEntry

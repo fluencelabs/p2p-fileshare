@@ -37,5 +37,9 @@ update msg model =
         ShowTrust certIdx trustIdx ->
             ( { model | showCertState = Just { certIdx = certIdx, trustIdx = trustIdx } }, Cmd.none )
 
+        ChangeFocus _ ->
+            -- this msg is for parent model only
+            ( model, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )

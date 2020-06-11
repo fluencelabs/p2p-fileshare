@@ -79,6 +79,13 @@ untilFromCert chain =
     untilIso
 
 
+issuedForFocusEl : String -> Element Msg
+issuedForFocusEl id =
+    Input.button
+        [ Font.underline ]
+        { onPress = Just <| ChangeFocus id, label = text id }
+
+
 certView : Int -> Certificate -> Maybe Int -> Element Msg
 certView certIdx cert showTrust =
     let
@@ -114,7 +121,7 @@ certView certIdx cert showTrust =
                                     Just
                                         (column [ Background.blackAlpha 30, paddingXY 40 12 ]
                                             [ -- TODO focus on this peerId after clicking
-                                              certAttrRow "issued for: " t.issuedFor
+                                              certAttrRowEl "issued for: " (issuedForFocusEl t.issuedFor)
                                             , certAttrRow "expires at: " <| millisToISO t.expiresAt
                                             , certAttrRow "issued at: " <| millisToISO t.issuedAt
                                             , certAttrRow "signature: " t.signature

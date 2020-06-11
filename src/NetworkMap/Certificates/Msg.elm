@@ -24,5 +24,6 @@ type Msg
     = CertificatesAdded (Array Certificate)
     | AddCertificate String
     | GetCertificate String
+    | ChangeFocus String
     | ShowTrust Int Int
     | NoOp
