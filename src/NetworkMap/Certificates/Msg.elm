@@ -1,4 +1,4 @@
-module AddFile.Msg exposing (Msg(..))
+module NetworkMap.Certificates.Msg exposing (Msg(..))
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,9 +16,13 @@ limitations under the License.
 
 -}
 
+import Array exposing (Array)
+import NetworkMap.Certificates.Model exposing (Certificate)
+
 
 type Msg
-    = SetVisible Bool
-    | ChangeIpfsHash String
-    | DownloadIpfs
-    | FileRequested
+    = CertificatesAdded (Array Certificate)
+    | AddCertificate String
+    | GetCertificate String
+    | ShowTrust Int Int
+    | NoOp

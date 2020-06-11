@@ -20,15 +20,99 @@ import Fluence from "fluence";
 import {
     addRelay, getConnection,
     getCurrentPeerId,
-    peerErrorEvent,
-    peerEvent,
-    relayEvent,
     setConnection,
     setCurrentPeerId,
     to_multiaddr
 } from "./ports";
+import {TrustGraph} from "fluence/dist/trust/trust_graph";
+import {nodeRootCert} from "fluence/dist/trust/misc";
+import {issue} from "fluence/dist/trust/certificate";
+import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
 
 let Address4 = require('ip-address').Address4;
+
+let rootCert;
+let trustGraph;
+let app;
+
+function getRootCert() {
+    return rootCert;
+}
+
+function setRootCert(newCert) {
+    rootCert = newCert
+}
+
+function sendCerts(id, certs) {
+    let decoded = certs.map((cert) => {
+        cert.chain = cert.chain.map((t) => {
+            let copied = {...t}
+            copied.issuedFor = t.issuedFor.toB58String();
+            return copied;
+        })
+
+        return cert;
+    })
+
+    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, id: id, peerAppeared: null});
+}
+
+export function initAdmin(adminApp) {
+    app = adminApp;
+
+    app.ports.certificatesRequest.subscribe(async ({command, id}) => {
+        let cert;
+        if (!getConnection()) console.error("Cannot handle networkMapRequest when not connected");
+        else
+            switch (command) {
+                case "issue":
+                    cert = await addCertificate(id);
+                    sendCerts(id, [cert])
+                    break;
+                case "get_cert":
+                    let certs = await getCertificates(id);
+                    sendCerts(id, certs)
+                    break;
+                default:
+                    console.error("Received unknown fileRequest from the Elm app", command);
+
+            }
+    });
+}
+
+window.getCertificates = getCertificates;
+window.addCertificate = addCertificate;
+
+export async function getCertificates(peerId) {
+    let conn = getConnection();
+
+    if (!trustGraph) {
+        trustGraph = new TrustGraph(conn);
+    }
+
+    return await trustGraph.getCertificates(peerId);
+}
+
+export async function addCertificate(peerId) {
+    let conn = getConnection();
+
+    if (!trustGraph) {
+        trustGraph = new TrustGraph(conn);
+    }
+
+    if (!rootCert) {
+        setRootCert(await nodeRootCert(conn.selfPeerInfo.id));
+        await trustGraph.publishCertificates(peerId, [rootCert]);
+    }
+
+    let issuedAt = new Date();
+    let expiresAt = new Date();
+    expiresAt.setMonth(expiresAt.getMonth() + 1);
+
+    let issuedCert = await issue(conn.selfPeerInfo.id, PeerId.createFromB58String(peerId), getRootCert(), expiresAt.getTime(), issuedAt.getTime());
+    await trustGraph.publishCertificates(peerId, [getRootCert()]);
+    return issuedCert;
+}
 
 export async function establishConnection(app, target) {
     let errorMsg = "";
@@ -62,7 +146,7 @@ export async function establishConnection(app, target) {
             }
 
             if (errorMsg) {
-                peerErrorEvent(app, errorMsg);
+                peerErrorEvent(errorMsg);
                 return;
             }
 
@@ -77,7 +161,7 @@ export async function establishConnection(app, target) {
                 console.log("PRIVATE KEY GENERATED: " + privateKey)
             }
 
-            relayEvent(app, "relay_connecting");
+            relayEvent("relay_connecting");
             let host = null;
             let dns = null;
             if (isIp) {
@@ -98,16 +182,16 @@ export async function establishConnection(app, target) {
                 con.connect(to_multiaddr(relay), relay.peer.id);
             } else {
                 setCurrentPeerId(peerId);
-                peerEvent(app, "set_peer", {id: peerId.toB58String(), privateKey: privateKey});
+                peerEvent("set_peer", {id: peerId.toB58String(), privateKey: privateKey});
 
                 let conn = await Fluence.connect(to_multiaddr(relay), peerId);
                 setConnection(app, conn);
             }
 
-            relayEvent(app,"relay_connected", relay);
+            relayEvent("relay_connected", relay);
         }
     } catch (e) {
-        console.log(e);
-        peerErrorEvent(app,errorMsg + e.message);
+        console.error(e);
+        peerErrorEvent(errorMsg + e.message);
     }
 }

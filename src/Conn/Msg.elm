@@ -1,6 +1,8 @@
 module Conn.Msg exposing (..)
 
 import Conn.Relay exposing (Peer, Relay)
+
+
 type Msg
     = SetRelay Relay
     | UpdatePeerInput String

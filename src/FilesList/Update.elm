@@ -1,19 +1,19 @@
 module FilesList.Update exposing (update)
 
-{-|
-  Copyright 2020 Fluence Labs Limited
+{-| Copyright 2020 Fluence Labs Limited
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 -}
 
 import FilesList.Model exposing (FileEntry, Model, Status(..))
@@ -38,6 +38,7 @@ updateEntry model hash upd =
     in
     { model | files = files }
 
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -50,6 +51,7 @@ update msg model =
 
         Copy hash ->
             ( model, FilesList.Port.fileRequest { command = "copy", hash = Just hash } )
+
         Copied hash ->
             let
                 replaceCopyMessageTask =
@@ -63,6 +65,7 @@ update msg model =
                         )
             in
             ( updatedModel, replaceCopyMessageTask )
+
         ReplaceCopyMessage hash ->
             let
                 updatedModel =
@@ -73,6 +76,7 @@ update msg model =
                         )
             in
             ( updatedModel, Cmd.none )
+
         DownloadFile hash ->
             ( model, FilesList.Port.fileRequest { command = "download", hash = Just hash } )
 
@@ -152,7 +156,8 @@ update msg model =
 
                                         _ ->
                                             Seeding 1
-                            in { e | status = st }
+                            in
+                            { e | status = st }
                         )
             in
             ( updatedModel, Cmd.none )

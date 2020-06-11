@@ -1,4 +1,4 @@
-module AddFile.Msg exposing (Msg(..))
+port module NetworkMap.Certificates.Port exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -17,8 +17,8 @@ limitations under the License.
 -}
 
 
-type Msg
-    = SetVisible Bool
-    | ChangeIpfsHash String
-    | DownloadIpfs
-    | FileRequested
+type alias Command =
+    { command : String, id : Maybe String }
+
+
+port certificatesRequest : Command -> Cmd msg

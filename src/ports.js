@@ -4,9 +4,19 @@ import bs58 from 'bs58';
 
 import Fluence from 'fluence';
 import {genUUID} from "fluence/dist/function_call";
-import {establishConnection} from "./admin"
+import {establishConnection, initAdmin} from "./admin"
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
+import {
+    fileAdvertised,
+    fileAsked,
+    fileDownloading,
+    fileLoaded,
+    fileLog, fileRequested,
+    fileUploaded,
+    fileUploading, resetEntries
+} from "./fileReceiver";
+import {peerEvent, relayEvent} from "./connectionReceiver";
 
 let relays = [
     {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", privateKey: null}, dns: "relay01.fluence.dev", pport: 19001},
@@ -27,13 +37,22 @@ export function getRelays() {
 let currentPeerId;
 let conn;
 let knownFiles = {};
+let app;
 
 export function addRelay(app, relay) {
     // TODO: if the same peerId with different ip addresses?
     if (!relays.find(r => r.peer.id === relay.peer.id)) {
-        relayEvent(app, "relay_discovered", relay)
+        relayEvent("relay_discovered", relay)
         relays.push(relay)
     }
+}
+
+export function getApp() {
+    return app
+}
+
+export function setApp(newApp) {
+    app = newApp
 }
 
 export function getCurrentPeerId() {
@@ -46,9 +65,11 @@ export function setCurrentPeerId(peerId) {
 
 export function setConnection(app, connection) {
     // if we create new connection - reset all old file entries
-    resetEntries(app);
+    resetEntries();
     knownFiles = {};
     conn = connection;
+
+    subsribeToAppear(app, conn, getCurrentPeerId())
 }
 
 export function getConnection() {
@@ -68,7 +89,7 @@ export function to_multiaddr(relay) {
     return `${host}/tcp/${relay.pport}/${protocol}/p2p/${relay.peer.id}`;
 }
 
-function subsribeToApper(app, conn, peerIdStr) {
+function subsribeToAppear(app, conn, peerIdStr) {
     // subscribe for all outgoing calls to watch for all Fluence network members
     conn.subscribe((args, target, replyTo) => {
         let date = new Date().toISOString();
@@ -82,80 +103,10 @@ function subsribeToApper(app, conn, peerIdStr) {
     });
 }
 
-// event with an error message
-export function peerErrorEvent(app, errorMsg) {
-    app.ports.connReceiver.send({event: "error", relay: null, peer: null, errorMsg});
-}
-
-// new peer is generated
-export function peerEvent(app, name, peer) {
-    let peerToSend = {privateKey: null, ...peer};
-    app.ports.connReceiver.send({event: name, relay: null, errorMsg: null, peer: peerToSend});
-}
-
-export function convertRelayForELM(relay) {
-    let host;
-    if (relay.host) {
-        host = relay.host;
-    } else {
-        host = relay.dns;
-    }
-    return {host: host, peer: relay.peer, pport: relay.pport};
-}
-
-// new relay connection established
-export function relayEvent(app, name, relay) {
-    let relayToSend = null;
-    if (relay) {
-        relayToSend = convertRelayForELM(relay)
-    }
-    let ev = {event: name, peer: null, errorMsg: null, relay: relayToSend};
-    app.ports.connReceiver.send(ev);
-}
-
 // call if we found out about any peers or relays in Fluence network
 export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    app.ports.networkMapReceiver.send({event: "peer_appeared", peerAppeared});
-}
-
-/**
- * Handle file commands, sending events
- */
-let emptyFileEvent = {hash: null, log: null, preview: null};
-export function sendToFileReceiver(app, ev) {
-    app.ports.fileReceiver.send({...emptyFileEvent, ...ev});
-}
-
-export function fileAdvertised(app, hash, preview) {
-    sendToFileReceiver(app,{event: "advertised", hash, preview});
-}
-export function fileUploading(app, hash) {
-    sendToFileReceiver(app, {event: "uploading", hash});
-}
-export function fileUploaded(app, hash) {
-    sendToFileReceiver(app, {event: "uploaded", hash});
-}
-export function fileDownloading(app, hash) {
-    sendToFileReceiver(app, {event: "downloading", hash});
-}
-export function fileAsked(app, hash) {
-    sendToFileReceiver(app, {event: "asked", hash});
-}
-export function fileRequested(app, hash) {
-    sendToFileReceiver(app, {event: "requested", hash});
-}
-export function fileLoaded(app, hash, preview) {
-    sendToFileReceiver(app, {event: "loaded", hash, preview});
-}
-export function hashCopied(app, hash) {
-    sendToFileReceiver(app, {event: "copied", hash});
-}
-export function fileLog(app, hash, log) {
-    sendToFileReceiver(app,{event: "log", hash, log});
-}
-export function resetEntries(app) {
-    sendToFileReceiver(app,{event: "reset_entries"});
+    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, id: null, peerAppeared});
 }
 
 function validateHash(hash) {
@@ -172,6 +123,10 @@ function validateHash(hash) {
 }
 
 export default async function ports(app) {
+
+    setApp(app)
+    await initAdmin(app);
+
     // add all relays from list as appeared
     let date = new Date().toISOString();
     for (const relay of relays) {
@@ -190,25 +145,24 @@ export default async function ports(app) {
                         break;
                     }
 
-                    relayEvent(app, "relay_connecting");
+                    relayEvent("relay_connecting");
                     // if the connection already established, connect to another node and save previous services and subscriptions
                     if (conn) {
                         conn.connect(to_multiaddr(relay));
                     } else {
-                        conn = await Fluence.connect(to_multiaddr(relay), getCurrentPeerId());
+                        setConnection(app, await Fluence.connect(to_multiaddr(relay), getCurrentPeerId()));
                     }
 
-                    relayEvent(app, "relay_connected", relay);
+                    relayEvent("relay_connected", relay);
                 }
 
                 break;
 
             case "generate_peer":
-                console.log("generate peer")
                 let peerId = await Fluence.generatePeerId();
                 currentPeerId = peerId;
                 let peerIdStr = peerId.toB58String();
-                peerEvent(app, "set_peer", {id: peerIdStr});
+                peerEvent( "set_peer", {id: peerIdStr});
                 break;
 
             case "connect_to":
@@ -243,7 +197,7 @@ export default async function ports(app) {
 
             if (!knownFiles[hash]) {
 
-                fileRequested(app, hash);
+                fileRequested(hash);
 
                 let previewStr = getPreview(array);
 
@@ -251,10 +205,10 @@ export default async function ports(app) {
 
                 let serviceName = "IPFS.get_" + hash;
 
-                fileLog(app, hash, "Going to advertise");
-                fileLoaded(app, hash, previewStr);
+                fileLog(hash, "Going to advertise");
+                fileLoaded(hash, previewStr);
                 await conn.registerService(serviceName, async fc => {
-                    fileLog(app, hash, "File asked");
+                    fileLog(hash, "File asked");
 
                     let replyWithMultiaddr = async (multiaddr) =>
                         await conn.sendCall(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
@@ -270,26 +224,24 @@ export default async function ports(app) {
                         let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
                         let multiaddr = multiaddrResult.multiaddr;
                         // upload a file
-                        console.log("going to upload");
-                        fileUploading(app, hash);
+                        fileUploading(hash);
                         await ipfsAdd(multiaddr, knownFiles[hash].bytes);
-                        fileUploaded(app, hash);
-                        fileLog(app, hash, "File uploaded to " + multiaddr);
+                        fileUploaded(hash);
+                        fileLog(hash, "File uploaded to " + multiaddr);
                         knownFiles[hash].multiaddr = multiaddr;
                         // send back multiaddr
                         await replyWithMultiaddr(multiaddr);
                     }
 
-                    fileAsked(app, hash);
+                    fileAsked(hash);
 
                 });
-                fileLog(app, hash, "File advertised on Fluence network");
+                fileLog(hash, "File advertised on Fluence network");
 
-                fileAdvertised(app, hash, previewStr);
+                fileAdvertised(hash, previewStr);
 
             } else {
-                console.log("This file is already advertised.");
-                fileLog(app, hash, "Trying to advertise this file, but the file is already advertised.");
+                fileLog(hash, "Trying to advertise this file, but the file is already advertised.");
             }
         };
 
@@ -313,7 +265,7 @@ export default async function ports(app) {
                     el.select();
                     document.execCommand('copy');
                     document.body.removeChild(el);
-                    hashCopied(app, hash);
+                    hashCopied(hash);
                     break;
                 default:
                     console.error("Received unknown fileRequest from the Elm app", command);
@@ -326,32 +278,32 @@ export default async function ports(app) {
 
         if (!validateHash(hash)) {
             console.error(`Hash '${hash}' is not valid.`);
-            fileLog(app, hash, `Hash is not valid.`);
+            fileLog(hash, `Hash is not valid.`);
             return;
         }
 
-        fileRequested(app, hash);
+        fileRequested(hash);
 
         let file = knownFiles[hash];
         if (!!file && file.bytes && file.bytes.length > 0) {
-            fileLog(app, hash, "This file is already known");
+            fileLog(hash, "This file is already known");
         } else {
             let msgId = genUUID();
             let serviceName = "IPFS.get_" + hash;
 
-            fileLog(app, hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
+            fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
             let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
             let multiaddr = multiaddrResult.multiaddr;
 
-            fileLog(app, hash, "Got multiaddr: " + multiaddr + ", going to download the file");
+            fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
 
-            fileDownloading(app, hash);
+            fileDownloading(hash);
             let data = await ipfsGet(multiaddr, hash);
-            fileLog(app, hash, "File downloaded from " + multiaddr);
+            fileLog(hash, "File downloaded from " + multiaddr);
 
             let preview = getPreview(data);
 
-            fileLoaded(app, hash, preview);
+            fileLoaded(hash, preview);
             knownFiles[hash] = {
                 bytes: data,
                 multiaddr,

@@ -1,4 +1,4 @@
-module AddFile.Msg exposing (Msg(..))
+module NetworkMap.Certificates.Model exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,9 +16,30 @@ limitations under the License.
 
 -}
 
+import Array exposing (Array)
 
-type Msg
-    = SetVisible Bool
-    | ChangeIpfsHash String
-    | DownloadIpfs
-    | FileRequested
+
+type alias ShowCertState =
+    { certIdx : Int
+    , trustIdx : Int
+    }
+
+
+type alias Trust =
+    { issuedFor : String
+    , expiresAt : Int
+    , signature : String
+    , issuedAt : Int
+    }
+
+
+type alias Certificate =
+    { chain : Array Trust
+    }
+
+
+type alias Model =
+    { id : String
+    , certificates : Array Certificate
+    , showCertState : Maybe ShowCertState
+    }

@@ -1,19 +1,19 @@
 module Palette exposing (..)
 
-{-|
-  Copyright 2020 Fluence Labs Limited
+{-| Copyright 2020 Fluence Labs Limited
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 -}
 
 import Element exposing (Element, el)
@@ -54,6 +54,7 @@ link url label =
         linkStyle
         { url = url, label = Element.text label }
 
+
 newTabLink : String -> String -> Element msg
 newTabLink url label =
     Element.newTabLink
@@ -87,21 +88,37 @@ limitLayoutWidth =
 
 
 layoutBlock screen =
-    [ Element.centerX, limitLayoutWidth, Element.paddingXY (S.baseRem (if (isNarrow screen) then 2 else 4)) (S.baseRem 1) ]
+    [ Element.centerX
+    , limitLayoutWidth
+    , Element.paddingXY
+        (S.baseRem
+            (if isNarrow screen then
+                2
+
+             else
+                4
+            )
+        )
+        (S.baseRem 1)
+    ]
 
 
 pSpacing =
     Element.spacing <| S.baseRem 0.5
 
 
+shortHashRaw size hash =
+    String.concat
+        [ String.left size hash
+        , "..."
+        , String.right (size - 1) hash
+        ]
+
+
 shortHashEl size hash =
     let
         sh =
-            String.concat
-                [ String.left size hash
-                , "..."
-                , String.right (size - 1) hash
-                ]
+            shortHashRaw size hash
     in
     Element.el
         [ B.nearBlack
@@ -110,11 +127,14 @@ shortHashEl size hash =
     <|
         Element.text sh
 
+
 shortHash hash =
     shortHashEl 6 hash
 
+
 mediumHash hash =
     shortHashEl 12 hash
+
 
 showHash hash =
     Element.el
@@ -122,7 +142,7 @@ showHash hash =
         , F.code
         ]
     <|
-        Element.text (hash)
+        Element.text hash
 
 
 layout : List (Element msg) -> Html msg
