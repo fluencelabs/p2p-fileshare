@@ -1,19 +1,19 @@
 module FilesList.View exposing (view)
 
-{-|
-  Copyright 2020 Fluence Labs Limited
+{-| Copyright 2020 Fluence Labs Limited
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
       http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 -}
 
 import Element exposing (Element, alignLeft, alignRight, centerX, centerY, column, el, fillPortion, height, padding, paddingXY, paragraph, px, row, spacing, text, width)
@@ -34,24 +34,45 @@ import Screen.Model as Screen exposing (isMedium, isNarrow)
 view : Screen.Model -> Model -> Element Msg
 view screen { files } =
     let
-        isMediumSize = isMedium screen
-        table = if List.isEmpty files then
-                    [ el [ limitLayoutWidth, padding (if isMediumSize then 30 else 60), F.size6, Font.italic, Font.center, centerX, B.black, B.width1 B.Bottom ]
-                        <| text "Please add a file to be shown" ]
-                else if (isMediumSize) then
-                    (files |> List.map (showFileLazy screen))
-                else
-                    [ row [ limitLayoutWidth, spacing 15, F.gray, Font.bold ]
-                        [ el [ alignLeft, width <| fillPortion 1 ] <| text "PREVIEW"
-                        , el [ centerX, width <| fillPortion 7 ] <| text "FILE"
-                        , el [ centerX, width <| fillPortion 1 ] <| text "STATUS"
-                        , el [ alignRight, width <| fillPortion 1 ] <| text "LOGS"
-                        ]
-                    ] ++ (files |> List.map (showFileLazy screen))
+        isMediumSize =
+            isMedium screen
+
+        table =
+            if List.isEmpty files then
+                [ el
+                    [ limitLayoutWidth
+                    , padding
+                        (if isMediumSize then
+                            30
+
+                         else
+                            60
+                        )
+                    , F.size6
+                    , Font.italic
+                    , Font.center
+                    , centerX
+                    , B.black
+                    , B.width1 B.Bottom
+                    ]
+                  <|
+                    text "Please add a file to be shown"
+                ]
+
+            else if isMediumSize then
+                files |> List.map (showFileLazy screen)
+
+            else
+                [ row [ limitLayoutWidth, spacing 15, F.gray, Font.bold ]
+                    [ el [ alignLeft, width <| fillPortion 1 ] <| text "PREVIEW"
+                    , el [ centerX, width <| fillPortion 7 ] <| text "FILE"
+                    , el [ centerX, width <| fillPortion 1 ] <| text "STATUS"
+                    , el [ alignRight, width <| fillPortion 1 ] <| text "LOGS"
+                    ]
+                ]
+                    ++ (files |> List.map (showFileLazy screen))
     in
-        column (layoutBlock screen ++ [ blockBackground ]) <| table
-
-
+    column (layoutBlock screen ++ [ blockBackground ]) <| table
 
 
 showFilePreview : Int -> Maybe String -> Element Msg
@@ -70,12 +91,18 @@ showFilePreview size maybePreview =
             el [ centerY, centerX ] <| text "n/a"
 
 
-showPreview : Bool ->FileEntry -> Element Msg
+showPreview : Bool -> FileEntry -> Element Msg
 showPreview isPhone { preview, hash } =
     let
-        size = if (isPhone) then 30 else 66
-        p = showFilePreview (size - 2) preview
+        size =
+            if isPhone then
+                30
 
+            else
+                66
+
+        p =
+            showFilePreview (size - 2) preview
     in
     el
         [ Element.Events.onClick <| DownloadFile hash
@@ -108,8 +135,10 @@ showStatus s =
 
             Loaded ->
                 text "Loaded"
+
             Uploading ->
                 text "Uploading..."
+
             Downloading ->
                 text "Downloading..."
 
@@ -122,44 +151,61 @@ showFileLazy screen =
 showFile : Screen.Model -> FileEntry -> Element Msg
 showFile screen fileEntry =
     let
-        isMediumSize = isMedium screen
-        isNarrowSize = isNarrow screen
+        isMediumSize =
+            isMedium screen
+
+        isNarrowSize =
+            isNarrow screen
+
         hashView =
-            el [ alignLeft ] <| (if (isNarrowSize) then shortHash else showHash) fileEntry.hash
+            el [ alignLeft ] <|
+                (if isNarrowSize then
+                    shortHash
+
+                 else
+                    showHash
+                )
+                    fileEntry.hash
 
         shareButton =
             Input.button
-                ([ Element.padding 5
+                [ Element.padding 5
                 , width <| Element.px 64
                 , Font.center
                 , alignLeft
                 , B.width1 B.AllSides
                 , dotted
                 , B.gray
-                ])
+                ]
             <|
                 { onPress = Just <| Copy fileEntry.hash
-                , label = text (if fileEntry.hashCopied then "Copied!" else "Share")
+                , label =
+                    text
+                        (if fileEntry.hashCopied then
+                            "Copied!"
+
+                         else
+                            "Share"
+                        )
                 }
 
         seeLogsText =
             if fileEntry.logsVisible then
                 "Hide Logs"
+
             else
                 "Show Logs"
 
         seeLogs =
             Input.button
-                ([ width <| Element.px 80 ]
-                )
+                [ width <| Element.px 80 ]
             <|
                 { onPress = Just <| SetLogsVisible fileEntry.hash (not fileEntry.logsVisible)
-
-                , label = Element.el
-                      [
-                        Font.underline
-                      ]
-                      (Element.text seeLogsText)
+                , label =
+                    Element.el
+                        [ Font.underline
+                        ]
+                        (Element.text seeLogsText)
                 }
 
         logs =
@@ -180,28 +226,29 @@ showFile screen fileEntry =
             else
                 Element.none
     in
-        if (isMediumSize) then
-            column [ fillWidth, paddingXY 0 10, B.width005 B.Bottom, B.lightSilver ]
-                [ row [ limitLayoutWidth, centerX, paddingXY 0 10, spacing 10 ]
-                    [ Element.el [ width <| fillPortion 1] <| showPreview isNarrowSize fileEntry
-                    , Element.el [ width <| fillPortion 6, fillWidth] <| hashView
-                    , Element.el [ width <| fillPortion 1] <| shareButton
-                    ],
-                row [ limitLayoutWidth, centerX, paddingXY 0 10, spacing 10 ]
-                    [ Element.el [ width <| fillPortion 1] <| showStatus fileEntry.status
-                    , Element.el [ width <| fillPortion 6, fillWidth] Element.none
-                    , Element.el [ width <| fillPortion 1] <| seeLogs
-                    ]
-                , logs
+    if isMediumSize then
+        column [ fillWidth, paddingXY 0 10, B.width005 B.Bottom, B.lightSilver ]
+            [ row [ limitLayoutWidth, centerX, paddingXY 0 10, spacing 10 ]
+                [ Element.el [ width <| fillPortion 1 ] <| showPreview isNarrowSize fileEntry
+                , Element.el [ width <| fillPortion 6, fillWidth ] <| hashView
+                , Element.el [ width <| fillPortion 1 ] <| shareButton
                 ]
-        else
-            column [ fillWidth, paddingXY 0 10, B.width005 B.Bottom, B.lightSilver ]
-                [ row [ limitLayoutWidth, centerX, spacing 15 ]
-                    [ Element.el [ width <| fillPortion 1] <| showPreview False fileEntry
-                    , Element.el [ width <| fillPortion 6] <| hashView
-                    , Element.el [ width <| fillPortion 1] <| shareButton
-                    , Element.el [ width <| fillPortion 1] <| showStatus fileEntry.status
-                    , Element.el [ width <| fillPortion 1] <| seeLogs
-                    ]
-                , logs
+            , row [ limitLayoutWidth, centerX, paddingXY 0 10, spacing 10 ]
+                [ Element.el [ width <| fillPortion 1 ] <| showStatus fileEntry.status
+                , Element.el [ width <| fillPortion 6, fillWidth ] Element.none
+                , Element.el [ width <| fillPortion 1 ] <| seeLogs
                 ]
+            , logs
+            ]
+
+    else
+        column [ fillWidth, paddingXY 0 10, B.width005 B.Bottom, B.lightSilver ]
+            [ row [ limitLayoutWidth, centerX, spacing 15 ]
+                [ Element.el [ width <| fillPortion 1 ] <| showPreview False fileEntry
+                , Element.el [ width <| fillPortion 6 ] <| hashView
+                , Element.el [ width <| fillPortion 1 ] <| shareButton
+                , Element.el [ width <| fillPortion 1 ] <| showStatus fileEntry.status
+                , Element.el [ width <| fillPortion 1 ] <| seeLogs
+                ]
+            , logs
+            ]

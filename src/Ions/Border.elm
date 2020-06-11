@@ -1,7 +1,7 @@
 module Ions.Border exposing (..)
 
 import Element
-import Element.Border exposing (color, roundEach, rounded, widthEach, widthXY, dotted)
+import Element.Border exposing (color, dotted, roundEach, rounded, widthEach, widthXY)
 import Ions.Color as TC
 import Ions.Size as S
 
@@ -91,11 +91,14 @@ radius w c =
         AllCorners ->
             rounded w
 
+
 width0 =
     width 0
 
+
 width005 =
     width <| S.baseRem 0.05
+
 
 width1 =
     width <| S.baseRem 0.125
