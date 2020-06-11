@@ -55,22 +55,24 @@ view : Screen.Model -> Model -> Element Msg
 view screen networkModel =
     if networkModel.show then
         let
-            sortedEntries = List.sortBy .date (Dict.values networkModel.network)
+            sortedEntries =
+                List.sortBy .date (Dict.values networkModel.network)
 
---            This is to put opened nodeEntry on top of the list
-{-                List.sortWith
-                    (\n1 ->
-                        \n2 ->
-                            if n1.actionsOpened && not n2.actionsOpened then
-                                GT
+            --            This is to put opened nodeEntry on top of the list
+            {- List.sortWith
+               (\n1 ->
+                   \n2 ->
+                       if n1.actionsOpened && not n2.actionsOpened then
+                           GT
 
-                            else if n2.actionsOpened && not n1.actionsOpened then
-                                LT
+                       else if n2.actionsOpened && not n1.actionsOpened then
+                           LT
 
-                            else
-                                compare n1.date n2.date
-                    )
-                    (Dict.values networkModel.network)-}
+                       else
+                           compare n1.date n2.date
+               )
+               (Dict.values networkModel.network)
+            -}
         in
         column (layoutBlock screen ++ [ blockBackground ]) <|
             [ row [ fillWidth, F.white, F.size2, Background.gray, padding 10 ]
