@@ -89,11 +89,15 @@ update msg model =
             ( model, Cmd.none )
 
 
+
+-- change 'actionsOpened' to true, only if 'currentId' equals 'idToOpen'
+
+
 openOnlyOne : String -> String -> NodeEntry -> NodeEntry
-openOnlyOne id currentId nodeEntry =
+openOnlyOne idToOpen currentId nodeEntry =
     let
         opened =
-            if currentId == id then
+            if currentId == idToOpen then
                 True
 
             else
