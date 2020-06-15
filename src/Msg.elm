@@ -16,9 +16,8 @@ limitations under the License.
 
 -}
 
-import AddFile.Msg
 import Conn.Msg
-import FilesList.Msg
+import FileSharing.Msg
 import NetworkMap.Msg
 import Screen.Msg
 
@@ -26,7 +25,6 @@ import Screen.Msg
 type Msg
     = NoOp
     | ConnMsg Conn.Msg.Msg
-    | AddFileMsg AddFile.Msg.Msg
-    | FilesListMsg FilesList.Msg.Msg
+    | FileSharingMsg FileSharing.Msg.Msg
     | NetworkMapMsg NetworkMap.Msg.Msg
     | ScreenMsg Screen.Msg.Msg

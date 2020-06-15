@@ -56,7 +56,7 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header model.screen, [ connectivity model, addFile model, filesList model, networkMap model ] ]
+    layout <| List.concat [ header model.screen, [ connectivity model, fileSharing model, networkMap model ] ]
 
 
 liftView :
@@ -113,16 +113,10 @@ connectivity model =
     liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
 
 
-addFile : Model -> Element Msg
-addFile model =
-    liftView .addFile AddFileMsg (AddFile.View.view model.screen) <| model
-
-
-filesList : Model -> Element Msg
-filesList model =
-    liftView .filesList FilesListMsg (FilesList.View.view model.screen) <| model
-
-
 networkMap : Model -> Element Msg
 networkMap model =
     liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screen) <| model
+
+fileSharing : Model -> Element Msg
+fileSharing model =
+    liftView .fileSharing FileSharingMsg (FileSharing.View.view model.screen) <| model

@@ -16,11 +16,10 @@ limitations under the License.
 
 -}
 
-import AddFile.Model exposing (emptyAddFile)
 import Config exposing (Config)
 import Conn.Model exposing (emptyConn)
 import Element
-import FilesList.Model exposing (emptyFilesList)
+import FileSharing.Model exposing (emptyFileSharing)
 import Msg exposing (Msg(..))
 import NetworkMap.Model exposing (emptyNetwork)
 import Screen.Model as Screen
@@ -28,8 +27,7 @@ import Screen.Model as Screen
 
 type alias Model =
     { connectivity : Conn.Model.Model
-    , addFile : AddFile.Model.Model
-    , filesList : FilesList.Model.Model
+    , fileSharing: FileSharing.Model.Model
     , networkMap : NetworkMap.Model.Model
     , screen : Screen.Model
     }
@@ -45,8 +43,7 @@ emptyModel config =
             Element.classifyDevice config.windowSize
     in
     ( { connectivity = emptyConnModel
-      , addFile = emptyAddFile
-      , filesList = emptyFilesList
+      , fileSharing = emptyFileSharing
       , networkMap = emptyNetwork config.isAdmin
       , screen = { device = device, screenSize = config.windowSize }
       }
