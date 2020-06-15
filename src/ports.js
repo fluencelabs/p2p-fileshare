@@ -276,6 +276,11 @@ export default async function ports(app) {
     // callback to add a file from Fluence network by hash
     app.ports.addFileByHash.subscribe(async (hash) => {
 
+        if (!getConnection()) {
+            console.error("Establish connection before adding files.")
+            return;
+        }
+
         if (!validateHash(hash)) {
             console.error(`Hash '${hash}' is not valid.`);
             fileLog(hash, `Hash is not valid.`);
