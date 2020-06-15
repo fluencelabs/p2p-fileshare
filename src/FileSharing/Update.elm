@@ -18,10 +18,10 @@ limitations under the License.
 
 import FileSharing.AddFile.Msg
 import FileSharing.AddFile.Update
-import FileSharing.Model exposing (Model)
-import FileSharing.Msg exposing (Msg(..))
 import FileSharing.FilesList.Msg
 import FileSharing.FilesList.Update
+import FileSharing.Model exposing (Model)
+import FileSharing.Msg exposing (Msg(..))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
