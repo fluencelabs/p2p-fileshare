@@ -1,4 +1,4 @@
-module FilesList.View exposing (view)
+module FileSharing.FilesList.View exposing (view)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -22,8 +22,8 @@ import Element.Events
 import Element.Font as Font
 import Element.Input as Input
 import Element.Lazy exposing (lazy)
-import FilesList.Model exposing (FileEntry, Model, Status(..))
-import FilesList.Msg exposing (Msg(..))
+import FileSharing.FilesList.Model exposing (FileEntry, Model, Status(..))
+import FileSharing.FilesList.Msg exposing (Msg(..))
 import Ions.Background as BG
 import Ions.Border as B
 import Ions.Font as F

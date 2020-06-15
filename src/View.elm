@@ -16,7 +16,6 @@ limitations under the License.
 
 -}
 
-import AddFile.View
 import Browser exposing (Document)
 import Conn.View
 import Element
@@ -33,7 +32,7 @@ import Element
         )
 import Element.Font as Font
 import Element.Lazy exposing (lazy)
-import FilesList.View
+import FileSharing.View
 import Html exposing (Html)
 import Ions.Font as F
 import Ions.Size as S
@@ -116,6 +115,7 @@ connectivity model =
 networkMap : Model -> Element Msg
 networkMap model =
     liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screen) <| model
+
 
 fileSharing : Model -> Element Msg
 fileSharing model =

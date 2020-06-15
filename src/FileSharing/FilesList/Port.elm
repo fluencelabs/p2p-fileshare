@@ -1,4 +1,4 @@
-port module FilesList.Port exposing (..)
+port module FileSharing.FilesList.Port exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,8 +16,8 @@ limitations under the License.
 
 -}
 
-import FilesList.Model exposing (Model, Status(..))
-import FilesList.Msg exposing (Msg(..))
+import FileSharing.FilesList.Model exposing (Model, Status(..))
+import FileSharing.FilesList.Msg exposing (Msg(..))
 import Maybe exposing (andThen)
 
 

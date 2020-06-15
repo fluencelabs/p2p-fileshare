@@ -1,9 +1,10 @@
 module FileSharing.Msg exposing (..)
 
-import AddFile.Msg
-import FilesList.Msg
+import FileSharing.AddFile.Msg
+import FileSharing.FilesList.Msg
+
 
 type Msg
     = NoOp
-    | AddFileMsg AddFile.Msg.Msg
-    | FilesListMsg FilesList.Msg.Msg
+    | AddFileMsg FileSharing.AddFile.Msg.Msg
+    | FilesListMsg FileSharing.FilesList.Msg.Msg

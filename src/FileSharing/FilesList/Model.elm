@@ -1,4 +1,4 @@
-module FilesList.Model exposing (FileEntry, Model, Status(..), emptyFilesList)
+module FileSharing.FilesList.Model exposing (FileEntry, Model, Status(..), emptyFilesList)
 
 {-| Copyright 2020 Fluence Labs Limited
 

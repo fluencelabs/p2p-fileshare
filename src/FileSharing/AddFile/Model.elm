@@ -1,4 +1,4 @@
-module AddFile.Model exposing (..)
+module FileSharing.AddFile.Model exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 

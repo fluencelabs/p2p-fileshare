@@ -1,4 +1,4 @@
-port module AddFile.Port exposing (..)
+port module FileSharing.AddFile.Port exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 

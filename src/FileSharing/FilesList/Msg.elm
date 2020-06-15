@@ -1,4 +1,4 @@
-module FilesList.Msg exposing (Msg(..))
+module FileSharing.FilesList.Msg exposing (Msg(..))
 
 {-| Copyright 2020 Fluence Labs Limited
 

@@ -27,7 +27,7 @@ import Screen.Model as Screen
 
 type alias Model =
     { connectivity : Conn.Model.Model
-    , fileSharing: FileSharing.Model.Model
+    , fileSharing : FileSharing.Model.Model
     , networkMap : NetworkMap.Model.Model
     , screen : Screen.Model
     }

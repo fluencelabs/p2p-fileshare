@@ -1,4 +1,4 @@
-module AddFile.View exposing (view)
+module FileSharing.AddFile.View exposing (view)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,8 +16,8 @@ limitations under the License.
 
 -}
 
-import AddFile.Model exposing (Model)
-import AddFile.Msg exposing (Msg(..))
+import FileSharing.AddFile.Model exposing (Model)
+import FileSharing.AddFile.Msg exposing (Msg(..))
 import Element exposing (Element, centerX, column, el, fillPortion, padding, paddingXY, paragraph, pointer, row, spacing, text, width)
 import Element.Border exposing (dotted)
 import Element.Events exposing (onClick)

@@ -1,12 +1,14 @@
 module FileSharing.Model exposing (..)
 
-import AddFile.Model exposing (emptyAddFile)
-import FilesList.Model exposing (emptyFilesList)
+import FileSharing.AddFile.Model exposing (emptyAddFile)
+import FileSharing.FilesList.Model exposing (emptyFilesList)
+
 
 type alias Model =
-    { addFile : AddFile.Model.Model
-    , filesList : FilesList.Model.Model
+    { addFile : FileSharing.AddFile.Model.Model
+    , filesList : FileSharing.FilesList.Model.Model
     }
+
 
 emptyFileSharing : Model
 emptyFileSharing =

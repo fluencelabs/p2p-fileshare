@@ -1,4 +1,4 @@
-module AddFile.Update exposing (update)
+module FileSharing.AddFile.Update exposing (update)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,9 +16,9 @@ limitations under the License.
 
 -}
 
-import AddFile.Model exposing (Model)
-import AddFile.Msg exposing (Msg(..))
-import AddFile.Port
+import FileSharing.AddFile.Model exposing (Model)
+import FileSharing.AddFile.Msg exposing (Msg(..))
+import FileSharing.AddFile.Port
 import Platform.Cmd exposing (Cmd(..))
 
 
@@ -32,7 +32,7 @@ update msg model =
             ( { model | ipfsHash = hash }, Cmd.none )
 
         DownloadIpfs ->
-            ( { model | ipfsHash = "" }, AddFile.Port.addFileByHash model.ipfsHash )
+            ( { model | ipfsHash = "" }, FileSharing.AddFile.Port.addFileByHash model.ipfsHash )
 
         FileRequested ->
-            ( model, AddFile.Port.selectFile () )
+            ( model, FileSharing.AddFile.Port.selectFile () )

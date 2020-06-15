@@ -52,6 +52,7 @@ updateConn =
 updateFileSharing =
     liftUpdate .fileSharing (\c -> \m -> { m | fileSharing = c }) FileSharingMsg FileSharing.Update.update
 
+
 updateNetworkMap =
     liftUpdate .networkMap (\c -> \m -> { m | networkMap = c }) NetworkMapMsg NetworkMap.Update.update
 
