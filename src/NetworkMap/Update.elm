@@ -43,6 +43,7 @@ update msg model =
                     updatedPeer
                         |> withDefault
                             { peer = peer
+                            , idx = Dict.size model.network
                             , peerType = peerType
                             , date = date
                             , appearencesNumber = 0
@@ -111,17 +112,17 @@ openOnlyOne idToOpen currentId nodeEntry =
 
 
 updateFocus : Model -> String -> ( Model, Cmd Msg )
-updateFocus model idFor =
+updateFocus model id =
     let
         updated =
-            model.network |> Dict.map (openOnlyOne idFor)
+            model.network |> Dict.map (openOnlyOne id)
 
         cmd =
-            if Dict.member idFor model.network then
+            if Dict.member id model.network then
                 Cmd.none
 
             else
-                Time.now |> perform (\t -> PeerAppeared { id = idFor } Undefined (fromTime t) True)
+                Time.now |> perform (\t -> PeerAppeared { id = id } Undefined (fromTime t) True)
     in
     ( { model | network = updated }, cmd )
 

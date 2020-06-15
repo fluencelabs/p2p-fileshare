@@ -60,6 +60,14 @@ eventToMsg event =
                                 |> andThen (\peerType -> Just (PeerAppeared peerAppeared.peer peerType peerAppeared.updateDate False))
                         )
 
+            "append_cert" ->
+                event.certs
+                    |> andThen
+                        (\certs ->
+                            event.id
+                                --TODO: handle certificate events in 'Certificates' module
+                                |> andThen (\id -> Just (CertMsg id (CertificatesMsg.AppendCertificates <| Array.fromList certs)))
+                        )
             "add_cert" ->
                 event.certs
                     |> andThen

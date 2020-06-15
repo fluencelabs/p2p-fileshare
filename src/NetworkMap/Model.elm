@@ -31,7 +31,8 @@ type alias Peer =
 
 
 type alias NodeEntry =
-    { peer : Peer
+    { idx : Int
+    , peer : Peer
     , peerType : PeerType
     , date : String
     , appearencesNumber : Int
