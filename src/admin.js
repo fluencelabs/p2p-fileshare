@@ -43,7 +43,7 @@ function setRootCert(newCert) {
     rootCert = newCert
 }
 
-function sendCerts(id, certs) {
+function sendCerts(id, certs, append) {
     let decoded = certs.map((cert) => {
         cert.chain = cert.chain.map((t) => {
             let copied = {...t}
@@ -54,7 +54,14 @@ function sendCerts(id, certs) {
         return cert;
     })
 
-    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, id: id, peerAppeared: null});
+    let event;
+    if (append) {
+        event = "append_cert"
+    } else {
+        event = "add_cert"
+    }
+
+    app.ports.networkMapReceiver.send({event: event, certs: decoded, id: id, peerAppeared: null});
 }
 
 export function initAdmin(adminApp) {
@@ -67,11 +74,11 @@ export function initAdmin(adminApp) {
             switch (command) {
                 case "issue":
                     cert = await addCertificate(id);
-                    sendCerts(id, [cert])
+                    sendCerts(id, [cert], true)
                     break;
                 case "get_cert":
                     let certs = await getCertificates(id);
-                    sendCerts(id, certs)
+                    sendCerts(id, certs, false)
                     break;
                 default:
                     console.error("Received unknown fileRequest from the Elm app", command);
