@@ -110,7 +110,8 @@ demoView screen conn =
             el [ Element.width (Element.fillPortion 4), Font.alignLeft ] <|
                 Maybe.withDefault (Element.el [ F.lightRed ] <| Element.text (statusToString conn.status)) <|
                     Maybe.map
-                        (.peer >> .id
+                        (.peer
+                            >> .id
                             >> (if isNarrowSize then
                                     mediumHash
 

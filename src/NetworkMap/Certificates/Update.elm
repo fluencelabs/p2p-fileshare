@@ -25,8 +25,11 @@ import NetworkMap.Certificates.Port as Port
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        AppendCertificates certs ->
+                    ( { model | certificates = Array.append model.certificates certs }, Cmd.none )
+
         CertificatesAdded array ->
-            ( { model | certificates = Array.append model.certificates array }, Cmd.none )
+            ( { model | certificates = array }, Cmd.none )
 
         AddCertificate id ->
             ( model, Port.certificatesRequest { command = "issue", id = Just id } )
@@ -36,6 +39,10 @@ update msg model =
 
         ShowTrust certIdx trustIdx ->
             ( { model | showCertState = Just { certIdx = certIdx, trustIdx = trustIdx } }, Cmd.none )
+
+        ChangeFocus _ ->
+            -- this msg is for parent model only
+            ( model, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )

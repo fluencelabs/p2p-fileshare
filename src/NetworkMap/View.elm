@@ -56,7 +56,7 @@ view screen networkModel =
     if networkModel.show then
         let
             sortedEntries =
-                List.sortBy .date (Dict.values networkModel.network)
+                List.sortBy .idx (Dict.values networkModel.network)
         in
         column (layoutBlock screen ++ [ blockBackground ]) <|
             [ row [ fillWidth, F.white, F.size2, Background.gray, padding 10 ]
@@ -64,7 +64,7 @@ view screen networkModel =
                 ]
             ]
                 ++ addPeerView screen networkModel
-                ++ List.reverse (List.map (showNode screen) sortedEntries)
+                ++ List.map (showNode screen) sortedEntries
 
     else
         Element.none
@@ -90,9 +90,16 @@ showNode screen nodeEntry =
             Input.button
                 [ padding 10, Background.blackAlpha 60 ]
                 { onPress = Just <| OpenActions nodeEntry.peer.id, label = text "Actions" }
+
+        background =
+            if nodeEntry.actionsOpened then
+                Background.washedGreen
+
+            else
+                Background.white
     in
     column [ fillWidth, paddingXY 0 10, B.width1 B.Bottom, B.nearBlack ]
-        ([ row [ limitLayoutWidth, Background.white, centerX ]
+        ([ row [ limitLayoutWidth, background, centerX ]
             [ el
                 [ Font.center
                 , centerY

@@ -14,7 +14,7 @@ import {
     fileLoaded,
     fileLog, fileRequested,
     fileUploaded,
-    fileUploading, resetEntries
+    fileUploading, hashCopied, resetEntries
 } from "./fileReceiver";
 import {peerEvent, relayEvent} from "./connectionReceiver";
 
