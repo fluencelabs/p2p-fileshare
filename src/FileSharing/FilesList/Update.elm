@@ -1,4 +1,4 @@
-module FilesList.Update exposing (update)
+module FileSharing.FilesList.Update exposing (update)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,9 +16,9 @@ limitations under the License.
 
 -}
 
-import FilesList.Model exposing (FileEntry, Model, Status(..))
-import FilesList.Msg exposing (Msg(..))
-import FilesList.Port
+import FileSharing.FilesList.Model exposing (FileEntry, Model, Status(..))
+import FileSharing.FilesList.Msg exposing (Msg(..))
+import FileSharing.FilesList.Port
 import Process
 import Task
 
@@ -50,7 +50,7 @@ update msg model =
             ( updatedModel, Cmd.none )
 
         Copy hash ->
-            ( model, FilesList.Port.fileRequest { command = "copy", hash = Just hash } )
+            ( model, FileSharing.FilesList.Port.fileRequest { command = "copy", hash = Just hash } )
 
         Copied hash ->
             let
@@ -78,7 +78,7 @@ update msg model =
             ( updatedModel, Cmd.none )
 
         DownloadFile hash ->
-            ( model, FilesList.Port.fileRequest { command = "download", hash = Just hash } )
+            ( model, FileSharing.FilesList.Port.fileRequest { command = "download", hash = Just hash } )
 
         FileRequested hash ->
             if List.any (\f -> f.hash == hash) model.files then

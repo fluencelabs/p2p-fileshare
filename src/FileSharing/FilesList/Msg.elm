@@ -1,4 +1,4 @@
-module Msg exposing (Msg(..))
+module FileSharing.FilesList.Msg exposing (Msg(..))
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,15 +16,20 @@ limitations under the License.
 
 -}
 
-import Conn.Msg
-import FileSharing.Msg
-import NetworkMap.Msg
-import Screen.Msg
-
 
 type Msg
     = NoOp
-    | ConnMsg Conn.Msg.Msg
-    | FileSharingMsg FileSharing.Msg.Msg
-    | NetworkMapMsg NetworkMap.Msg.Msg
-    | ScreenMsg Screen.Msg.Msg
+    | FileUploading String
+    | FileUploaded String
+    | FileDownloading String
+    | FileAdvertised String (Maybe String)
+    | FileLog String String
+    | FileAsked String
+    | ResetEntries
+    | FileRequested String
+    | FileLoaded String (Maybe String)
+    | DownloadFile String
+    | Copy String
+    | Copied String
+    | ReplaceCopyMessage String
+    | SetLogsVisible String Bool

@@ -16,9 +16,8 @@ limitations under the License.
 
 -}
 
-import AddFile.Update
 import Conn.Update
-import FilesList.Update
+import FileSharing.Update
 import Model exposing (Model)
 import Msg exposing (..)
 import NetworkMap.Update
@@ -50,12 +49,8 @@ updateConn =
     liftUpdate .connectivity (\c -> \m -> { m | connectivity = c }) ConnMsg Conn.Update.update
 
 
-updateAddFile =
-    liftUpdate .addFile (\c -> \m -> { m | addFile = c }) AddFileMsg AddFile.Update.update
-
-
-updateFilesList =
-    liftUpdate .filesList (\c -> \m -> { m | filesList = c }) FilesListMsg FilesList.Update.update
+updateFileSharing =
+    liftUpdate .fileSharing (\c -> \m -> { m | fileSharing = c }) FileSharingMsg FileSharing.Update.update
 
 
 updateNetworkMap =
@@ -72,11 +67,8 @@ update msg model =
         ConnMsg m ->
             updateConn m model
 
-        AddFileMsg m ->
-            updateAddFile m model
-
-        FilesListMsg m ->
-            updateFilesList m model
+        FileSharingMsg m ->
+            updateFileSharing m model
 
         NetworkMapMsg m ->
             updateNetworkMap m model
@@ -84,5 +76,5 @@ update msg model =
         ScreenMsg m ->
             updateScreen m model
 
-        _ ->
+        NoOp ->
             ( model, Cmd.none )

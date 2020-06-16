@@ -17,7 +17,7 @@ limitations under the License.
 -}
 
 import Conn.Port
-import FilesList.Port
+import FileSharing.Port
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import NetworkMap.Port
@@ -28,7 +28,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
-        , FilesList.Port.subscriptions model.filesList |> Sub.map FilesListMsg
+        , FileSharing.Port.subscriptions model.fileSharing |> Sub.map FileSharingMsg
         , NetworkMap.Port.subscriptions model.networkMap |> Sub.map NetworkMapMsg
         , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
         ]

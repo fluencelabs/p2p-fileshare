@@ -1,4 +1,4 @@
-module Msg exposing (Msg(..))
+module FileSharing.AddFile.Msg exposing (Msg(..))
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,15 +16,9 @@ limitations under the License.
 
 -}
 
-import Conn.Msg
-import FileSharing.Msg
-import NetworkMap.Msg
-import Screen.Msg
-
 
 type Msg
-    = NoOp
-    | ConnMsg Conn.Msg.Msg
-    | FileSharingMsg FileSharing.Msg.Msg
-    | NetworkMapMsg NetworkMap.Msg.Msg
-    | ScreenMsg Screen.Msg.Msg
+    = SetVisible Bool
+    | ChangeIpfsHash String
+    | DownloadIpfs
+    | FileRequested

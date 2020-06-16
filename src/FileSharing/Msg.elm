@@ -1,4 +1,4 @@
-port module AddFile.Port exposing (..)
+module FileSharing.Msg exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,13 +16,11 @@ limitations under the License.
 
 -}
 
-import Array exposing (Array)
+import FileSharing.AddFile.Msg
+import FileSharing.FilesList.Msg
 
 
-port calcHash : Array Int -> Cmd msg
-
-
-port addFileByHash : String -> Cmd msg
-
-
-port selectFile : () -> Cmd msg
+type Msg
+    = NoOp
+    | AddFileMsg FileSharing.AddFile.Msg.Msg
+    | FilesListMsg FileSharing.FilesList.Msg.Msg

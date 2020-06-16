@@ -1,4 +1,4 @@
-module FilesList.Model exposing (FileEntry, Model, Status(..), emptyFilesList)
+port module FileSharing.AddFile.Port exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,33 +16,13 @@ limitations under the License.
 
 -}
 
-
-type Status
-    = Prepared
-    | Advertised
-    | Seeding Int
-    | Requested
-    | Loaded
-    | Uploading
-    | Downloading
+import Array exposing (Array)
 
 
-type alias FileEntry =
-    { preview : Maybe String
-    , hash : String
-    , status : Status
-    , hashCopied : Bool
-    , logs : List String
-    , logsVisible : Bool
-    }
+port calcHash : Array Int -> Cmd msg
 
 
-type alias Model =
-    { files : List FileEntry
-    }
+port addFileByHash : String -> Cmd msg
 
 
-emptyFilesList : Model
-emptyFilesList =
-    { files = []
-    }
+port selectFile : () -> Cmd msg

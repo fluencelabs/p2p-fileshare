@@ -1,4 +1,4 @@
-module AddFile.Msg exposing (Msg(..))
+module FileSharing.Model exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,9 +16,18 @@ limitations under the License.
 
 -}
 
+import FileSharing.AddFile.Model exposing (emptyAddFile)
+import FileSharing.FilesList.Model exposing (emptyFilesList)
 
-type Msg
-    = SetVisible Bool
-    | ChangeIpfsHash String
-    | DownloadIpfs
-    | FileRequested
+
+type alias Model =
+    { addFile : FileSharing.AddFile.Model.Model
+    , filesList : FileSharing.FilesList.Model.Model
+    }
+
+
+emptyFileSharing : Model
+emptyFileSharing =
+    { addFile = emptyAddFile
+    , filesList = emptyFilesList
+    }

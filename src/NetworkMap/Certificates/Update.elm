@@ -26,7 +26,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         AppendCertificates certs ->
-                    ( { model | certificates = Array.append model.certificates certs }, Cmd.none )
+            ( { model | certificates = Array.append model.certificates certs }, Cmd.none )
 
         CertificatesAdded array ->
             ( { model | certificates = array }, Cmd.none )

@@ -1,4 +1,4 @@
-module FilesList.Msg exposing (Msg(..))
+module FileSharing.Port exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,20 +16,13 @@ limitations under the License.
 
 -}
 
+import FileSharing.FilesList.Port
+import FileSharing.Model exposing (Model)
+import FileSharing.Msg as FileSharingMsg exposing (Msg(..))
 
-type Msg
-    = NoOp
-    | FileUploading String
-    | FileUploaded String
-    | FileDownloading String
-    | FileAdvertised String (Maybe String)
-    | FileLog String String
-    | FileAsked String
-    | ResetEntries
-    | FileRequested String
-    | FileLoaded String (Maybe String)
-    | DownloadFile String
-    | Copy String
-    | Copied String
-    | ReplaceCopyMessage String
-    | SetLogsVisible String Bool
+
+subscriptions : Model -> Sub FileSharingMsg.Msg
+subscriptions model =
+    Sub.batch
+        [ FileSharing.FilesList.Port.subscriptions model.filesList |> Sub.map FilesListMsg
+        ]

@@ -1,4 +1,4 @@
-module Msg exposing (Msg(..))
+module FileSharing.FilesList.Model exposing (FileEntry, Model, Status(..), emptyFilesList)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,15 +16,33 @@ limitations under the License.
 
 -}
 
-import Conn.Msg
-import FileSharing.Msg
-import NetworkMap.Msg
-import Screen.Msg
+
+type Status
+    = Prepared
+    | Advertised
+    | Seeding Int
+    | Requested
+    | Loaded
+    | Uploading
+    | Downloading
 
 
-type Msg
-    = NoOp
-    | ConnMsg Conn.Msg.Msg
-    | FileSharingMsg FileSharing.Msg.Msg
-    | NetworkMapMsg NetworkMap.Msg.Msg
-    | ScreenMsg Screen.Msg.Msg
+type alias FileEntry =
+    { preview : Maybe String
+    , hash : String
+    , status : Status
+    , hashCopied : Bool
+    , logs : List String
+    , logsVisible : Bool
+    }
+
+
+type alias Model =
+    { files : List FileEntry
+    }
+
+
+emptyFilesList : Model
+emptyFilesList =
+    { files = []
+    }
