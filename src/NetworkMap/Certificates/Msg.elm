@@ -22,7 +22,6 @@ import NetworkMap.Certificates.Model exposing (Certificate)
 
 type Msg
     = CertificatesAdded (Array Certificate)
-    | AppendCertificates (Array Certificate)
     | AddCertificate String
     | GetCertificate String
     | ChangeFocus String

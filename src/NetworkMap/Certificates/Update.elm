@@ -16,20 +16,74 @@ limitations under the License.
 
 -}
 
-import Array
-import NetworkMap.Certificates.Model exposing (Model)
+import Array exposing (Array)
+import Dict exposing (Dict)
+import List
+import List.FlatMap
+import List.Unique
+import NetworkMap.Certificates.Model exposing (Certificate, CertificateMask, Model, Trust)
 import NetworkMap.Certificates.Msg exposing (Msg(..))
 import NetworkMap.Certificates.Port as Port
+import Utils.ArrayExtras as ArrayExtras
 
+convertCert : Certificate -> List (String, String, Trust)
+convertCert cert =
+    let
+        chain = cert.chain
+        (_, pairs) = chain |> Array.foldl folder (Nothing, [])
+    in
+        pairs
+
+folder : Trust -> (Maybe String, List (String, String, Trust)) -> (Maybe String, List (String, String, Trust))
+folder t acc =
+    let
+        (previous, pairs) = acc
+        pr = previous |> Maybe.withDefault t.issuedFor
+    in
+        (Just t.issuedFor, pairs ++ [(pr, t.issuedFor, t)])
+
+updateTrust : Trust -> Maybe Trust -> Maybe Trust
+updateTrust trust previousTrust =
+    let
+        updated = previousTrust |> Maybe.map (\t -> if (t.issuedAt < trust.issuedAt) then trust else t)
+        actualTrust = Maybe.withDefault trust updated
+    in
+        Just actualTrust
+
+updateDict : (String, String, Trust) -> Dict (String, String) Trust -> Dict (String, String) Trust
+updateDict pairWithTrust dict =
+    let
+        (prev, cur, trust) = pairWithTrust
+        pair = (prev, cur)
+        updated = dict |> Dict.update pair (updateTrust trust)
+    in
+        updated
+
+updateTrusts : List (String, String, Trust) -> Dict (String, String) Trust -> Dict (String, String) Trust
+updateTrusts pairs storage =
+    let
+        updated = pairs |> List.foldl updateDict storage
+    in
+        updated
+
+certEquals : CertificateMask -> CertificateMask -> Bool
+certEquals l r =
+    l == r
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AppendCertificates certs ->
-            ( { model | certificates = Array.append model.certificates certs }, Cmd.none )
 
         CertificatesAdded array ->
-            ( { model | certificates = array }, Cmd.none )
+            let
+               pairs = array |> Array.map convertCert
+               certMasks = pairs |> Array.map (\ps -> { trustIds = Array.fromList (ps |> List.map ( \(l, r, _) -> (l, r))) } )
+               uniqueMasks = List.Unique.filterDuplicates (Array.toList certMasks) |> Array.fromList
+               allPairs = List.FlatMap.flatMap (\l -> l) (Array.toList pairs)
+               updated = updateTrusts allPairs model.trusts
+               uniquePairs = uniqueMasks |> Array.filter (\p -> not (model.certificates  |> ArrayExtras.contains (certEquals p) ))
+
+            in ( { model | certificates = Array.append model.certificates uniquePairs, trusts = updated }, Cmd.none )
 
         AddCertificate id ->
             ( model, Port.certificatesRequest { command = "issue", id = Just id } )

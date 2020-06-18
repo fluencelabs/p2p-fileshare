@@ -17,6 +17,7 @@ limitations under the License.
 -}
 
 import Array exposing (Array)
+import Dict exposing (Dict)
 
 
 type alias ShowCertState =
@@ -37,9 +38,13 @@ type alias Certificate =
     { chain : Array Trust
     }
 
+type alias CertificateMask =
+    { trustIds : Array (String, String)
+    }
 
 type alias Model =
     { id : String
-    , certificates : Array Certificate
+    , certificates : Array CertificateMask
+    , trusts : Dict (String, String) Trust
     , showCertState : Maybe ShowCertState
     }
