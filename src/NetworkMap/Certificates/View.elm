@@ -33,26 +33,37 @@ import Screen.Model as Screen
 import Time
 import Utils.ArrayExtras as ArrayExtras
 
+
 flat : Array (Maybe a) -> Array a
 flat ar =
-    ar |> A.foldr (\m -> \a ->
-        case m of
-            Just el ->
-                A.append a (A.fromList [el])
-            Nothing ->
-                a
-    ) A.empty
+    ar
+        |> A.foldr
+            (\m ->
+                \a ->
+                    case m of
+                        Just el ->
+                            A.append a (A.fromList [ el ])
+
+                        Nothing ->
+                            a
+            )
+            A.empty
 
 
 view : Screen.Model -> Model -> Element Msg
 view screen networkModel =
     let
-        maybes = networkModel.certificates |> A.map (\{trustIds} -> trustIds |> A.map (\p -> Dict.get p networkModel.trusts))
-        certs = maybes |> A.map (\m -> { chain = ArrayExtras.reverse (flat m) })
-        _ = Debug.log "certs: " certs
+        maybes =
+            networkModel.certificates |> A.map (\{ trustIds } -> trustIds |> A.map (\p -> Dict.get p networkModel.trusts))
+
+        certs =
+            maybes |> A.map (\m -> { chain = ArrayExtras.reverse (flat m) })
+
+        _ =
+            Debug.log "certs: " certs
     in
-        column [ fillWidth ]
-            (actionView networkModel.id certs networkModel.showCertState)
+    column [ fillWidth ]
+        (actionView networkModel.id certs networkModel.showCertState)
 
 
 showCertLink : Int -> Int -> String -> Element Msg

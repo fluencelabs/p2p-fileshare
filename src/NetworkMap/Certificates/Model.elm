@@ -38,13 +38,15 @@ type alias Certificate =
     { chain : Array Trust
     }
 
+
 type alias CertificateMask =
-    { trustIds : Array (String, String)
+    { trustIds : Array ( String, String )
     }
+
 
 type alias Model =
     { id : String
     , certificates : Array CertificateMask
-    , trusts : Dict (String, String) Trust
+    , trusts : Dict ( String, String ) Trust
     , showCertState : Maybe ShowCertState
     }

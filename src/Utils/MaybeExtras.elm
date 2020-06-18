@@ -1,13 +1,16 @@
 module Utils.MaybeExtras exposing (..)
 
+
 isEmpty : Maybe a -> Bool
 isEmpty maybe =
-  case maybe of
-    Just _ ->
-      False
+    case maybe of
+        Just _ ->
+            False
 
-    Nothing ->
-      True
+        Nothing ->
+            True
+
 
 nonEmpty : Maybe a -> Bool
-nonEmpty m = not <| isEmpty m
+nonEmpty m =
+    not <| isEmpty m
