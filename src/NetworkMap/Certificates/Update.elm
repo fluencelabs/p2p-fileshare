@@ -21,7 +21,7 @@ import Dict exposing (Dict)
 import List
 import List.FlatMap
 import List.Unique
-import NetworkMap.Certificates.Model exposing (Certificate, CertificateMask, Model, Trust)
+import NetworkMap.Certificates.Model exposing (Certificate, CertificateIds, Model, Trust)
 import NetworkMap.Certificates.Msg exposing (Msg(..))
 import NetworkMap.Certificates.Port as Port
 import Utils.ArrayExtras as ArrayExtras
@@ -34,13 +34,13 @@ convertCert cert =
             cert.chain
 
         ( _, pairs ) =
-            chain |> Array.foldl folder ( Nothing, [] )
+            chain |> Array.foldl gatherPairs ( Nothing, [] )
     in
     pairs
 
 
-folder : Trust -> ( Maybe String, List ( String, String, Trust ) ) -> ( Maybe String, List ( String, String, Trust ) )
-folder t acc =
+gatherPairs : Trust -> ( Maybe String, List ( String, String, Trust ) ) -> ( Maybe String, List ( String, String, Trust ) )
+gatherPairs t acc =
     let
         ( previous, pairs ) =
             acc
@@ -71,8 +71,8 @@ updateTrust trust previousTrust =
     Just actualTrust
 
 
-updateDict : ( String, String, Trust ) -> Dict ( String, String ) Trust -> Dict ( String, String ) Trust
-updateDict pairWithTrust dict =
+updateTrusts : ( String, String, Trust ) -> Dict ( String, String ) Trust -> Dict ( String, String ) Trust
+updateTrusts pairWithTrust dict =
     let
         ( prev, cur, trust ) =
             pairWithTrust
@@ -86,20 +86,6 @@ updateDict pairWithTrust dict =
     updated
 
 
-updateTrusts : List ( String, String, Trust ) -> Dict ( String, String ) Trust -> Dict ( String, String ) Trust
-updateTrusts pairs storage =
-    let
-        updated =
-            pairs |> List.foldl updateDict storage
-    in
-    updated
-
-
-certEquals : CertificateMask -> CertificateMask -> Bool
-certEquals l r =
-    l == r
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -108,22 +94,23 @@ update msg model =
                 pairs =
                     array |> Array.map convertCert
 
-                certMasks =
+                certIds =
                     pairs |> Array.map (\ps -> { trustIds = Array.fromList (ps |> List.map (\( l, r, _ ) -> ( l, r ))) })
 
-                uniqueMasks =
-                    List.Unique.filterDuplicates (Array.toList certMasks) |> Array.fromList
+                uniqueIds =
+                    List.Unique.filterDuplicates (Array.toList certIds) |> Array.fromList
 
                 allPairs =
                     List.FlatMap.flatMap (\l -> l) (Array.toList pairs)
 
-                updated =
-                    updateTrusts allPairs model.trusts
+                updatedTrusts =
+                    allPairs |> List.foldl updateTrusts model.trusts
 
+                -- don't add the same certificates in model
                 uniquePairs =
-                    uniqueMasks |> Array.filter (\p -> not (model.certificates |> ArrayExtras.contains (certEquals p)))
+                    uniqueIds |> Array.filter (\p -> not (model.certificates |> ArrayExtras.contains ((==) p)))
             in
-            ( { model | certificates = Array.append model.certificates uniquePairs, trusts = updated }, Cmd.none )
+            ( { model | certificates = Array.append model.certificates uniquePairs, trusts = updatedTrusts }, Cmd.none )
 
         AddCertificate id ->
             ( model, Port.certificatesRequest { command = "issue", id = Just id } )

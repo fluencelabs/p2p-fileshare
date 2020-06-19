@@ -39,14 +39,14 @@ type alias Certificate =
     }
 
 
-type alias CertificateMask =
+type alias CertificateIds =
     { trustIds : Array ( String, String )
     }
 
 
 type alias Model =
     { id : String
-    , certificates : Array CertificateMask
+    , certificates : Array CertificateIds
     , trusts : Dict ( String, String ) Trust
     , showCertState : Maybe ShowCertState
     }
