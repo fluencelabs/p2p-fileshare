@@ -34,8 +34,8 @@ import Time
 import Utils.ArrayExtras as ArrayExtras
 
 
-flat : Array (Maybe a) -> Array a
-flat ar =
+flatMaybes : Array (Maybe a) -> Array a
+flatMaybes ar =
     ar
         |> A.foldr
             (\m ->
@@ -57,10 +57,7 @@ view screen networkModel =
             networkModel.certificates |> A.map (\{ trustIds } -> trustIds |> A.map (\p -> Dict.get p networkModel.trusts))
 
         certs =
-            maybes |> A.map (\m -> { chain = ArrayExtras.reverse (flat m) })
-
-        _ =
-            Debug.log "certs: " certs
+            maybes |> A.map (\m -> { chain = ArrayExtras.reverse (flatMaybes m) })
     in
     column [ fillWidth ]
         (actionView networkModel.id certs networkModel.showCertState)
