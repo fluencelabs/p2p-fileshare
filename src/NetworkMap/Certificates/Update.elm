@@ -27,8 +27,15 @@ import NetworkMap.Certificates.Port as Port
 import Utils.ArrayExtras as ArrayExtras
 
 
-convertCert : Certificate -> List ( String, String, Trust )
-convertCert cert =
+type alias TrustExt =
+    { issuedBy : String
+    , issuedFor : String
+    , trust : Trust
+    }
+
+
+convertCertToTrustExtChain : Certificate -> List TrustExt
+convertCertToTrustExtChain cert =
     let
         chain =
             cert.chain
@@ -39,7 +46,7 @@ convertCert cert =
     pairs
 
 
-gatherPairs : Trust -> ( Maybe String, List ( String, String, Trust ) ) -> ( Maybe String, List ( String, String, Trust ) )
+gatherPairs : Trust -> ( Maybe String, List TrustExt ) -> ( Maybe String, List TrustExt )
 gatherPairs t acc =
     let
         ( previous, pairs ) =
@@ -48,7 +55,7 @@ gatherPairs t acc =
         pr =
             previous |> Maybe.withDefault t.issuedFor
     in
-    ( Just t.issuedFor, pairs ++ [ ( pr, t.issuedFor, t ) ] )
+    ( Just t.issuedFor, pairs ++ [ { issuedBy = pr, issuedFor = t.issuedFor, trust = t } ] )
 
 
 updateTrust : Trust -> Maybe Trust -> Maybe Trust
@@ -71,17 +78,11 @@ updateTrust trust previousTrust =
     Just actualTrust
 
 
-updateTrusts : ( String, String, Trust ) -> Dict ( String, String ) Trust -> Dict ( String, String ) Trust
-updateTrusts pairWithTrust dict =
+updateTrusts : TrustExt -> Dict ( String, String ) Trust -> Dict ( String, String ) Trust
+updateTrusts trust dict =
     let
-        ( prev, cur, trust ) =
-            pairWithTrust
-
-        pair =
-            ( prev, cur )
-
         updated =
-            dict |> Dict.update pair (updateTrust trust)
+            dict |> Dict.update ( trust.issuedBy, trust.issuedFor ) (updateTrust trust.trust)
     in
     updated
 
@@ -92,10 +93,10 @@ update msg model =
         CertificatesAdded array ->
             let
                 pairs =
-                    array |> Array.map convertCert
+                    array |> Array.map convertCertToTrustExtChain
 
                 certIds =
-                    pairs |> Array.map (\ps -> { trustIds = Array.fromList (ps |> List.map (\( l, r, _ ) -> ( l, r ))) })
+                    pairs |> Array.map (\ps -> { trustIds = Array.fromList (ps |> List.map (\t -> ( t.issuedBy, t.issuedFor ))) })
 
                 uniqueIds =
                     List.Unique.filterDuplicates (Array.toList certIds) |> Array.fromList

@@ -16,7 +16,7 @@ limitations under the License.
 
 -}
 
-import Array exposing (Array, empty, filter, foldl, fromList, get, push, toList)
+import Array exposing (Array, append, empty, filter, foldr, fromList, get, push, toList)
 import Utils.MaybeExtras exposing (nonEmpty)
 
 
@@ -33,3 +33,19 @@ contains f l =
 reverse : Array a -> Array a
 reverse ar =
     fromList (List.reverse (toList ar))
+
+
+flatMaybes : Array (Maybe a) -> Array a
+flatMaybes ar =
+    ar
+        |> foldr
+            (\m ->
+                \a ->
+                    case m of
+                        Just el ->
+                            append a (fromList [ el ])
+
+                        Nothing ->
+                            a
+            )
+            empty

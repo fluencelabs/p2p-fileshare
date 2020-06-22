@@ -31,23 +31,7 @@ import NetworkMap.Certificates.Msg exposing (Msg(..))
 import Palette exposing (fillWidth, limitLayoutWidth, shortHashRaw)
 import Screen.Model as Screen
 import Time
-import Utils.ArrayExtras as ArrayExtras
-
-
-flatMaybes : Array (Maybe a) -> Array a
-flatMaybes ar =
-    ar
-        |> A.foldr
-            (\m ->
-                \a ->
-                    case m of
-                        Just el ->
-                            A.append a (A.fromList [ el ])
-
-                        Nothing ->
-                            a
-            )
-            A.empty
+import Utils.ArrayExtras exposing (flatMaybes, reverse)
 
 
 view : Screen.Model -> Model -> Element Msg
@@ -57,7 +41,7 @@ view screen networkModel =
             networkModel.certificates |> A.map (\{ trustIds } -> trustIds |> A.map (\p -> Dict.get p networkModel.trusts))
 
         certs =
-            maybes |> A.map (\m -> { chain = ArrayExtras.reverse (flatMaybes m) })
+            maybes |> A.map (\m -> { chain = reverse (flatMaybes m) })
     in
     column [ fillWidth ]
         (actionView networkModel.id certs networkModel.showCertState)
@@ -156,7 +140,9 @@ certView certIdx cert showTrust =
                     )
     in
     column [ Background.blackAlpha 20, paddingXY 0 10 ]
-        [ row [ spacing 10 ] <| flatMap (\e -> e) certElementsList ++ [ paragraph [ Font.bold ] [ text <| " - until " ++ untilIso ] ]
+        [ row [ spacing 10 ] <|
+            flatMap (\e -> e) certElementsList
+                ++ [ paragraph [ Font.bold ] [ text <| " - until " ++ untilIso ] ]
         , withDefault Element.none trustToShow
         ]
 
