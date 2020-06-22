@@ -1,4 +1,4 @@
-module NetworkMap.Certificates.Msg exposing (Msg(..))
+module Utils.ListExtras exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,14 +16,15 @@ limitations under the License.
 
 -}
 
-import Array exposing (Array)
-import NetworkMap.Certificates.Model exposing (Certificate)
+import List exposing (filter, head)
+import Utils.MaybeExtras exposing (nonEmpty)
 
 
-type Msg
-    = CertificatesAdded (Array Certificate)
-    | AddCertificate String
-    | GetCertificate String
-    | ChangeFocus String
-    | ShowTrust Int Int
-    | NoOp
+find : (a -> Bool) -> List a -> Maybe a
+find f l =
+    l |> filter f |> head
+
+
+contains : (a -> Bool) -> List a -> Bool
+contains f l =
+    nonEmpty (find f l)

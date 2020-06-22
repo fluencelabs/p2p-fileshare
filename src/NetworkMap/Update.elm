@@ -47,7 +47,7 @@ update msg model =
                             , peerType = peerType
                             , date = date
                             , appearencesNumber = 0
-                            , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing }
+                            , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing, trusts = Dict.empty }
                             , actionsOpened = opened
                             }
 

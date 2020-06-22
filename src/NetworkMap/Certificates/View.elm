@@ -17,6 +17,7 @@ limitations under the License.
 -}
 
 import Array as A exposing (Array)
+import Dict
 import Element exposing (Element, alignRight, centerX, column, el, padding, paddingXY, paragraph, row, spacing, text)
 import Element.Font as Font
 import Element.Input as Input
@@ -30,12 +31,20 @@ import NetworkMap.Certificates.Msg exposing (Msg(..))
 import Palette exposing (fillWidth, limitLayoutWidth, shortHashRaw)
 import Screen.Model as Screen
 import Time
+import Utils.ArrayExtras exposing (flatMaybes, reverse)
 
 
 view : Screen.Model -> Model -> Element Msg
 view screen networkModel =
+    let
+        maybes =
+            networkModel.certificates |> A.map (\{ trustIds } -> trustIds |> A.map (\p -> Dict.get p networkModel.trusts))
+
+        certs =
+            maybes |> A.map (\m -> { chain = reverse (flatMaybes m) })
+    in
     column [ fillWidth ]
-        (actionView networkModel.id networkModel.certificates networkModel.showCertState)
+        (actionView networkModel.id certs networkModel.showCertState)
 
 
 showCertLink : Int -> Int -> String -> Element Msg
@@ -131,7 +140,9 @@ certView certIdx cert showTrust =
                     )
     in
     column [ Background.blackAlpha 20, paddingXY 0 10 ]
-        [ row [ spacing 10 ] <| flatMap (\e -> e) certElementsList ++ [ paragraph [ Font.bold ] [ text <| " - until " ++ untilIso ] ]
+        [ row [ spacing 10 ] <|
+            flatMap (\e -> e) certElementsList
+                ++ [ paragraph [ Font.bold ] [ text <| " - until " ++ untilIso ] ]
         , withDefault Element.none trustToShow
         ]
 
