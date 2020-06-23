@@ -16,8 +16,11 @@ limitations under the License.
 
 -}
 
+import AppSelector.Model exposing (App(..), appKey)
+import AppSelector.View
 import Browser exposing (Document)
 import Conn.View
+import Dict exposing (Dict)
 import Element
     exposing
         ( Element
@@ -55,7 +58,17 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header model.screen, [ connectivity model, fileSharing model, networkMap model ] ]
+    layout <| List.concat [ header model.screen, [ connectivity model,
+      appSelector model (apps model) ] ]
+
+apps : Model -> Dict String (Element Msg)
+apps model =
+    let
+        appsList = [(appKey FileSharing, (lazy fileSharing model)), (appKey NetworkMap, (lazy networkMap model))]
+        dict = Dict.fromList appsList
+
+    in
+        dict
 
 
 liftView :
@@ -110,6 +123,10 @@ header screenI =
 connectivity : Model -> Element Msg
 connectivity model =
     liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
+
+appSelector : Model -> Dict String (Element msg) -> Element Msg
+appSelector model appsDict =
+    liftView .appSelector AppSelectorMsg (AppSelector.View.view model.screen appsDict) <| model
 
 
 networkMap : Model -> Element Msg
