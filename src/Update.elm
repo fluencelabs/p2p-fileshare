@@ -57,6 +57,7 @@ updateFileSharing =
 updateNetworkMap =
     liftUpdate .networkMap (\c -> \m -> { m | networkMap = c }) NetworkMapMsg NetworkMap.Update.update
 
+
 updateAppSelector =
     liftUpdate .appSelector (\c -> \m -> { m | appSelector = c }) AppSelectorMsg AppSelector.Update.update
 
@@ -85,5 +86,3 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
-
-

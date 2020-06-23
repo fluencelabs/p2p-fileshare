@@ -25,13 +25,14 @@ import Msg exposing (Msg(..))
 import NetworkMap.Model exposing (emptyNetwork)
 import Screen.Model as Screen
 
+
 type alias Model =
     { connectivity : Conn.Model.Model
     , fileSharing : FileSharing.Model.Model
     , networkMap : NetworkMap.Model.Model
-    , appSelector: AppSelector.Model.Model
+    , appSelector : AppSelector.Model.Model
     , screen : Screen.Model
-    , isAdmin: Bool
+    , isAdmin : Bool
     }
 
 

@@ -59,24 +59,27 @@ title _ =
 body : Model -> Html Msg
 body model =
     layout <|
-        if (model.isAdmin) then
+        if model.isAdmin then
             admin model
+
         else
             demo model
+
 
 demo : Model -> List (Element Msg)
 demo model =
     List.concat [ header model.screen, [ connectivity model, fileSharing model, networkMap model ] ]
 
+
 admin : Model -> List (Element Msg)
 admin model =
     List.concat
-                    [ header model.screen
-                    , [ connectivity model
-                      , appSelector model
-                      , selectedApp model (apps model)
-                      ]
-                    ]
+        [ header model.screen
+        , [ connectivity model
+          , appSelector model
+          , selectedApp model (apps model)
+          ]
+        ]
 
 
 apps : Model -> Dict String (Element Msg)
