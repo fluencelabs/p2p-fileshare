@@ -58,17 +58,26 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header model.screen, [ connectivity model,
-      appSelector model (apps model) ] ]
+    layout <|
+        List.concat
+            [ header model.screen
+            , [ connectivity model
+              , appSelector model
+              , selectedApp model (apps model)
+              ]
+            ]
+
 
 apps : Model -> Dict String (Element Msg)
 apps model =
     let
-        appsList = [(appKey FileSharing, (lazy fileSharing model)), (appKey NetworkMap, (lazy networkMap model))]
-        dict = Dict.fromList appsList
+        appsList =
+            [ ( appKey FileSharing, lazy fileSharing model ), ( appKey NetworkMap, lazy networkMap model ) ]
 
+        dict =
+            Dict.fromList appsList
     in
-        dict
+    dict
 
 
 liftView :
@@ -124,9 +133,15 @@ connectivity : Model -> Element Msg
 connectivity model =
     liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
 
-appSelector : Model -> Dict String (Element msg) -> Element Msg
-appSelector model appsDict =
-    liftView .appSelector AppSelectorMsg (AppSelector.View.view model.screen appsDict) <| model
+
+selectedApp : Model -> Dict String (Element Msg) -> Element Msg
+selectedApp model appsDict =
+    AppSelector.View.view model.screen appsDict <| model.appSelector
+
+
+appSelector : Model -> Element Msg
+appSelector model =
+    liftView .appSelector AppSelectorMsg (AppSelector.View.appsList model.screen) <| model
 
 
 networkMap : Model -> Element Msg
