@@ -59,13 +59,24 @@ title _ =
 body : Model -> Html Msg
 body model =
     layout <|
-        List.concat
-            [ header model.screen
-            , [ connectivity model
-              , appSelector model
-              , selectedApp model (apps model)
-              ]
-            ]
+        if (model.isAdmin) then
+            admin model
+        else
+            demo model
+
+demo : Model -> List (Element Msg)
+demo model =
+    List.concat [ header model.screen, [ connectivity model, fileSharing model, networkMap model ] ]
+
+admin : Model -> List (Element Msg)
+admin model =
+    List.concat
+                    [ header model.screen
+                    , [ connectivity model
+                      , appSelector model
+                      , selectedApp model (apps model)
+                      ]
+                    ]
 
 
 apps : Model -> Dict String (Element Msg)
@@ -136,12 +147,12 @@ connectivity model =
 
 selectedApp : Model -> Dict String (Element Msg) -> Element Msg
 selectedApp model appsDict =
-    AppSelector.View.view model.screen appsDict <| model.appSelector
+    AppSelector.View.showSelectedApp model.screen appsDict <| model.appSelector
 
 
 appSelector : Model -> Element Msg
 appSelector model =
-    liftView .appSelector AppSelectorMsg (AppSelector.View.appsList model.screen) <| model
+    liftView .appSelector AppSelectorMsg (AppSelector.View.showAppsList model.screen) <| model
 
 
 networkMap : Model -> Element Msg

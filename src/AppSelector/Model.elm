@@ -9,10 +9,10 @@ appKey : App -> String
 appKey app =
     case app of
         FileSharing ->
-            "FileSharing"
+            "File Sharing"
 
         NetworkMap ->
-            "NetworkMap"
+            "Network Map"
 
         None ->
             "None"
@@ -20,10 +20,10 @@ appKey app =
 stringToApp : String -> App
 stringToApp key =
     case key of
-        "FileSharing" ->
+        "File Sharing" ->
             FileSharing
 
-        "NetworkMap" ->
+        "Network Map" ->
             NetworkMap
 
         _ -> None

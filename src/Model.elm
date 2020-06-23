@@ -31,6 +31,7 @@ type alias Model =
     , networkMap : NetworkMap.Model.Model
     , appSelector: AppSelector.Model.Model
     , screen : Screen.Model
+    , isAdmin: Bool
     }
 
 
@@ -48,6 +49,7 @@ emptyModel config =
       , networkMap = emptyNetwork config.isAdmin
       , screen = { device = device, screenSize = config.windowSize }
       , appSelector = emptyAppSelector
+      , isAdmin = config.isAdmin
       }
     , Cmd.map ConnMsg cmd
     )
