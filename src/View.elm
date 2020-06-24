@@ -16,8 +16,11 @@ limitations under the License.
 
 -}
 
+import AppSelector.Model exposing (App(..), appName)
+import AppSelector.View
 import Browser exposing (Document)
 import Conn.View
+import Dict exposing (Dict)
 import Element
     exposing
         ( Element
@@ -55,7 +58,42 @@ title _ =
 
 body : Model -> Html Msg
 body model =
-    layout <| List.concat [ header model.screen, [ connectivity model, fileSharing model, networkMap model ] ]
+    layout <|
+        if model.isAdmin then
+            admin model
+
+        else
+            demo model
+
+
+demo : Model -> List (Element Msg)
+demo model =
+    List.concat [ header model.screen, [ connectivity model, fileSharing model, networkMap model ] ]
+
+
+admin : Model -> List (Element Msg)
+admin model =
+    List.concat
+        [ header model.screen
+        , [ connectivity model
+          ]
+            ++ Conn.View.showIfConnected model.connectivity
+                [ appSelector model
+                , selectedApp model (apps model)
+                ]
+        ]
+
+
+apps : Model -> Dict String (Element Msg)
+apps model =
+    let
+        appsList =
+            [ ( appName FileSharing, lazy fileSharing model ), ( appName NetworkMap, lazy networkMap model ) ]
+
+        dict =
+            Dict.fromList appsList
+    in
+    dict
 
 
 liftView :
@@ -110,6 +148,16 @@ header screenI =
 connectivity : Model -> Element Msg
 connectivity model =
     liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
+
+
+selectedApp : Model -> Dict String (Element Msg) -> Element Msg
+selectedApp model appsDict =
+    AppSelector.View.showSelectedApp model.screen appsDict <| model.appSelector
+
+
+appSelector : Model -> Element Msg
+appSelector model =
+    liftView .appSelector AppSelectorMsg (AppSelector.View.showAppsList model.screen) <| model
 
 
 networkMap : Model -> Element Msg

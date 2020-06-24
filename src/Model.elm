@@ -16,6 +16,7 @@ limitations under the License.
 
 -}
 
+import AppSelector.Model exposing (emptyAppSelector)
 import Config exposing (Config)
 import Conn.Model exposing (emptyConn)
 import Element
@@ -29,7 +30,9 @@ type alias Model =
     { connectivity : Conn.Model.Model
     , fileSharing : FileSharing.Model.Model
     , networkMap : NetworkMap.Model.Model
+    , appSelector : AppSelector.Model.Model
     , screen : Screen.Model
+    , isAdmin : Bool
     }
 
 
@@ -46,6 +49,8 @@ emptyModel config =
       , fileSharing = emptyFileSharing
       , networkMap = emptyNetwork config.isAdmin
       , screen = { device = device, screenSize = config.windowSize }
+      , appSelector = emptyAppSelector
+      , isAdmin = config.isAdmin
       }
     , Cmd.map ConnMsg cmd
     )

@@ -1,4 +1,4 @@
-module Conn.View exposing (view)
+module Conn.View exposing (showIfConnected, view)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -214,3 +214,13 @@ view screen conn =
     in
     column (layoutBlock screen ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
         ([ blockTitle <| text "NETWORK INFO" ] ++ elements ++ demoView screen conn)
+
+
+showIfConnected : Model -> List (Element msg) -> List (Element msg)
+showIfConnected model elements =
+    case model.status of
+        Connected ->
+            elements
+
+        _ ->
+            []

@@ -16,6 +16,7 @@ limitations under the License.
 
 -}
 
+import AppSelector.Update
 import Conn.Update
 import FileSharing.Update
 import Model exposing (Model)
@@ -57,6 +58,10 @@ updateNetworkMap =
     liftUpdate .networkMap (\c -> \m -> { m | networkMap = c }) NetworkMapMsg NetworkMap.Update.update
 
 
+updateAppSelector =
+    liftUpdate .appSelector (\c -> \m -> { m | appSelector = c }) AppSelectorMsg AppSelector.Update.update
+
+
 updateScreen =
     liftUpdate .screen (\s -> \m -> { m | screen = s }) ScreenMsg Screen.Update.update
 
@@ -75,6 +80,9 @@ update msg model =
 
         ScreenMsg m ->
             updateScreen m model
+
+        AppSelectorMsg m ->
+            updateAppSelector m model
 
         NoOp ->
             ( model, Cmd.none )

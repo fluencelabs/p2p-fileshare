@@ -16,6 +16,7 @@ limitations under the License.
 
 -}
 
+import AppSelector.Msg
 import Conn.Msg
 import FileSharing.Msg
 import NetworkMap.Msg
@@ -25,6 +26,7 @@ import Screen.Msg
 type Msg
     = NoOp
     | ConnMsg Conn.Msg.Msg
+    | AppSelectorMsg AppSelector.Msg.Msg
     | FileSharingMsg FileSharing.Msg.Msg
     | NetworkMapMsg NetworkMap.Msg.Msg
     | ScreenMsg Screen.Msg.Msg
