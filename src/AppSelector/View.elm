@@ -1,6 +1,6 @@
 module AppSelector.View exposing (showAppsList, showSelectedApp)
 
-import AppSelector.Model exposing (App(..), Model, appKey)
+import AppSelector.Model exposing (App(..), Model, appName)
 import AppSelector.Msg exposing (Msg(..))
 import Dict exposing (Dict)
 import Element exposing (Element, column, spacing, text, width)
@@ -14,10 +14,10 @@ import Screen.Model as Screen
 
 showSelectedApp : Screen.Model -> Dict String (Element msg) -> Model -> Element msg
 showSelectedApp screen apps model =
-    case Dict.get (appKey model.currentApp) apps of
+    case Dict.get (appName model.currentApp) apps of
         Just app ->
             column (layoutBlock screen ++ [ blockBackground, spacing <| S.baseRem 0.75, F.size7 ])
-                ([ blockTitle <| text (appKey model.currentApp) ] ++ [ app ])
+                ([ blockTitle <| text (appName model.currentApp) ] ++ [ app ])
 
         Nothing ->
             Element.none

@@ -16,7 +16,7 @@ limitations under the License.
 
 -}
 
-import AppSelector.Model exposing (App(..), appKey)
+import AppSelector.Model exposing (App(..), appName)
 import AppSelector.View
 import Browser exposing (Document)
 import Conn.View
@@ -88,7 +88,7 @@ apps : Model -> Dict String (Element Msg)
 apps model =
     let
         appsList =
-            [ ( appKey FileSharing, lazy fileSharing model ), ( appKey NetworkMap, lazy networkMap model ) ]
+            [ ( appName FileSharing, lazy fileSharing model ), ( appName NetworkMap, lazy networkMap model ) ]
 
         dict =
             Dict.fromList appsList

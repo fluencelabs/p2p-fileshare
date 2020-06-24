@@ -7,8 +7,8 @@ type App
     | None
 
 
-appKey : App -> String
-appKey app =
+appName : App -> String
+appName app =
     case app of
         FileSharing ->
             "File Sharing"
