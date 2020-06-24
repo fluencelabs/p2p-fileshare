@@ -76,9 +76,11 @@ admin model =
     List.concat
         [ header model.screen
         , [ connectivity model
-          , appSelector model
-          , selectedApp model (apps model)
           ]
+            ++ Conn.View.showIfConnected model.connectivity
+                [ appSelector model
+                , selectedApp model (apps model)
+                ]
         ]
 
 
