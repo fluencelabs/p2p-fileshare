@@ -51,7 +51,7 @@ update msg model =
                             , date = date
                             , appearencesNumber = 0
                             , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing, trusts = Dict.empty }
-                            , interfaces = { interface = Nothing }
+                            , interfaces = { id = peer.id, interface = Nothing, inputs = Dict.empty }
                             , actionsOpened = opened
                             }
 

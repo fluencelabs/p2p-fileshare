@@ -1,6 +1,8 @@
 module NetworkMap.Interfaces.Model exposing (..)
 
 
+import Array exposing (Array)
+import Dict exposing (Dict)
 type alias Function =
     { name : String, inputs : List String, outputs : List String }
 
@@ -12,6 +14,8 @@ type alias Module =
 type alias Interface =
     { modules : List Module }
 
+type alias Inputs = Dict String (Dict String (Array String))
+
 
 type alias Model =
-    { interface : Maybe Interface }
+    { id: String, interface : Maybe Interface, inputs : Inputs}

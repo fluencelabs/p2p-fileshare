@@ -20,6 +20,8 @@ import Array
 import Maybe exposing (andThen)
 import NetworkMap.Certificates.Model exposing (Certificate)
 import NetworkMap.Certificates.Msg as CertificatesMsg
+import NetworkMap.Interfaces.Model exposing (Interface)
+import NetworkMap.Interfaces.Msg
 import NetworkMap.Model exposing (Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 
@@ -29,7 +31,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, certs : Maybe (List Certificate), id : Maybe String, peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String } }
+    { event : String, certs : Maybe (List Certificate), interface: Maybe Interface, id : Maybe String, peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String } }
 
 
 port networkMapReceiver : (Event -> msg) -> Sub msg
@@ -67,6 +69,14 @@ eventToMsg event =
                             event.id
                                 --TODO: handle certificate events in 'Certificates' module
                                 |> andThen (\id -> Just (CertMsg id (CertificatesMsg.CertificatesAdded <| Array.fromList certs)))
+                        )
+
+            "add_interface" ->
+                event.interface
+                    |> andThen
+                        (\interface ->
+                            event.id
+                                |> andThen (\id -> Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterface <| interface)))
                         )
 
             _ ->

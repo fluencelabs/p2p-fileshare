@@ -42,7 +42,7 @@ let relays = [
     // {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", privateKey: null}, dns: "relay01.fluence.dev", pport: 19005},
     // {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", privateKey: null}, dns: "relay01.fluence.dev", pport: 19990},
     // {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", privateKey: null}, dns: "relay01.fluence.dev", pport: 19100},
-    {peer: {id: "12D3KooWGeNZUiTJrNK6YKHxg7TnLcF3uQrMqkwGvAcBRjckiHZZ", privateKey: null}, host: "127.0.0.1", pport: 9999},
+    {peer: {id: "12D3KooWGwgiSyGk2Lp5j9eoiknLsVYhjGpHXs6WoHE7STkZCa7L", privateKey: null}, host: "127.0.0.1", pport: 9999},
 ];
 
 export function getRelays() {
@@ -123,7 +123,7 @@ function subsribeToAppear(app, conn, peerIdStr) {
 // call if we found out about any peers or relays in Fluence network
 export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, id: null, peerAppeared});
+    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, interface: null, id: null, peerAppeared});
 }
 
 function validateHash(hash) {

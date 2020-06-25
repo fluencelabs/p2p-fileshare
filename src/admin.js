@@ -55,7 +55,7 @@ function sendCerts(id, certs) {
         return cert;
     })
 
-    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, id: id, peerAppeared: null});
+    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, interface: null, id: id, peerAppeared: null});
 }
 
 export function initAdmin(adminApp) {
@@ -69,8 +69,7 @@ export function initAdmin(adminApp) {
                 case "get_interface":
                     let msgId = genUUID();
                     let result = await conn.sendServiceLocalCallWaitResponse("get_interface", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
-                    console.log("RESULT")
-                    console.log(result)
+                    app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null});
             }
 
     });
