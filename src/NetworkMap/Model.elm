@@ -18,6 +18,7 @@ limitations under the License.
 
 import Dict exposing (Dict)
 import NetworkMap.Certificates.Model as Certificates
+import NetworkMap.Interfaces.Model as Interfaces
 
 
 type PeerType
@@ -37,6 +38,7 @@ type alias NodeEntry =
     , date : String
     , appearencesNumber : Int
     , certificates : Certificates.Model
+    , interfaces : Interfaces.Model
     , actionsOpened : Bool
     }
 

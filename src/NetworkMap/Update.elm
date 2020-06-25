@@ -23,6 +23,9 @@ import Maybe exposing (map, withDefault)
 import NetworkMap.Certificates.Model as Certificates
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Certificates.Update
+import NetworkMap.Interfaces.Model as Interfaces
+import NetworkMap.Interfaces.Msg as InterfaceMsg
+import NetworkMap.Interfaces.Update
 import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 import Task exposing (perform)
@@ -48,6 +51,7 @@ update msg model =
                             , date = date
                             , appearencesNumber = 0
                             , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing, trusts = Dict.empty }
+                            , interfaces = { interface = Nothing }
                             , actionsOpened = opened
                             }
 
@@ -86,8 +90,12 @@ update msg model =
                 _ ->
                     liftCertMsg model id certMsg
 
+        InterfaceMsg id intMsg ->
+            liftInterfaceMsg model id intMsg
+
         NoOp ->
             ( model, Cmd.none )
+
 
 
 
@@ -143,6 +151,30 @@ liftCertMsg model id msg =
     in
     updated |> withDefault ( model, Cmd.none )
 
+liftInterfaceMsg : Model -> String -> InterfaceMsg.Msg -> ( Model, Cmd Msg )
+liftInterfaceMsg model id msg =
+    let
+        node =
+            model.network |> get id
+
+        result =
+            node |> map (\n -> NetworkMap.Interfaces.Update.update msg n.interfaces)
+
+        updated =
+            result
+                |> map
+                    (\tuple -> ( { model | network = updateIDict id (first tuple) model.network }, Cmd.map (InterfaceMsg id) (second tuple) ))
+    in
+    updated |> withDefault ( model, Cmd.none )
+
+updateIEntry : Interfaces.Model -> NodeEntry -> NodeEntry
+updateIEntry interfaces entry =
+    { entry | interfaces = interfaces }
+
+
+updateIDict : String -> Interfaces.Model -> Dict String NodeEntry -> Dict String NodeEntry
+updateIDict id model dict =
+    Dict.update id (\nm -> map (updateIEntry model) nm) dict
 
 updateEntry : Certificates.Model -> NodeEntry -> NodeEntry
 updateEntry certModel entry =

@@ -17,12 +17,14 @@ limitations under the License.
 -}
 
 import NetworkMap.Certificates.Msg
+import NetworkMap.Interfaces.Msg
 import NetworkMap.Model exposing (Peer, PeerType)
 
 
 type Msg
     = PeerAppeared Peer PeerType String Bool
     | OpenActions String
+    | InterfaceMsg String NetworkMap.Interfaces.Msg.Msg
     | CertMsg String NetworkMap.Certificates.Msg.Msg
     | ChangePeerInput String
     | AddPeerId

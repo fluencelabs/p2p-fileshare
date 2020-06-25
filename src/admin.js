@@ -28,6 +28,7 @@ import {TrustGraph} from "fluence/dist/trust/trust_graph";
 import {nodeRootCert} from "fluence/dist/trust/misc";
 import {issue} from "fluence/dist/trust/certificate";
 import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
+import {genUUID} from "fluence/dist/function_call";
 
 let Address4 = require('ip-address').Address4;
 
@@ -60,9 +61,23 @@ function sendCerts(id, certs) {
 export function initAdmin(adminApp) {
     app = adminApp;
 
+    app.ports.interfacesRequest.subscribe(async ({command, id}) => {
+        let conn = getConnection();
+        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
+        else
+            switch (command) {
+                case "get_interface":
+                    let msgId = genUUID();
+                    let result = await conn.sendServiceLocalCallWaitResponse("get_interface", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                    console.log("RESULT")
+                    console.log(result)
+            }
+
+    });
+
     app.ports.certificatesRequest.subscribe(async ({command, id}) => {
         let cert;
-        if (!getConnection()) console.error("Cannot handle networkMapRequest when not connected");
+        if (!getConnection()) console.error("Cannot handle certificatesRequest when not connected");
         else
             switch (command) {
                 case "issue":

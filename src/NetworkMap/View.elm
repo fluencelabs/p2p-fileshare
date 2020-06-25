@@ -25,6 +25,7 @@ import Ions.Background as Background
 import Ions.Border as B
 import Ions.Font as F
 import NetworkMap.Certificates.View
+import NetworkMap.Interfaces.View
 import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 import Palette exposing (blockBackground, fillWidth, layoutBlock, limitLayoutWidth)
@@ -118,9 +119,12 @@ showNode screen nodeEntry =
 
                  else
                     Element.none
-               ]
+               ] ++ [ interfaces screen nodeEntry ]
         )
 
+interfaces : Screen.Model -> NodeEntry -> Element Msg
+interfaces screen node =
+    liftView .interfaces (InterfaceMsg node.peer.id) (NetworkMap.Interfaces.View.view screen) <| node
 
 certificates : Screen.Model -> NodeEntry -> Element Msg
 certificates screen node =
