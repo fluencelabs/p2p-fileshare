@@ -2,7 +2,7 @@ module NetworkMap.Interfaces.View exposing (..)
 
 import Array exposing (Array)
 import Dict exposing (Dict)
-import Element exposing (Element, centerX, column, el, fillPortion, padding, paddingXY, row, text, width)
+import Element exposing (Element, centerX, column, el, fillPortion, padding, paddingXY, row, spacing, text, width)
 import Element.Font as Font
 import Element.Input as Input
 import Ions.Background as Background
@@ -61,16 +61,16 @@ functionForms id inputs moduleId function =
         name = function.name
         nameEl = row [ fillWidth, centerX ] [ defn "Function: ", valn <| text name ]
         inputsElements = function.inputs |> Array.indexedMap (\i -> \inp -> genInput moduleId name i inp inputs)
-        btn = Input.button
+        btn = row [] [Input.button
               (accentButton ++ [ width <| Element.px 100, paddingXY 0 (S.baseRem 0.5), Font.center ])
-              { onPress = Just <| CallFunction id moduleId name, label = text "Call Function" }
+              { onPress = Just <| CallFunction id moduleId name, label = text "Call Function" }]
         outputs = function.outputs
     in
-        column [ fillWidth, Background.blackAlpha 40, padding 10 ] ([ nameEl ] ++ (Array.toList inputsElements) ++ [ btn ])
+        column [ spacing 12, fillWidth, Background.blackAlpha 40, padding 10 ] ([ nameEl ] ++ (Array.toList inputsElements) ++ [ btn ])
 
 genInput : String -> String -> Int -> String -> Inputs -> Element Msg
 genInput moduleId functionId idx fieldType inputs =
-    Input.text [ width (fillPortion 5) ]
+    Input.text [ width <| Element.px 400 ]
           { onChange = UpdateInput moduleId functionId idx
           , text = (inputs |> getInputText moduleId functionId idx)
           , placeholder = Just (Input.placeholder [] (text fieldType))

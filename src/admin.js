@@ -95,9 +95,10 @@ export function initAdmin(adminApp) {
                     app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null});
                     break;
                 case "call":
-                    console.log("call: " + call)
+                    console.log("call: ")
+                    console.log(call)
                     if (getRelayPeerId() === id) {
-                        result = await conn.sendServiceLocalCallWaitResponse(call.fname, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                        result = await conn.sendServiceLocalCallWaitResponse(call.moduleName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId, call.fname);
                     } else {
                         let peerAddr = createPeerAddress(id);
                         result = await conn.sendCall(peerAddr, call.args, true, call.moduleName, call.fname);
