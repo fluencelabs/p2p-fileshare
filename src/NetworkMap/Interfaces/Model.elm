@@ -3,8 +3,14 @@ module NetworkMap.Interfaces.Model exposing (..)
 
 import Array exposing (Array)
 import Dict exposing (Dict)
+
+type alias Arg = String
+
+type alias Call =
+    { moduleName: String, fname: String, args: List Arg }
+
 type alias Function =
-    { name : String, inputs : List String, outputs : List String }
+    { name : String, inputs : Array String, outputs : Array String }
 
 
 type alias Module =

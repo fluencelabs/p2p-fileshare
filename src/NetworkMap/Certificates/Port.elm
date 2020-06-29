@@ -16,7 +16,6 @@ limitations under the License.
 
 -}
 
-
 type alias Command =
     { command : String, id : Maybe String }
 

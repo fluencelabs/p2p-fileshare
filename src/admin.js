@@ -29,12 +29,22 @@ import {nodeRootCert} from "fluence/dist/trust/misc";
 import {issue} from "fluence/dist/trust/certificate";
 import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
 import {genUUID} from "fluence/dist/function_call";
+import {createPeerAddress, createServiceAddress} from "fluence/dist/address";
 
 let Address4 = require('ip-address').Address4;
 
 let rootCert;
 let trustGraph;
 let app;
+let relayPeerId;
+
+export function getRelayPeerId() {
+    return relayPeerId
+}
+
+export function setRelayPeerId(peerId) {
+    relayPeerId = peerId
+}
 
 function getRootCert() {
     return rootCert;
@@ -61,16 +71,42 @@ function sendCerts(id, certs) {
 export function initAdmin(adminApp) {
     app = adminApp;
 
-    app.ports.interfacesRequest.subscribe(async ({command, id}) => {
+    app.ports.interfacesRequest.subscribe(async ({command, id, call}) => {
         let conn = getConnection();
         if (!conn) console.error("Cannot handle interfacesRequest when not connected");
-        else
+        else {
+            let msgId = genUUID();
+            let result;
             switch (command) {
                 case "get_interface":
-                    let msgId = genUUID();
-                    let result = await conn.sendServiceLocalCallWaitResponse("get_interface", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                    console.log("id = " + id)
+                    console.log("peer id = " + getRelayPeerId())
+                    if (getRelayPeerId() === id) {
+                        result = await conn.sendServiceLocalCallWaitResponse("get_interface", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                    } else {
+                        let peerAddr = createPeerAddress(id);
+                        let serviceAddr = createServiceAddress("get_interface");
+                        let addr = {
+                            protocols: peerAddr.protocols.concat(serviceAddr.protocols)
+                        }
+
+                        result = await conn.sendCallWaitResponse(addr, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId, call.moduleName, call.fname);
+                    }
                     app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null});
+                    break;
+                case "call":
+                    console.log("call: " + call)
+                    if (getRelayPeerId() === id) {
+                        result = await conn.sendServiceLocalCallWaitResponse(call.fname, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                    } else {
+                        let peerAddr = createPeerAddress(id);
+                        result = await conn.sendCall(peerAddr, call.args, true, call.moduleName, call.fname);
+                    }
+                    break;
+                default:
+                    console.error("Received unknown interfacesRequest from the Elm app", command);
             }
+        }
 
     });
 
@@ -158,6 +194,10 @@ export async function establishConnection(app, target) {
             } else {
                 await PeerId.createFromB58String(target.peerId);
             }
+
+            console.log("set peer id = " + target.peerId)
+
+            setRelayPeerId(target.peerId);
 
             if (errorMsg) {
                 peerErrorEvent(errorMsg);

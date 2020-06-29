@@ -29,7 +29,7 @@ let flags = {
     defaultPeerRelayInput: {
         host: "127.0.0.1",
         pport: "9999",
-        peerId: "12D3KooWGwgiSyGk2Lp5j9eoiknLsVYhjGpHXs6WoHE7STkZCa7L",
+        peerId: "12D3KooWHTgADoqubMPnTQFjwfTd7PgJdPmtmm4b8PmhoYPFbvjx",
         privateKey: ""
     },
     relays: getRelays().map(convertRelayForELM),

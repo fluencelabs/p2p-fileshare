@@ -2,22 +2,37 @@ module NetworkMap.Interfaces.Update exposing (..)
 
 import Array exposing (Array)
 import Dict exposing (Dict)
+import Maybe exposing (andThen)
 import NetworkMap.Interfaces.Port as Port
-import NetworkMap.Interfaces.Model exposing (Model)
+import NetworkMap.Interfaces.Model exposing (Arg, Function, Inputs, Model, Module)
 import NetworkMap.Interfaces.Msg exposing (Msg(..))
+
+getArgs : String -> String -> Inputs -> Array Arg
+getArgs moduleName fname inputs =
+    let
+        args = inputs |> Dict.get moduleName |> andThen (Dict.get fname)
+    in
+        Maybe.withDefault Array.empty args
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetInterface peerId ->
-            ( model, Port.interfacesRequest { command = "get_interface", id = Just peerId } )
+            ( model, Port.interfacesRequest { command = "get_interface", id = Just peerId, call = Nothing } )
+
+        CallFunction id moduleName fname ->
+            let
+                args = model.inputs |> getArgs moduleName fname
+                call = { moduleName = moduleName, fname = fname, args = Array.toList args}
+            in
+                ( model, Port.interfacesRequest { command = "call", id = Just id, call = Just call } )
 
         AddInterface interface ->
             let
-                a = 1
+                inputs = modulesToInputs interface.modules
 
             in
-                ( { model | interface = Just interface }, Cmd.none )
+                ( { model | interface = Just interface, inputs = inputs }, Cmd.none )
 
         UpdateInput moduleId functionId idx input ->
             let
@@ -27,6 +42,14 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
+
+modulesToInputs : List Module -> Inputs
+modulesToInputs modules =
+    modules |> List.foldl (\m -> \d -> d |> Dict.insert m.name (functionsToDic m.functions)) Dict.empty
+
+functionsToDic : List Function -> Dict String (Array String)
+functionsToDic functions =
+    functions |> List.foldl (\f -> \d -> d |> Dict.insert f.name (Array.initialize (Array.length f.inputs) (always ""))) Dict.empty
 
 moduleUpdate: String -> String -> Int -> Maybe (Dict String (Array String)) -> Maybe (Dict String (Array String))
 moduleUpdate input functionId idx old =

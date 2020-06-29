@@ -114,12 +114,10 @@ showNode screen nodeEntry =
             , el [ alignRight, padding 10 ] <| actionButton
             ]
          ]
-            ++ [ if nodeEntry.actionsOpened then
-                    certificates screen nodeEntry
-
+            ++ if nodeEntry.actionsOpened then
+                    [ certificates screen nodeEntry, interfaces screen nodeEntry ]
                  else
-                    Element.none
-               ] ++ [ interfaces screen nodeEntry ]
+                    [ Element.none ]
         )
 
 interfaces : Screen.Model -> NodeEntry -> Element Msg

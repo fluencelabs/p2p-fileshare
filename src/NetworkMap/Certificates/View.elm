@@ -184,7 +184,7 @@ actionView id certs showCertState =
         ]
     , column [ fillWidth, limitLayoutWidth, Background.blackAlpha 10, centerX, paddingXY 20 10 ] <|
         if A.isEmpty certsView then
-            [ text "No certificates loaded." ]
+            [ Element.none ]
 
         else
             A.toList certsView

@@ -42,7 +42,7 @@ let relays = [
     // {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", privateKey: null}, dns: "relay01.fluence.dev", pport: 19005},
     // {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", privateKey: null}, dns: "relay01.fluence.dev", pport: 19990},
     // {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", privateKey: null}, dns: "relay01.fluence.dev", pport: 19100},
-    {peer: {id: "12D3KooWGwgiSyGk2Lp5j9eoiknLsVYhjGpHXs6WoHE7STkZCa7L", privateKey: null}, host: "127.0.0.1", pport: 9999},
+    {peer: {id: "12D3KooWHTgADoqubMPnTQFjwfTd7PgJdPmtmm4b8PmhoYPFbvjx", privateKey: null}, host: "127.0.0.1", pport: 9999},
 ];
 
 export function getRelays() {
