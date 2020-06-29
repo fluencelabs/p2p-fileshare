@@ -31,7 +31,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, certs : Maybe (List Certificate), interface: Maybe Interface, id : Maybe String, peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String } }
+    { event : String, certs : Maybe (List Certificate), interface : Maybe Interface, id : Maybe String, peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String } }
 
 
 port networkMapReceiver : (Event -> msg) -> Sub msg

@@ -114,15 +114,19 @@ showNode screen nodeEntry =
             , el [ alignRight, padding 10 ] <| actionButton
             ]
          ]
-            ++ if nodeEntry.actionsOpened then
+            ++ (if nodeEntry.actionsOpened then
                     [ certificates screen nodeEntry, interfaces screen nodeEntry ]
-                 else
+
+                else
                     [ Element.none ]
+               )
         )
+
 
 interfaces : Screen.Model -> NodeEntry -> Element Msg
 interfaces screen node =
     liftView .interfaces (InterfaceMsg node.peer.id) (NetworkMap.Interfaces.View.view screen) <| node
+
 
 certificates : Screen.Model -> NodeEntry -> Element Msg
 certificates screen node =

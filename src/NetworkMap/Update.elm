@@ -98,7 +98,6 @@ update msg model =
 
 
 
-
 -- change 'actionsOpened' to true, only if 'currentId' equals 'idToOpen'
 
 
@@ -151,6 +150,7 @@ liftCertMsg model id msg =
     in
     updated |> withDefault ( model, Cmd.none )
 
+
 liftInterfaceMsg : Model -> String -> InterfaceMsg.Msg -> ( Model, Cmd Msg )
 liftInterfaceMsg model id msg =
     let
@@ -167,6 +167,7 @@ liftInterfaceMsg model id msg =
     in
     updated |> withDefault ( model, Cmd.none )
 
+
 updateIEntry : Interfaces.Model -> NodeEntry -> NodeEntry
 updateIEntry interfaces entry =
     { entry | interfaces = interfaces }
@@ -175,6 +176,7 @@ updateIEntry interfaces entry =
 updateIDict : String -> Interfaces.Model -> Dict String NodeEntry -> Dict String NodeEntry
 updateIDict id model dict =
     Dict.update id (\nm -> map (updateIEntry model) nm) dict
+
 
 updateEntry : Certificates.Model -> NodeEntry -> NodeEntry
 updateEntry certModel entry =
