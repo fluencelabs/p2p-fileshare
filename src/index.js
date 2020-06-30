@@ -27,9 +27,9 @@ let flags = {
     isAdmin: false,
     peerId: null,
     defaultPeerRelayInput: {
-        host: "127.0.0.1",
-        pport: "9999",
-        peerId: "12D3KooWHTgADoqubMPnTQFjwfTd7PgJdPmtmm4b8PmhoYPFbvjx",
+        host: "relay02.fluence.dev",
+        pport: "19001",
+        peerId: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9",
         privateKey: ""
     },
     relays: getRelays().map(convertRelayForELM),

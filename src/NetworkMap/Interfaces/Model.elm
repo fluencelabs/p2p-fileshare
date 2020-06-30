@@ -25,7 +25,7 @@ type alias Arg =
 
 
 type alias Call =
-    { moduleName : String, fname : String, args : List Arg }
+    { moduleName : String, fname : String, args : Maybe (List Arg) }
 
 
 type alias Function =

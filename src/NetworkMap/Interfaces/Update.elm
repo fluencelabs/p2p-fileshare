@@ -43,9 +43,10 @@ update msg model =
             let
                 args =
                     model.inputs |> getArgs moduleName fname
+                argsM = if (Array.isEmpty args) then Nothing else Just <| Array.toList args
 
                 call =
-                    { moduleName = moduleName, fname = fname, args = Array.toList args }
+                    { moduleName = moduleName, fname = fname, args = argsM }
             in
             ( model, Port.interfacesRequest { command = "call", id = Just id, call = Just call } )
 

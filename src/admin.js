@@ -85,12 +85,8 @@ export function initAdmin(adminApp) {
                         result = await conn.sendServiceLocalCallWaitResponse("get_interface", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
                     } else {
                         let peerAddr = createPeerAddress(id);
-                        let serviceAddr = createServiceAddress("get_interface");
-                        let addr = {
-                            protocols: peerAddr.protocols.concat(serviceAddr.protocols)
-                        }
 
-                        result = await conn.sendCallWaitResponse(addr, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId, call.moduleName, call.fname);
+                        result = await conn.sendCallWaitResponse(peerAddr, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId, "get_interface");
                     }
                     app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null});
                     break;
