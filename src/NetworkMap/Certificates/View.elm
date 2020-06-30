@@ -44,7 +44,7 @@ view screen networkModel =
             maybes |> A.map (\m -> { chain = reverse (flatMaybes m) })
     in
     column [ fillWidth ]
-        (actionView networkModel.id certs networkModel.showCertState)
+        (actionView certs networkModel.showCertState)
 
 
 showCertLink : Int -> Int -> String -> Element Msg
@@ -147,19 +147,28 @@ certView certIdx cert showTrust =
         ]
 
 
-actionView : String -> Array Certificate -> Maybe ShowCertState -> List (Element Msg)
-actionView id certs showCertState =
+optionsView : Model -> Element Msg
+optionsView model =
     let
         addCertButton =
             Input.button
                 [ padding 10, Background.blackAlpha 60 ]
-                { onPress = Just <| AddCertificate id, label = text "Add Cert" }
+                { onPress = Just <| AddCertificate model.id, label = text "Add Cert" }
 
         getCertButton =
             Input.button
                 [ padding 10, Background.blackAlpha 60 ]
-                { onPress = Just <| GetCertificate id, label = text "Get Cert" }
+                { onPress = Just <| GetCertificate model.id, label = text "Get Cert" }
+    in
+    row [ limitLayoutWidth, Background.white, centerX ]
+        [ el [ alignRight, padding 5 ] <| addCertButton
+        , el [ alignRight, padding 5 ] <| getCertButton
+        ]
 
+
+actionView : Array Certificate -> Maybe ShowCertState -> List (Element Msg)
+actionView certs showCertState =
+    let
         certsView =
             A.indexedMap
                 (\i ->
@@ -178,11 +187,7 @@ actionView id certs showCertState =
                 )
                 certs
     in
-    [ row [ limitLayoutWidth, Background.white, centerX ]
-        [ el [ alignRight, padding 5 ] <| addCertButton
-        , el [ alignRight, padding 5 ] <| getCertButton
-        ]
-    , column [ fillWidth, limitLayoutWidth, Background.blackAlpha 10, centerX, paddingXY 20 10 ] <|
+    [ column [ fillWidth, limitLayoutWidth, Background.blackAlpha 10, centerX, paddingXY 20 10 ] <|
         if A.isEmpty certsView then
             [ Element.none ]
 

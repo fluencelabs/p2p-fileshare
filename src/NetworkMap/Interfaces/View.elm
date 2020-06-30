@@ -18,7 +18,7 @@ limitations under the License.
 
 import Array exposing (Array)
 import Dict exposing (Dict)
-import Element exposing (Element, centerX, column, el, fillPortion, padding, paddingXY, row, spacing, text, width)
+import Element exposing (Element, alignRight, centerX, column, el, fillPortion, padding, paddingXY, row, spacing, text, width)
 import Element.Font as Font
 import Element.Input as Input
 import Ions.Background as Background
@@ -26,7 +26,7 @@ import Ions.Font as F
 import Ions.Size as S
 import NetworkMap.Interfaces.Model exposing (Function, Inputs, Interface, Model, Module)
 import NetworkMap.Interfaces.Msg exposing (Msg(..))
-import Palette exposing (accentButton, fillWidth, letterSpacing)
+import Palette exposing (accentButton, fillWidth, letterSpacing, limitLayoutWidth)
 import Screen.Model as Screen
 
 
@@ -37,17 +37,25 @@ view screen model =
             (model.interface |> Maybe.map (interfaceForms model.id model.inputs)) |> Maybe.withDefault Element.none
     in
     column [ fillWidth ]
-        [ modulesEl
-        , Input.button
-            [ width <| Element.px 80 ]
-          <|
-            { onPress = Just <| GetInterface model.id
-            , label =
-                Element.el
-                    [ Font.underline
-                    ]
-                    (Element.text "Get Interfaces")
-            }
+        [ modulesEl ]
+
+
+optionsView : Model -> Element Msg
+optionsView model =
+    let
+        btn =
+            Input.button
+                [ padding 10, Background.blackAlpha 60 ]
+            <|
+                { onPress = Just <| GetInterface model.id
+                , label =
+                    Element.el
+                        []
+                        (Element.text "Get Interfaces")
+                }
+    in
+    row [ limitLayoutWidth, Background.white, centerX ]
+        [ el [ alignRight, padding 5 ] <| btn
         ]
 
 

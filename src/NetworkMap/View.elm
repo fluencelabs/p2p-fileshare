@@ -115,22 +115,29 @@ showNode screen nodeEntry =
             ]
          ]
             ++ (if nodeEntry.actionsOpened then
-                    [ certificates screen nodeEntry, interfaces screen nodeEntry ]
+                    [ certificateOptions nodeEntry, interfaceOptions nodeEntry, certificates screen nodeEntry, interfaces screen nodeEntry ]
 
                 else
                     [ Element.none ]
                )
         )
 
-
 interfaces : Screen.Model -> NodeEntry -> Element Msg
 interfaces screen node =
     liftView .interfaces (InterfaceMsg node.peer.id) (NetworkMap.Interfaces.View.view screen) <| node
+
+interfaceOptions : NodeEntry -> Element Msg
+interfaceOptions node =
+    liftView .interfaces (InterfaceMsg node.peer.id) (NetworkMap.Interfaces.View.optionsView) <| node
 
 
 certificates : Screen.Model -> NodeEntry -> Element Msg
 certificates screen node =
     liftView .certificates (CertMsg node.peer.id) (NetworkMap.Certificates.View.view screen) <| node
+
+certificateOptions : NodeEntry -> Element Msg
+certificateOptions node =
+    liftView .certificates (CertMsg node.peer.id) (NetworkMap.Certificates.View.optionsView) <| node
 
 
 liftView :
