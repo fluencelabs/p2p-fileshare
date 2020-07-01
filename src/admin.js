@@ -28,8 +28,7 @@ import {TrustGraph} from "fluence/dist/trust/trust_graph";
 import {nodeRootCert} from "fluence/dist/trust/misc";
 import {issue} from "fluence/dist/trust/certificate";
 import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
-import {genUUID} from "fluence/dist/function_call";
-import {createPeerAddress, createServiceAddress} from "fluence/dist/address";
+import {createPeerAddress} from "fluence/dist/address";
 
 let Address4 = require('ip-address').Address4;
 
@@ -75,26 +74,22 @@ export function initAdmin(adminApp) {
         let conn = getConnection();
         if (!conn) console.error("Cannot handle interfacesRequest when not connected");
         else {
-            let msgId = genUUID();
             let result;
             switch (command) {
                 case "get_interface":
-                    console.log("id = " + id)
-                    console.log("peer id = " + getRelayPeerId())
                     if (getRelayPeerId() === id) {
-                        result = await conn.sendServiceLocalCallWaitResponse("get_interface", {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+                        result = await conn.sendServiceLocalCallWaitResponse("get_interface", {});
                     } else {
                         let peerAddr = createPeerAddress(id);
 
-                        result = await conn.sendCallWaitResponse(peerAddr, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId, "get_interface");
+                        result = await conn.sendCallWaitResponse(peerAddr, {}, "get_interface");
                     }
+
                     app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null});
                     break;
                 case "call":
-                    console.log("call: ")
-                    console.log(call)
                     if (getRelayPeerId() === id) {
-                        result = await conn.sendServiceLocalCallWaitResponse(call.moduleName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId, call.fname);
+                        result = await conn.sendServiceLocalCallWaitResponse(call.moduleName, {}, call.fname);
                     } else {
                         let peerAddr = createPeerAddress(id);
                         result = await conn.sendCall(peerAddr, call.args, true, call.moduleName, call.fname);
@@ -191,8 +186,6 @@ export async function establishConnection(app, target) {
             } else {
                 await PeerId.createFromB58String(target.peerId);
             }
-
-            console.log("set peer id = " + target.peerId)
 
             setRelayPeerId(target.peerId);
 

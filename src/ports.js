@@ -19,7 +19,6 @@ import Hash from 'ipfs-only-hash';
 import bs58 from 'bs58';
 
 import Fluence from 'fluence';
-import {genUUID} from "fluence/dist/function_call";
 import {establishConnection, initAdmin} from "./admin"
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
@@ -191,7 +190,8 @@ export default async function ports(app) {
         }
     });
 
-    let multiaddrService = "IPFS.multiaddr";
+    let multiaddrService = "ipfs_node.wasm";
+    let multiaddrFname = "get_address";
 
     // callback to add a local file in Fluence network
     app.ports.selectFile.subscribe(async () => {
@@ -235,10 +235,9 @@ export default async function ports(app) {
                     } else {
 
                         // call multiaddr
-                        let msgId = genUUID();
+                        let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, [], multiaddrFname);
 
-                        let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
-                        let multiaddr = multiaddrResult.multiaddr;
+                        let multiaddr = multiaddrResult.result;
                         // upload a file
                         fileUploading(hash);
                         await ipfsAdd(multiaddr, knownFiles[hash].bytes);
@@ -309,11 +308,10 @@ export default async function ports(app) {
         if (!!file && file.bytes && file.bytes.length > 0) {
             fileLog(hash, "This file is already known");
         } else {
-            let msgId = genUUID();
             let serviceName = "IPFS.get_" + hash;
 
-            fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
-            let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+            fileLog(hash, "Trying to discover " + serviceName);
+            let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {});
             let multiaddr = multiaddrResult.multiaddr;
 
             fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");

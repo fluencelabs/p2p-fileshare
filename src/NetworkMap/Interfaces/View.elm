@@ -65,7 +65,7 @@ interfaceForms id inputs interface =
         modules =
             interface.modules
     in
-    column [ fillWidth, spacing 10 ] (modules |> List.map (moduleForms id inputs))
+    column [ fillWidth, spacing 10 ] (Dict.values (modules |> Dict.map (\n -> \m -> moduleForms id n inputs m)))
 
 
 defn : String -> Element Msg
@@ -78,32 +78,26 @@ valn t =
     el [ width (fillPortion 5), Font.size 16 ] <| t
 
 
-moduleForms : String -> Inputs -> Module -> Element Msg
-moduleForms id inputs mod =
+moduleForms : String -> String -> Inputs -> Module -> Element Msg
+moduleForms id name inputs mod =
     let
-        name =
-            mod.name
-
         nameEl =
             row [ fillWidth, centerX, padding 8 ] [ defn "Module: ", valn <| text name ]
 
         functions =
             mod.functions
     in
-    column [ fillWidth, Background.blackAlpha 20, padding 10 ] ([ nameEl ] ++ (functions |> List.map (functionForms id inputs name)))
+    column [ fillWidth, Background.blackAlpha 20, padding 10 ] ([ nameEl ] ++ Dict.values (functions |> Dict.map (\n -> \f -> functionForms id n inputs name f)))
 
 
-functionForms : String -> Inputs -> String -> Function -> Element Msg
-functionForms id inputs moduleId function =
+functionForms : String -> String -> Inputs -> String -> Function -> Element Msg
+functionForms id name inputs moduleId function =
     let
-        name =
-            function.name
-
         nameEl =
             row [ fillWidth, centerX ] [ defn "Function: ", valn <| text name ]
 
         inputsElements =
-            function.inputs |> Array.indexedMap (\i -> \inp -> genInput moduleId name i inp inputs)
+            function.input_types |> Array.indexedMap (\i -> \inp -> genInput moduleId name i inp inputs)
 
         btn =
             row []
@@ -113,7 +107,7 @@ functionForms id inputs moduleId function =
                 ]
 
         outputs =
-            function.outputs
+            function.output_types
     in
     column [ spacing 12, fillWidth, Background.blackAlpha 40, padding 10 ] ([ nameEl ] ++ Array.toList inputsElements ++ [ btn ])
 

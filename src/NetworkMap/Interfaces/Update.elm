@@ -74,14 +74,14 @@ update msg model =
             ( model, Cmd.none )
 
 
-modulesToInputs : List Module -> Inputs
+modulesToInputs : Dict String Module -> Inputs
 modulesToInputs modules =
-    modules |> List.foldl (\m -> \d -> d |> Dict.insert m.name (functionsToDic m.functions)) Dict.empty
+    modules |> Dict.map (\_ -> \m -> functionsToDic m.functions)
 
 
-functionsToDic : List Function -> Dict String (Array String)
+functionsToDic : Dict String Function -> Dict String (Array String)
 functionsToDic functions =
-    functions |> List.foldl (\f -> \d -> d |> Dict.insert f.name (Array.initialize (Array.length f.inputs) (always ""))) Dict.empty
+    functions |> Dict.map (\_ -> \f -> Array.initialize (Array.length f.input_types) (always ""))
 
 
 moduleUpdate : String -> String -> Int -> Maybe (Dict String (Array String)) -> Maybe (Dict String (Array String))

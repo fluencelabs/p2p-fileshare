@@ -29,15 +29,15 @@ type alias Call =
 
 
 type alias Function =
-    { name : String, inputs : Array String, outputs : Array String }
+    { input_types : Array String, output_types : Array String }
 
 
 type alias Module =
-    { name : String, functions : List Function }
+    { functions : Dict String Function }
 
 
 type alias Interface =
-    { modules : List Module }
+    { modules : Dict String Module }
 
 
 type alias Inputs =
