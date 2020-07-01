@@ -75,10 +75,11 @@ update msg model =
                 updated =
                     model.results |> Dict.update callResult.moduleName (resultUpdate callResult.result callResult.fname)
             in
-                ( { model | results = updated }, Cmd.none )
+            ( { model | results = updated }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
+
 
 resultUpdate : String -> String -> Maybe (Dict String String) -> Maybe (Dict String String)
 resultUpdate value fname old =
@@ -88,9 +89,11 @@ resultUpdate value fname old =
 
         Maybe.Nothing ->
             let
-                newDict = Dict.empty
+                newDict =
+                    Dict.empty
             in
-                Just (newDict |> Dict.insert fname value)
+            Just (newDict |> Dict.insert fname value)
+
 
 modulesToInputs : Dict String Module -> Inputs
 modulesToInputs modules =

@@ -23,6 +23,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Ions.Background as Background
+import Ions.Border as B
 import Ions.Font as F
 import Ions.Size as S
 import NetworkMap.Interfaces.Model exposing (Function, Inputs, Interface, Model, Module, Results)
@@ -91,14 +92,16 @@ moduleForms id name inputs results mod =
         functions =
             mod.functions
     in
-    column [ fillWidth, Background.blackAlpha 20, padding 10 ]
+    column [ fillWidth, Background.blackAlpha 20, padding 10, spacing 10 ]
         ([ nameEl ]
             ++ Dict.values (functions |> Dict.map (\n -> \f -> functionForms id n inputs (getResult name n results) name f))
         )
 
+
 getResult : String -> String -> Results -> Maybe String
 getResult moduleId fname results =
     results |> Dict.get moduleId |> Maybe.andThen (\d -> d |> Dict.get fname)
+
 
 functionForms : String -> String -> Inputs -> Maybe String -> String -> Function -> Element Msg
 functionForms id name inputs result moduleId function =
@@ -116,18 +119,22 @@ functionForms id name inputs result moduleId function =
                     { onPress = Just <| CallFunction id moduleId name, label = text "Call Function" }
                 ]
 
-        resultEl = case result of
-            Just r ->
-                text r
+        resultEl =
+            case result of
+                Just r ->
+                    text r
 
-            Nothing ->
-                Element.none
+                Nothing ->
+                    Element.none
 
         outputs =
-            function.output_types
+            row [ fillWidth, centerX ]
+                [ defn "Output Types"
+                , valn <| text ("[ " ++ String.join ", " (Array.toList function.output_types) ++ " ]")
+                ]
     in
-    column [ spacing 12, fillWidth, Background.blackAlpha 40, Border.solid, padding 10 ]
-        ([ nameEl ] ++ Array.toList inputsElements ++ [ resultEl, btn ])
+    column [ spacing 12, fillWidth, Background.blackAlpha 40, B.width1 B.AllSides, Border.dotted, padding 10 ]
+        ([ nameEl ] ++ Array.toList inputsElements ++ [ outputs, resultEl, btn ])
 
 
 genInput : String -> String -> Int -> String -> Inputs -> Element Msg
