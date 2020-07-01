@@ -28,6 +28,10 @@ type alias Call =
     { moduleName : String, fname : String, args : Maybe (List Arg) }
 
 
+type alias CallResult =
+    { moduleName : String, fname : String, result : String }
+
+
 type alias Function =
     { input_types : Array String, output_types : Array String }
 
@@ -44,5 +48,9 @@ type alias Inputs =
     Dict String (Dict String (Array String))
 
 
+type alias Results =
+    Dict String (Dict String String)
+
+
 type alias Model =
-    { id : String, interface : Maybe Interface, inputs : Inputs }
+    { id : String, interface : Maybe Interface, inputs : Inputs, results : Results }

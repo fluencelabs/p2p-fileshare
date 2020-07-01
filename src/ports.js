@@ -121,7 +121,7 @@ function subsribeToAppear(app, conn, peerIdStr) {
 // call if we found out about any peers or relays in Fluence network
 export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, interface: null, id: null, peerAppeared});
+    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, interface: null, id: null, result: null, peerAppeared});
 }
 
 function validateHash(hash) {

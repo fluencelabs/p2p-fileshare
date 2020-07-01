@@ -64,7 +64,7 @@ function sendCerts(id, certs) {
         return cert;
     })
 
-    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, interface: null, id: id, peerAppeared: null});
+    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, interface: null, result: null, id: id, peerAppeared: null});
 }
 
 export function initAdmin(adminApp) {
@@ -85,15 +85,19 @@ export function initAdmin(adminApp) {
                         result = await conn.sendCallWaitResponse(peerAddr, {}, "get_interface");
                     }
 
-                    app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null});
+                    app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null, result: null});
                     break;
                 case "call":
                     if (getRelayPeerId() === id) {
                         result = await conn.sendServiceLocalCallWaitResponse(call.moduleName, {}, call.fname);
                     } else {
                         let peerAddr = createPeerAddress(id);
-                        result = await conn.sendCall(peerAddr, call.args, true, call.moduleName, call.fname);
+                        result = await conn.sendCallWaitResponse(peerAddr, call.args, call.moduleName, call.fname);
                     }
+
+                    let callResult = {moduleName: call.moduleName, fname: call.fname, result: JSON.stringify(result, undefined, 2)};
+                    app.ports.networkMapReceiver.send({event: "add_result", certs: null, result: callResult, id: id, peerAppeared: null, interface: null});
+
                     break;
                 default:
                     console.error("Received unknown interfacesRequest from the Elm app", command);

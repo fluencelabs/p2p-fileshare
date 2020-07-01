@@ -19,12 +19,13 @@ limitations under the License.
 import Array exposing (Array)
 import Dict exposing (Dict)
 import Element exposing (Element, alignRight, centerX, column, el, fillPortion, padding, paddingXY, row, spacing, text, width)
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Ions.Background as Background
 import Ions.Font as F
 import Ions.Size as S
-import NetworkMap.Interfaces.Model exposing (Function, Inputs, Interface, Model, Module)
+import NetworkMap.Interfaces.Model exposing (Function, Inputs, Interface, Model, Module, Results)
 import NetworkMap.Interfaces.Msg exposing (Msg(..))
 import Palette exposing (accentButton, fillWidth, letterSpacing, limitLayoutWidth)
 import Screen.Model as Screen
@@ -34,7 +35,10 @@ view : Screen.Model -> Model -> Element Msg
 view screen model =
     let
         modulesEl =
-            (model.interface |> Maybe.map (interfaceForms model.id model.inputs)) |> Maybe.withDefault Element.none
+            (model.interface
+                |> Maybe.map (interfaceForms model.id model.inputs model.results)
+            )
+                |> Maybe.withDefault Element.none
     in
     column [ fillWidth ]
         [ modulesEl ]
@@ -59,13 +63,13 @@ optionsView model =
         ]
 
 
-interfaceForms : String -> Inputs -> Interface -> Element Msg
-interfaceForms id inputs interface =
+interfaceForms : String -> Inputs -> Results -> Interface -> Element Msg
+interfaceForms id inputs results interface =
     let
         modules =
             interface.modules
     in
-    column [ fillWidth, spacing 10 ] (Dict.values (modules |> Dict.map (\n -> \m -> moduleForms id n inputs m)))
+    column [ fillWidth, spacing 10 ] (Dict.values (modules |> Dict.map (\n -> \m -> moduleForms id n inputs results m)))
 
 
 defn : String -> Element Msg
@@ -78,8 +82,8 @@ valn t =
     el [ width (fillPortion 5), Font.size 16 ] <| t
 
 
-moduleForms : String -> String -> Inputs -> Module -> Element Msg
-moduleForms id name inputs mod =
+moduleForms : String -> String -> Inputs -> Results -> Module -> Element Msg
+moduleForms id name inputs results mod =
     let
         nameEl =
             row [ fillWidth, centerX, padding 8 ] [ defn "Module: ", valn <| text name ]
@@ -87,11 +91,17 @@ moduleForms id name inputs mod =
         functions =
             mod.functions
     in
-    column [ fillWidth, Background.blackAlpha 20, padding 10 ] ([ nameEl ] ++ Dict.values (functions |> Dict.map (\n -> \f -> functionForms id n inputs name f)))
+    column [ fillWidth, Background.blackAlpha 20, padding 10 ]
+        ([ nameEl ]
+            ++ Dict.values (functions |> Dict.map (\n -> \f -> functionForms id n inputs (getResult name n results) name f))
+        )
 
+getResult : String -> String -> Results -> Maybe String
+getResult moduleId fname results =
+    results |> Dict.get moduleId |> Maybe.andThen (\d -> d |> Dict.get fname)
 
-functionForms : String -> String -> Inputs -> String -> Function -> Element Msg
-functionForms id name inputs moduleId function =
+functionForms : String -> String -> Inputs -> Maybe String -> String -> Function -> Element Msg
+functionForms id name inputs result moduleId function =
     let
         nameEl =
             row [ fillWidth, centerX ] [ defn "Function: ", valn <| text name ]
@@ -106,10 +116,18 @@ functionForms id name inputs moduleId function =
                     { onPress = Just <| CallFunction id moduleId name, label = text "Call Function" }
                 ]
 
+        resultEl = case result of
+            Just r ->
+                text r
+
+            Nothing ->
+                Element.none
+
         outputs =
             function.output_types
     in
-    column [ spacing 12, fillWidth, Background.blackAlpha 40, padding 10 ] ([ nameEl ] ++ Array.toList inputsElements ++ [ btn ])
+    column [ spacing 12, fillWidth, Background.blackAlpha 40, Border.solid, padding 10 ]
+        ([ nameEl ] ++ Array.toList inputsElements ++ [ resultEl, btn ])
 
 
 genInput : String -> String -> Int -> String -> Inputs -> Element Msg

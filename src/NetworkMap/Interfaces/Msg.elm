@@ -16,12 +16,13 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Interfaces.Model exposing (Call, Interface)
+import NetworkMap.Interfaces.Model exposing (Call, CallResult, Interface)
 
 
 type Msg
     = GetInterface String
     | AddInterface Interface
+    | AddResult CallResult
     | CallFunction String String String
     | UpdateInput String String Int String
     | NoOp

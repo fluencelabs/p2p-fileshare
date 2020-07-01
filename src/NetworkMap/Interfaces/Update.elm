@@ -70,9 +70,27 @@ update msg model =
             in
             ( { model | inputs = updated }, Cmd.none )
 
+        AddResult callResult ->
+            let
+                updated =
+                    model.results |> Dict.update callResult.moduleName (resultUpdate callResult.result callResult.fname)
+            in
+                ( { model | results = updated }, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
+resultUpdate : String -> String -> Maybe (Dict String String) -> Maybe (Dict String String)
+resultUpdate value fname old =
+    case old of
+        Maybe.Just o ->
+            Just (o |> Dict.insert fname value)
+
+        Maybe.Nothing ->
+            let
+                newDict = Dict.empty
+            in
+                Just (newDict |> Dict.insert fname value)
 
 modulesToInputs : Dict String Module -> Inputs
 modulesToInputs modules =
