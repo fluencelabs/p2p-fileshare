@@ -25,7 +25,9 @@
   "homepage": "https://github.com/fluencelabs/p2p-fileshare#readme",
   "devDependencies": {
     "create-elm-app": "4.2.24",
-    "replace-in-file": "^6.0.0"
+    "replace-in-file": "^6.0.0",
+    "webpack": "^4.43.0",
+    "@babel/core": "^7.10.4"
   },
   "dependencies": {
     "ipfs-http-client": "44.1.0",
