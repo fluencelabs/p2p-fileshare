@@ -17,8 +17,8 @@ limitations under the License.
 -}
 
 import Array exposing (Array)
-import Json.Decode exposing (Decoder, Value, array, decodeValue, dict, field, map, map2, string)
-import Maybe exposing (andThen)
+import Json.Decode exposing (Decoder, Value, array, decodeValue, dict, field, map, string)
+import Maybe exposing (andThen, map2, withDefault)
 import NetworkMap.Certificates.Model exposing (Certificate)
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Interfaces.Model exposing (CallResult, Function, Interface, Module)
@@ -70,27 +70,23 @@ eventToMsg event =
                         )
 
             "add_cert" ->
-                event.certs
-                    |> andThen
-                        (\certs ->
-                            event.id
-                                --TODO: handle certificate events in 'Certificates' module
-                                |> andThen (\id -> Just (CertMsg id (CertificatesMsg.CertificatesAdded <| Array.fromList certs)))
-                        )
+                map2
+                    (\certs -> \id -> CertMsg id (CertificatesMsg.CertificatesAdded <| Array.fromList certs))
+                    event.certs
+                    event.id
 
             "add_interface" ->
-                event.interface
-                    |> andThen
-                        (\interface ->
-                            event.id |> andThen (\id -> decodeJson id interface)
-                        )
+                withDefault Nothing <|
+                    map2
+                        (\interface -> \id -> decodeJson id interface)
+                        event.interface
+                        event.id
 
             "add_result" ->
-                event.result
-                    |> andThen
-                        (\result ->
-                            event.id |> andThen (\id -> Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddResult result)))
-                        )
+                map2
+                    (\id -> \result -> InterfaceMsg id (NetworkMap.Interfaces.Msg.AddResult result))
+                    event.id
+                    event.result
 
             _ ->
                 Nothing
@@ -120,7 +116,7 @@ decodeStringList =
 
 decodeFunction : Decoder Function
 decodeFunction =
-    map2 Function
+    Json.Decode.map2 Function
         (field "input_types" decodeStringList)
         (field "output_types" decodeStringList)
 

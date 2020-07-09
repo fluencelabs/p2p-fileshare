@@ -73,13 +73,13 @@ interfaceForms id inputs results interface =
     column [ fillWidth, spacing 10 ] (Dict.values (modules |> Dict.map (\n -> \m -> moduleForms id n inputs results m)))
 
 
-defn : String -> Element Msg
-defn t =
+blockName : String -> Element Msg
+blockName t =
     el [ width (fillPortion 2), letterSpacing, F.gray ] <| Element.text t
 
 
-valn : Element Msg -> Element Msg
-valn t =
+blockValue : Element Msg -> Element Msg
+blockValue t =
     el [ width (fillPortion 5), Font.size 16 ] <| t
 
 
@@ -87,7 +87,7 @@ moduleForms : String -> String -> Inputs -> Results -> Module -> Element Msg
 moduleForms id name inputs results mod =
     let
         nameEl =
-            row [ fillWidth, centerX, padding 8 ] [ defn "Module: ", valn <| text name ]
+            row [ fillWidth, centerX, padding 8 ] [ blockName "Module: ", blockValue <| text name ]
 
         functions =
             mod.functions
@@ -107,7 +107,7 @@ functionForms : String -> String -> Inputs -> Maybe String -> String -> Function
 functionForms id name inputs result moduleId function =
     let
         nameEl =
-            row [ fillWidth, centerX ] [ defn "Function: ", valn <| text name ]
+            row [ fillWidth, centerX ] [ blockName "Function: ", blockValue <| text name ]
 
         inputsElements =
             function.input_types |> Array.indexedMap (\i -> \inp -> genInput moduleId name i inp inputs)
@@ -129,8 +129,8 @@ functionForms id name inputs result moduleId function =
 
         outputs =
             row [ fillWidth, centerX ]
-                [ defn "Output Types"
-                , valn <| text ("[ " ++ String.join ", " (Array.toList function.output_types) ++ " ]")
+                [ blockName "Output Types"
+                , blockValue <| text ("[ " ++ String.join ", " (Array.toList function.output_types) ++ " ]")
                 ]
     in
     column [ spacing 12, fillWidth, Background.blackAlpha 40, B.width1 B.AllSides, Border.dotted, padding 10 ]

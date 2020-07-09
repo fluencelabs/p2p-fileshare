@@ -97,11 +97,11 @@ resultUpdate value fname old =
 
 modulesToInputs : Dict String Module -> Inputs
 modulesToInputs modules =
-    modules |> Dict.map (\_ -> \m -> functionsToDic m.functions)
+    modules |> Dict.map (\_ -> \m -> functionsToStringArrays m.functions)
 
 
-functionsToDic : Dict String Function -> Dict String (Array String)
-functionsToDic functions =
+functionsToStringArrays : Dict String Function -> Dict String (Array String)
+functionsToStringArrays functions =
     functions |> Dict.map (\_ -> \f -> Array.initialize (Array.length f.input_types) (always ""))
 
 
@@ -109,14 +109,14 @@ moduleUpdate : String -> String -> Int -> Maybe (Dict String (Array String)) -> 
 moduleUpdate input functionId idx old =
     case old of
         Just o ->
-            Just (o |> Dict.update functionId (functionUpdate input idx))
+            Just (o |> Dict.update functionId (inputUpdate input idx))
 
         Nothing ->
             old
 
 
-functionUpdate : String -> Int -> Maybe (Array String) -> Maybe (Array String)
-functionUpdate input idx old =
+inputUpdate : String -> Int -> Maybe (Array String) -> Maybe (Array String)
+inputUpdate input idx old =
     case old of
         Just o ->
             Just (o |> Array.set idx input)
