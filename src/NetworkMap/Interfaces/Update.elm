@@ -97,11 +97,11 @@ resultUpdate value fname old =
 
 modulesToInputs : Dict String Module -> Inputs
 modulesToInputs modules =
-    modules |> Dict.map (\_ -> \m -> functionsToStringArrays m.functions)
+    modules |> Dict.map (\_ -> \m -> functionsToBlankInputs m.functions)
 
 
-functionsToStringArrays : Dict String Function -> Dict String (Array String)
-functionsToStringArrays functions =
+functionsToBlankInputs : Dict String Function -> Dict String (Array String)
+functionsToBlankInputs functions =
     functions |> Dict.map (\_ -> \f -> Array.initialize (Array.length f.input_types) (always ""))
 
 
