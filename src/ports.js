@@ -19,7 +19,6 @@ import Hash from 'ipfs-only-hash';
 import bs58 from 'bs58';
 
 import Fluence from 'fluence';
-import {genUUID} from "fluence/dist/function_call";
 import {establishConnection, initAdmin} from "./admin"
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
@@ -35,13 +34,13 @@ import {
 import {peerEvent, relayEvent} from "./connectionReceiver";
 
 let relays = [
-    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", privateKey: null}, dns: "relay01.fluence.dev", pport: 19001},
-    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er", privateKey: null}, dns: "relay01.fluence.dev", pport: 19002},
-    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", privateKey: null}, dns: "relay01.fluence.dev", pport: 19003},
-    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB", privateKey: null}, dns: "relay01.fluence.dev", pport: 19004},
-    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", privateKey: null}, dns: "relay01.fluence.dev", pport: 19005},
-    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", privateKey: null}, dns: "relay01.fluence.dev", pport: 19990},
-    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", privateKey: null}, dns: "relay01.fluence.dev", pport: 19100},
+    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", privateKey: null}, dns: "relay02.fluence.dev", pport: 19001},
+    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er", privateKey: null}, dns: "relay02.fluence.dev", pport: 19002},
+    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", privateKey: null}, dns: "relay02.fluence.dev", pport: 19003},
+    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB", privateKey: null}, dns: "relay02.fluence.dev", pport: 19004},
+    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", privateKey: null}, dns: "relay02.fluence.dev", pport: 19005},
+    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", privateKey: null}, dns: "relay02.fluence.dev", pport: 19990},
+    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", privateKey: null}, dns: "relay02.fluence.dev", pport: 19100},
 ];
 
 export function getRelays() {
@@ -122,7 +121,7 @@ function subsribeToAppear(app, conn, peerIdStr) {
 // call if we found out about any peers or relays in Fluence network
 export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, id: null, peerAppeared});
+    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, interface: null, id: null, result: null, peerAppeared});
 }
 
 function validateHash(hash) {
@@ -191,7 +190,8 @@ export default async function ports(app) {
         }
     });
 
-    let multiaddrService = "IPFS.multiaddr";
+    let multiaddrService = "ipfs_node.wasm";
+    let multiaddrFname = "get_address";
 
     // callback to add a local file in Fluence network
     app.ports.selectFile.subscribe(async () => {
@@ -235,10 +235,9 @@ export default async function ports(app) {
                     } else {
 
                         // call multiaddr
-                        let msgId = genUUID();
+                        let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, [], multiaddrFname);
 
-                        let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
-                        let multiaddr = multiaddrResult.multiaddr;
+                        let multiaddr = multiaddrResult.result;
                         // upload a file
                         fileUploading(hash);
                         await ipfsAdd(multiaddr, knownFiles[hash].bytes);
@@ -309,11 +308,10 @@ export default async function ports(app) {
         if (!!file && file.bytes && file.bytes.length > 0) {
             fileLog(hash, "This file is already known");
         } else {
-            let msgId = genUUID();
             let serviceName = "IPFS.get_" + hash;
 
-            fileLog(hash, "Trying to discover " + serviceName + ", msg_id=" + msgId);
-            let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {msg_id: msgId}, (args) => args.msg_id && args.msg_id === msgId);
+            fileLog(hash, "Trying to discover " + serviceName);
+            let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {});
             let multiaddr = multiaddrResult.multiaddr;
 
             fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");

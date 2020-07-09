@@ -16,10 +16,13 @@ limitations under the License.
 
 -}
 
-import Array
-import Maybe exposing (andThen)
+import Array exposing (Array)
+import Json.Decode exposing (Decoder, Value, array, decodeValue, dict, field, map, string)
+import Maybe exposing (andThen, map2, withDefault)
 import NetworkMap.Certificates.Model exposing (Certificate)
 import NetworkMap.Certificates.Msg as CertificatesMsg
+import NetworkMap.Interfaces.Model exposing (CallResult, Function, Interface, Module)
+import NetworkMap.Interfaces.Msg
 import NetworkMap.Model exposing (Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 
@@ -29,7 +32,13 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, certs : Maybe (List Certificate), id : Maybe String, peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String } }
+    { event : String
+    , certs : Maybe (List Certificate)
+    , interface : Maybe Json.Decode.Value
+    , result : Maybe CallResult
+    , id : Maybe String
+    , peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String }
+    }
 
 
 port networkMapReceiver : (Event -> msg) -> Sub msg
@@ -61,16 +70,60 @@ eventToMsg event =
                         )
 
             "add_cert" ->
-                event.certs
-                    |> andThen
-                        (\certs ->
-                            event.id
-                                --TODO: handle certificate events in 'Certificates' module
-                                |> andThen (\id -> Just (CertMsg id (CertificatesMsg.CertificatesAdded <| Array.fromList certs)))
-                        )
+                map2
+                    (\certs -> \id -> CertMsg id (CertificatesMsg.CertificatesAdded <| Array.fromList certs))
+                    event.certs
+                    event.id
+
+            "add_interface" ->
+                withDefault Nothing <|
+                    map2
+                        (\interface -> \id -> decodeJson id interface)
+                        event.interface
+                        event.id
+
+            "add_result" ->
+                map2
+                    (\id -> \result -> InterfaceMsg id (NetworkMap.Interfaces.Msg.AddResult result))
+                    event.id
+                    event.result
 
             _ ->
                 Nothing
+
+
+decodeJson : String -> Value -> Maybe Msg
+decodeJson id v =
+    let
+        interface =
+            decodeValue (field "modules" <| dict decodeModule) v
+
+        msg =
+            case interface of
+                Ok value ->
+                    Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterface <| { modules = value }))
+
+                Err error ->
+                    Nothing
+    in
+    msg
+
+
+decodeStringList : Decoder (Array String)
+decodeStringList =
+    array string
+
+
+decodeFunction : Decoder Function
+decodeFunction =
+    Json.Decode.map2 Function
+        (field "input_types" decodeStringList)
+        (field "output_types" decodeStringList)
+
+
+decodeModule : Decoder Module
+decodeModule =
+    map Module (dict decodeFunction)
 
 
 subscriptions : Model -> Sub Msg

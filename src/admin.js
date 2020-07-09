@@ -28,12 +28,22 @@ import {TrustGraph} from "fluence/dist/trust/trust_graph";
 import {nodeRootCert} from "fluence/dist/trust/misc";
 import {issue} from "fluence/dist/trust/certificate";
 import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
+import {createPeerAddress} from "fluence/dist/address";
 
 let Address4 = require('ip-address').Address4;
 
 let rootCert;
 let trustGraph;
 let app;
+let relayPeerId;
+
+export function getRelayPeerId() {
+    return relayPeerId
+}
+
+export function setRelayPeerId(peerId) {
+    relayPeerId = peerId
+}
 
 function getRootCert() {
     return rootCert;
@@ -54,15 +64,51 @@ function sendCerts(id, certs) {
         return cert;
     })
 
-    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, id: id, peerAppeared: null});
+    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, interface: null, result: null, id: id, peerAppeared: null});
 }
 
 export function initAdmin(adminApp) {
     app = adminApp;
 
+    app.ports.interfacesRequest.subscribe(async ({command, id, call}) => {
+        let conn = getConnection();
+        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
+        else {
+            let result;
+            switch (command) {
+                case "get_interface":
+                    if (getRelayPeerId() === id) {
+                        result = await conn.sendServiceLocalCallWaitResponse("get_interface", {});
+                    } else {
+                        let peerAddr = createPeerAddress(id);
+
+                        result = await conn.sendCallWaitResponse(peerAddr, {}, "get_interface");
+                    }
+
+                    app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null, result: null});
+                    break;
+                case "call":
+                    if (getRelayPeerId() === id) {
+                        result = await conn.sendServiceLocalCallWaitResponse(call.moduleName, {}, call.fname);
+                    } else {
+                        let peerAddr = createPeerAddress(id);
+                        result = await conn.sendCallWaitResponse(peerAddr, call.args, call.moduleName, call.fname);
+                    }
+
+                    let callResult = {moduleName: call.moduleName, fname: call.fname, result: JSON.stringify(result, undefined, 2)};
+                    app.ports.networkMapReceiver.send({event: "add_result", certs: null, result: callResult, id: id, peerAppeared: null, interface: null});
+
+                    break;
+                default:
+                    console.error("Received unknown interfacesRequest from the Elm app", command);
+            }
+        }
+
+    });
+
     app.ports.certificatesRequest.subscribe(async ({command, id}) => {
         let cert;
-        if (!getConnection()) console.error("Cannot handle networkMapRequest when not connected");
+        if (!getConnection()) console.error("Cannot handle certificatesRequest when not connected");
         else
             switch (command) {
                 case "issue":
@@ -102,7 +148,7 @@ export async function addCertificate(peerId) {
 
     if (!rootCert) {
         setRootCert(await nodeRootCert(conn.selfPeerInfo.id));
-        await trustGraph.publishCertificates(peerId, [rootCert]);
+        await trustGraph.publishCertificates(conn.selfPeerInfo.id.toB58String(), [rootCert]);
     }
 
     let issuedAt = new Date();
@@ -110,7 +156,7 @@ export async function addCertificate(peerId) {
     expiresAt.setMonth(expiresAt.getMonth() + 1);
 
     let issuedCert = await issue(conn.selfPeerInfo.id, PeerId.createFromB58String(peerId), getRootCert(), expiresAt.getTime(), issuedAt.getTime());
-    await trustGraph.publishCertificates(peerId, [getRootCert()]);
+    await trustGraph.publishCertificates(peerId, [issuedCert]);
     return issuedCert;
 }
 
@@ -144,6 +190,8 @@ export async function establishConnection(app, target) {
             } else {
                 await PeerId.createFromB58String(target.peerId);
             }
+
+            setRelayPeerId(target.peerId);
 
             if (errorMsg) {
                 peerErrorEvent(errorMsg);
