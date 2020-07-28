@@ -190,7 +190,9 @@ export default async function ports(app) {
         }
     });
 
-    let multiaddrService = "ipfs_node.wasm";
+    // TODO serviceId could be changed, get a new one on start with `getActiveInterfaces`
+    let multiaddrServiceId = "4a7a9034-474a-4d9c-8304-49a6441126c2";
+    let multiaddrModuleId = "ipfs_node.wasm";
     let multiaddrFname = "get_address";
 
     // callback to add a local file in Fluence network
@@ -219,15 +221,15 @@ export default async function ports(app) {
 
                 knownFiles[hash] = {bytes: array, preview: previewStr};
 
-                let serviceName = "IPFS.get_" + hash;
+                let providerName = "IPFS.get_" + hash;
 
                 fileLog(hash, "Going to advertise");
                 fileLoaded(hash, previewStr);
-                await conn.registerService(serviceName, async fc => {
+                await conn.provideName(providerName, async fc => {
                     fileLog(hash, "File asked");
 
                     let replyWithMultiaddr = async (multiaddr) =>
-                        await conn.sendCall(fc.reply_to, {msg_id: fc.arguments.msg_id, multiaddr});
+                        await conn.sendCall({target: fc.reply_to, args: {multiaddr}});
 
                     // check cache
                     if (knownFiles[hash].multiaddr) {
@@ -235,7 +237,7 @@ export default async function ports(app) {
                     } else {
 
                         // call multiaddr
-                        let multiaddrResult = await conn.sendServiceCallWaitResponse(multiaddrService, [], multiaddrFname);
+                        let multiaddrResult = await conn.callService("12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", multiaddrServiceId, multiaddrModuleId, [], multiaddrFname);
 
                         let multiaddr = multiaddrResult.result;
                         // upload a file
@@ -308,10 +310,11 @@ export default async function ports(app) {
         if (!!file && file.bytes && file.bytes.length > 0) {
             fileLog(hash, "This file is already known");
         } else {
-            let serviceName = "IPFS.get_" + hash;
+            let providerName = "IPFS.get_" + hash;
 
-            fileLog(hash, "Trying to discover " + serviceName);
-            let multiaddrResult = await conn.sendServiceCallWaitResponse(serviceName, {});
+            fileLog(hash, "Trying to discover " + providerName);
+            let multiaddrResult = await conn.callProvider(providerName, {}, providerName);
+
             let multiaddr = multiaddrResult.multiaddr;
 
             fileLog(hash, "Got multiaddr: " + multiaddr + ", going to download the file");
