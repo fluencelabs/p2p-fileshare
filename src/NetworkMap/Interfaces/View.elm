@@ -70,7 +70,7 @@ interfaceForms id inputs results interface =
         modules =
             interface.modules
     in
-    column [ fillWidth, spacing 10 ] (Dict.values (modules |> Dict.map (\n -> \m -> moduleForms id n inputs results m)))
+    column [ fillWidth, spacing 10 ] (modules |> List.map (\mod -> moduleForms id inputs results mod))
 
 
 blockName : String -> Element Msg
@@ -84,39 +84,39 @@ blockValue t =
 
 
 moduleForms : String -> String -> Inputs -> Results -> Module -> Element Msg
-moduleForms id name inputs results mod =
+moduleForms id serviceId inputs results mod =
     let
         nameEl =
-            row [ fillWidth, centerX, padding 8 ] [ blockName "Module: ", blockValue <| text name ]
+            row [ fillWidth, centerX, padding 8 ] [ blockName "Module: ", blockValue <| text mod.name ]
 
         functions =
             mod.functions
     in
     column [ fillWidth, Background.blackAlpha 20, padding 10, spacing 10 ]
         ([ nameEl ]
-            ++ Dict.values (functions |> Dict.map (\n -> \f -> functionForms id n inputs (getResult name n results) name f))
+            ++ (functions |> List.map (\f -> functionForms id inputs (getResult serviceId mod.name f.name results) mod.name f))
         )
 
 
-getResult : String -> String -> Results -> Maybe String
-getResult moduleId fname results =
-    results |> Dict.get moduleId |> Maybe.andThen (\d -> d |> Dict.get fname)
+getResult : String -> String -> String -> Results -> Maybe String
+getResult serviceId moduleId fname results =
+    results |> Dict.get serviceId |> Maybe.andThen (Dict.get moduleId) |> Maybe.andThen (\d -> d |> Dict.get fname)
 
 
-functionForms : String -> String -> Inputs -> Maybe String -> String -> Function -> Element Msg
-functionForms id name inputs result moduleId function =
+functionForms : String -> Inputs -> Maybe String -> String -> String -> Function -> Element Msg
+functionForms id inputs result serviceId moduleId function =
     let
         nameEl =
-            row [ fillWidth, centerX ] [ blockName "Function: ", blockValue <| text name ]
+            row [ fillWidth, centerX ] [ blockName "Function: ", blockValue <| text function.name ]
 
         inputsElements =
-            function.input_types |> Array.indexedMap (\i -> \inp -> genInput moduleId name i inp inputs)
+            function.input_types |> Array.indexedMap (\i -> \inp -> genInput serviceId moduleId function.name i inp inputs)
 
         btn =
             row []
                 [ Input.button
                     (accentButton ++ [ width <| Element.px 100, paddingXY 0 (S.baseRem 0.5), Font.center ])
-                    { onPress = Just <| CallFunction id moduleId name, label = text "Call Function" }
+                    { onPress = Just <| CallFunction id moduleId function.name, label = text "Call Function" }
                 ]
 
         resultEl =
@@ -137,8 +137,8 @@ functionForms id name inputs result moduleId function =
         ([ nameEl ] ++ Array.toList inputsElements ++ [ outputs, resultEl, btn ])
 
 
-genInput : String -> String -> Int -> String -> Inputs -> Element Msg
-genInput moduleId functionId idx fieldType inputs =
+genInput : String -> String -> String -> Int -> String -> Inputs -> Element Msg
+genInput serviceId moduleId functionId idx fieldType inputs =
     Input.text [ width <| Element.px 400 ]
         { onChange = UpdateInput moduleId functionId idx
         , text = inputs |> getInputText moduleId functionId idx

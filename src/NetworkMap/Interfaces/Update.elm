@@ -19,16 +19,16 @@ limitations under the License.
 import Array exposing (Array)
 import Dict exposing (Dict)
 import Maybe exposing (andThen)
-import NetworkMap.Interfaces.Model exposing (Arg, Function, Inputs, Model, Module)
+import NetworkMap.Interfaces.Model exposing (Arg, Function, Inputs, Interface, Model, Module)
 import NetworkMap.Interfaces.Msg exposing (Msg(..))
 import NetworkMap.Interfaces.Port as Port
 
 
-getArgs : String -> String -> Inputs -> Array Arg
-getArgs moduleName fname inputs =
+getArgs : String -> String -> String -> Dict String Inputs -> Array Arg
+getArgs serviceId moduleName fname inputs =
     let
         args =
-            inputs |> Dict.get moduleName |> andThen (Dict.get fname)
+            inputs |> Dict.get serviceId |> andThen (Dict.get moduleName) |> andThen (Dict.get fname)
     in
     Maybe.withDefault Array.empty args
 
@@ -39,10 +39,10 @@ update msg model =
         GetInterface peerId ->
             ( model, Port.interfacesRequest { command = "get_interface", id = Just peerId, call = Nothing } )
 
-        CallFunction id moduleName fname ->
+        CallFunction id serviceId moduleName fname ->
             let
                 args =
-                    model.inputs |> getArgs moduleName fname
+                    model.inputs |> getArgs serviceId moduleName fname
 
                 argsM =
                     if Array.isEmpty args then
@@ -52,57 +52,84 @@ update msg model =
                         Just <| Array.toList args
 
                 call =
-                    { moduleName = moduleName, fname = fname, args = argsM }
+                    { serviceId = serviceId, moduleName = moduleName, fname = fname, args = argsM }
             in
             ( model, Port.interfacesRequest { command = "call", id = Just id, call = Just call } )
 
-        AddInterface interface ->
+        AddInterfaces interfaces ->
             let
                 inputs =
-                    modulesToInputs interface.modules
+                    interfacesToInputs interfaces
             in
-            ( { model | interface = Just interface, inputs = inputs }, Cmd.none )
+            ( { model | interfaces = Just interfaces, inputs = inputs }, Cmd.none )
 
-        UpdateInput moduleId functionId idx input ->
+        UpdateInput serviceId moduleId functionId idx input ->
             let
                 updated =
-                    model.inputs |> Dict.update moduleId (moduleUpdate input functionId idx)
+                    model.inputs |> Dict.update serviceId (interfaceUpdate input moduleId functionId idx)
             in
             ( { model | inputs = updated }, Cmd.none )
 
         AddResult callResult ->
             let
                 updated =
-                    model.results |> Dict.update callResult.moduleName (resultUpdate callResult.result callResult.fname)
+                    model.results |> Dict.update callResult.serviceId (Dict.update callResult.moduleName (resultUpdate callResult.result callResult.fname))
             in
             ( { model | results = updated }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
 
-
-resultUpdate : String -> String -> Maybe (Dict String String) -> Maybe (Dict String String)
-resultUpdate value fname old =
+kjrfekjjnrfeUpdate : String -> String -> String -> String -> Maybe (Dict String (Dict String String)) -> Maybe (Dict String (Dict String String))
+kjrfekjjnrfeUpdate value serviceId moduleName functionName old =
     case old of
         Maybe.Just o ->
-            Just (o |> Dict.insert fname value)
+            Just (o |> Dict. functionName value)
 
         Maybe.Nothing ->
             let
                 newDict =
                     Dict.empty
             in
-            Just (newDict |> Dict.insert fname value)
+            Just (newDict |> Dict.insert functionName value)
+
+resultUpdate : String -> String -> Maybe (Dict String String) -> Maybe (Dict String String)
+resultUpdate value functionName old =
+    case old of
+        Maybe.Just o ->
+            Just (o |> Dict.insert functionName value)
+
+        Maybe.Nothing ->
+            let
+                newDict =
+                    Dict.empty
+            in
+            Just (newDict |> Dict.insert functionName value)
 
 
-modulesToInputs : Dict String Module -> Inputs
+interfacesToInputs : List Interface -> Dict String Inputs
+interfacesToInputs interfaces =
+    Dict.fromList (List.map (\i -> ( i.name, modulesToInputs i.modules )) interfaces)
+
+
+modulesToInputs : List Module -> Inputs
 modulesToInputs modules =
-    modules |> Dict.map (\_ -> \m -> functionsToBlankInputs m.functions)
+    Dict.fromList (List.map (\m -> ( m.name, functionsToBlankInputs m.functions )) modules)
 
 
-functionsToBlankInputs : Dict String Function -> Dict String (Array String)
+functionsToBlankInputs : List Function -> Dict String (Array String)
 functionsToBlankInputs functions =
-    functions |> Dict.map (\_ -> \f -> Array.initialize (Array.length f.input_types) (always ""))
+    Dict.fromList (functions |> List.map (\f -> ( f.name, Array.initialize (Array.length f.input_types) (always "") )))
+
+
+interfaceUpdate : String -> String -> String -> Int -> Maybe Inputs -> Maybe Inputs
+interfaceUpdate input moduleId functionId idx old =
+    case old of
+        Just o ->
+            Just (o |> Dict.update moduleId (moduleUpdate input functionId idx))
+
+        Nothing ->
+            old
 
 
 moduleUpdate : String -> String -> Int -> Maybe (Dict String (Array String)) -> Maybe (Dict String (Array String))

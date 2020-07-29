@@ -17,7 +17,7 @@ limitations under the License.
 -}
 
 import Array exposing (Array)
-import Json.Decode exposing (Decoder, Value, array, decodeValue, dict, field, map, string)
+import Json.Decode exposing (Decoder, Value, array, decodeValue, field, list, string)
 import Maybe exposing (andThen, map2, withDefault)
 import NetworkMap.Certificates.Model exposing (Certificate)
 import NetworkMap.Certificates.Msg as CertificatesMsg
@@ -95,13 +95,13 @@ eventToMsg event =
 decodeJson : String -> Value -> Maybe Msg
 decodeJson id v =
     let
-        interface =
-            decodeValue (field "modules" <| dict decodeModule) v
+        interfaces =
+            decodeValue decodeInterfaces v
 
         msg =
-            case interface of
+            case interfaces of
                 Ok value ->
-                    Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterface <| { modules = value }))
+                    Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterfaces <| value))
 
                 Err error ->
                     Nothing
@@ -116,14 +116,29 @@ decodeStringList =
 
 decodeFunction : Decoder Function
 decodeFunction =
-    Json.Decode.map2 Function
+    Json.Decode.map3 Function
+        (field "name" string)
         (field "input_types" decodeStringList)
         (field "output_types" decodeStringList)
 
 
+decodeInterfaces : Decoder (List Interface)
+decodeInterfaces =
+    list decodeInterface
+
+
+decodeInterface : Decoder Interface
+decodeInterface =
+    Json.Decode.map2 Interface
+        (field "name" string)
+        (field "modules" (list decodeModule))
+
+
 decodeModule : Decoder Module
 decodeModule =
-    map Module (dict decodeFunction)
+    Json.Decode.map2 Module
+        (field "name" string)
+        (field "functions" (list decodeFunction))
 
 
 subscriptions : Model -> Sub Msg

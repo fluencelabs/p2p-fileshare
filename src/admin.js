@@ -76,26 +76,26 @@ export function initAdmin(adminApp) {
         else {
             let result;
             switch (command) {
+                case "get_active_interfaces":
+                    result = await conn.getActiveInterfaces(id);
+                    break;
+                    // TODO
                 case "get_interface":
-                    if (getRelayPeerId() === id) {
-                        result = await conn.sendServiceLocalCallWaitResponse("get_interface", {});
-                    } else {
-                        let peerAddr = createPeerAddress(id);
-
-                        result = await conn.sendCallWaitResponse(peerAddr, {}, "get_interface");
-                    }
+                    // TODO
+                    let serviceId = ""
+                    result = await conn.getInterface(serviceId, id);
 
                     app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null, result: null});
                     break;
                 case "call":
-                    if (getRelayPeerId() === id) {
-                        result = await conn.sendServiceLocalCallWaitResponse(call.moduleName, {}, call.fname);
-                    } else {
-                        let peerAddr = createPeerAddress(id);
-                        result = await conn.sendCallWaitResponse(peerAddr, call.args, call.moduleName, call.fname);
-                    }
+                    result = await conn.callService(id, call.serviceId, call.moduleName, {}, call.fname);
 
-                    let callResult = {moduleName: call.moduleName, fname: call.fname, result: JSON.stringify(result, undefined, 2)};
+                    const callResult = {
+                        serviceId: call.serviceId,
+                        moduleName: call.moduleName,
+                        fname: call.fname,
+                        result: JSON.stringify(result, undefined, 2)
+                    };
                     app.ports.networkMapReceiver.send({event: "add_result", certs: null, result: callResult, id: id, peerAppeared: null, interface: null});
 
                     break;
