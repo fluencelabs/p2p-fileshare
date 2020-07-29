@@ -28,7 +28,6 @@ import {TrustGraph} from "fluence/dist/trust/trust_graph";
 import {nodeRootCert} from "fluence/dist/trust/misc";
 import {issue} from "fluence/dist/trust/certificate";
 import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
-import {createPeerAddress} from "fluence/dist/address";
 
 let Address4 = require('ip-address').Address4;
 
@@ -64,7 +63,7 @@ function sendCerts(id, certs) {
         return cert;
     })
 
-    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, interface: null, result: null, id: id, peerAppeared: null});
+    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, interfaces: null, result: null, id: id, peerAppeared: null});
 }
 
 export function initAdmin(adminApp) {
@@ -78,6 +77,7 @@ export function initAdmin(adminApp) {
             switch (command) {
                 case "get_active_interfaces":
                     result = await conn.getActiveInterfaces(id);
+                    app.ports.networkMapReceiver.send({event: "add_interfaces", certs: null, interfaces: result, id: id, peerAppeared: null, result: null});
                     break;
                     // TODO
                 case "get_interface":
@@ -85,7 +85,6 @@ export function initAdmin(adminApp) {
                     let serviceId = ""
                     result = await conn.getInterface(serviceId, id);
 
-                    app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null, result: null});
                     break;
                 case "call":
                     result = await conn.callService(id, call.serviceId, call.moduleName, {}, call.fname);
@@ -96,7 +95,7 @@ export function initAdmin(adminApp) {
                         fname: call.fname,
                         result: JSON.stringify(result, undefined, 2)
                     };
-                    app.ports.networkMapReceiver.send({event: "add_result", certs: null, result: callResult, id: id, peerAppeared: null, interface: null});
+                    app.ports.networkMapReceiver.send({event: "add_result", certs: null, result: callResult, id: id, peerAppeared: null, interfaces: null});
 
                     break;
                 default:

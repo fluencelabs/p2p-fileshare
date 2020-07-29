@@ -36,8 +36,8 @@ view : Screen.Model -> Model -> Element Msg
 view screen model =
     let
         modulesEl =
-            (model.interface
-                |> Maybe.map (interfaceForms model.id model.inputs model.results)
+            (model.interfaces
+                |> Maybe.map (interfacesForms model.id model.inputs model.results)
             )
                 |> Maybe.withDefault Element.none
     in
@@ -52,7 +52,7 @@ optionsView model =
             Input.button
                 [ padding 10, Background.blackAlpha 60 ]
             <|
-                { onPress = Just <| GetInterface model.id
+                { onPress = Just <| GetInterfaces model.id
                 , label =
                     Element.el
                         []
@@ -63,14 +63,22 @@ optionsView model =
         [ el [ alignRight, padding 5 ] <| btn
         ]
 
+interfacesForms : String -> Inputs -> Results -> List Interface -> Element Msg
+interfacesForms id inputs results interfaces =
+    let
+        interfacesF = interfaces |> List.map (\i -> interfaceForms id inputs results i)
+    in
+        column [ fillWidth, spacing 10 ] interfacesF
 
 interfaceForms : String -> Inputs -> Results -> Interface -> Element Msg
 interfaceForms id inputs results interface =
     let
+        nameEl =
+                    row [ fillWidth, centerX, padding 8 ] [ blockName "Service: ", blockValue <| text interface.name ]
         modules =
             interface.modules
     in
-    column [ fillWidth, spacing 10 ] (modules |> List.map (\mod -> moduleForms id inputs results mod))
+    column [ fillWidth, Background.blackAlpha 20, padding 10, spacing 10 ] ([nameEl] ++ (modules |> List.map (\mod -> moduleForms id interface.name inputs results mod)))
 
 
 blockName : String -> Element Msg
@@ -92,15 +100,15 @@ moduleForms id serviceId inputs results mod =
         functions =
             mod.functions
     in
-    column [ fillWidth, Background.blackAlpha 20, padding 10, spacing 10 ]
+    column [ fillWidth, Background.blackAlpha 40, padding 20, spacing 10 ]
         ([ nameEl ]
-            ++ (functions |> List.map (\f -> functionForms id inputs (getResult serviceId mod.name f.name results) mod.name f))
+            ++ (functions |> List.map (\f -> functionForms id inputs (getResult serviceId mod.name f.name results) serviceId mod.name f))
         )
 
 
 getResult : String -> String -> String -> Results -> Maybe String
 getResult serviceId moduleId fname results =
-    results |> Dict.get serviceId |> Maybe.andThen (Dict.get moduleId) |> Maybe.andThen (\d -> d |> Dict.get fname)
+    results |> Dict.get (serviceId, moduleId, fname)
 
 
 functionForms : String -> Inputs -> Maybe String -> String -> String -> Function -> Element Msg
@@ -116,7 +124,7 @@ functionForms id inputs result serviceId moduleId function =
             row []
                 [ Input.button
                     (accentButton ++ [ width <| Element.px 100, paddingXY 0 (S.baseRem 0.5), Font.center ])
-                    { onPress = Just <| CallFunction id moduleId function.name, label = text "Call Function" }
+                    { onPress = Just <| CallFunction id serviceId moduleId function.name, label = text "Call Function" }
                 ]
 
         resultEl =
@@ -140,18 +148,18 @@ functionForms id inputs result serviceId moduleId function =
 genInput : String -> String -> String -> Int -> String -> Inputs -> Element Msg
 genInput serviceId moduleId functionId idx fieldType inputs =
     Input.text [ width <| Element.px 400 ]
-        { onChange = UpdateInput moduleId functionId idx
-        , text = inputs |> getInputText moduleId functionId idx
+        { onChange = UpdateInput serviceId moduleId functionId idx
+        , text = inputs |> getInputText serviceId moduleId functionId idx
         , placeholder = Just (Input.placeholder [] (text fieldType))
         , label = Input.labelHidden fieldType
         }
 
 
-getInputText : String -> String -> Int -> Inputs -> String
-getInputText moduleId functionId idx inputs =
-    case Dict.get moduleId inputs of
+getInputText : String -> String -> String -> Int -> Inputs -> String
+getInputText serviceId moduleId functionId idx inputs =
+    case Dict.get (serviceId, moduleId, functionId) inputs of
         Just f ->
-            f |> getInputFromFunction functionId idx
+            Maybe.withDefault "" (Array.get idx f)
 
         Nothing ->
             ""

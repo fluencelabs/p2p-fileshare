@@ -43,14 +43,16 @@ type alias Module =
 type alias Interface =
     { name : String, modules : List Module }
 
+type alias Input =
+    ((String, String, String), (Array String))
 
 type alias Inputs =
-    Dict String (Dict String (Array String))
+    Dict (String, String, String) (Array String)
 
 
 type alias Results =
-    Dict String (Dict String (Dict String String))
+    Dict (String, String, String) String
 
 
 type alias Model =
-    { id : String, interfaces : Maybe (List Interface), inputs : Dict String Inputs, results : Results }
+    { id : String, interfaces : Maybe (List Interface), inputs : Inputs, results : Results }

@@ -34,7 +34,7 @@ type alias Command =
 type alias Event =
     { event : String
     , certs : Maybe (List Certificate)
-    , interface : Maybe Json.Decode.Value
+    , interfaces : Maybe Json.Decode.Value
     , result : Maybe CallResult
     , id : Maybe String
     , peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String }
@@ -75,11 +75,11 @@ eventToMsg event =
                     event.certs
                     event.id
 
-            "add_interface" ->
+            "add_interfaces" ->
                 withDefault Nothing <|
                     map2
                         (\interface -> \id -> decodeJson id interface)
-                        event.interface
+                        event.interfaces
                         event.id
 
             "add_result" ->
@@ -104,7 +104,10 @@ decodeJson id v =
                     Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterfaces <| value))
 
                 Err error ->
-                    Nothing
+                    let
+                        _ = Debug.log "alala" error
+                    in
+                     Nothing
     in
     msg
 
@@ -130,7 +133,7 @@ decodeInterfaces =
 decodeInterface : Decoder Interface
 decodeInterface =
     Json.Decode.map2 Interface
-        (field "name" string)
+        (field "service_id" string)
         (field "modules" (list decodeModule))
 
 

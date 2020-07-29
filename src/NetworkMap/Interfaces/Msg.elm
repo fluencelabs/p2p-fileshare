@@ -16,12 +16,11 @@ limitations under the License.
 
 -}
 
-import Array exposing (Array)
 import NetworkMap.Interfaces.Model exposing (Call, CallResult, Interface)
 
 
 type Msg
-    = GetInterface String
+    = GetInterfaces String
     | AddInterfaces (List Interface)
     | AddResult CallResult
     | CallFunction String String String String
