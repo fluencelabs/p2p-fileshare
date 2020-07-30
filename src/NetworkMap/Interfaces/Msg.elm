@@ -22,6 +22,7 @@ import NetworkMap.Interfaces.Model exposing (Call, CallResult, Interface)
 type Msg
     = GetInterfaces String
     | AddInterfaces (List Interface)
+    | ShowInterface String
     | AddResult CallResult
     | CallFunction String String String String
     | UpdateInput String String String Int String

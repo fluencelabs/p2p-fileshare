@@ -55,4 +55,4 @@ type alias Results =
 
 
 type alias Model =
-    { id : String, interfaces : Maybe (List Interface), inputs : Inputs, results : Results }
+    { id : String, interfaces : List Interface, isOpenedInterfaces: Dict String Bool, inputs : Inputs, results : Results }

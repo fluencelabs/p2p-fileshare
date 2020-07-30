@@ -26,6 +26,7 @@ import Ions.Background as Background
 import Ions.Border as B
 import Ions.Font as F
 import Ions.Size as S
+import Maybe exposing (withDefault)
 import NetworkMap.Interfaces.Model exposing (Function, Inputs, Interface, Model, Module, Results)
 import NetworkMap.Interfaces.Msg exposing (Msg(..))
 import Palette exposing (accentButton, fillWidth, letterSpacing, limitLayoutWidth)
@@ -37,9 +38,8 @@ view screen model =
     let
         modulesEl =
             (model.interfaces
-                |> Maybe.map (interfacesForms model.id model.inputs model.results)
+                |> interfacesForms model.id model.inputs model.results model.isOpenedInterfaces
             )
-                |> Maybe.withDefault Element.none
     in
     column [ fillWidth ]
         [ modulesEl ]
@@ -63,22 +63,28 @@ optionsView model =
         [ el [ alignRight, padding 5 ] <| btn
         ]
 
-interfacesForms : String -> Inputs -> Results -> List Interface -> Element Msg
-interfacesForms id inputs results interfaces =
+interfacesForms : String -> Inputs -> Results -> Dict String Bool -> List Interface -> Element Msg
+interfacesForms id inputs results isOpenedInterfaces interfaces  =
     let
-        interfacesF = interfaces |> List.map (\i -> interfaceForms id inputs results i)
+        interfacesF = interfaces |> List.map (\i -> interfaceForms id inputs results i (withDefault False (isOpenedInterfaces |> Dict.get i.name)))
     in
         column [ fillWidth, spacing 10 ] interfacesF
 
-interfaceForms : String -> Inputs -> Results -> Interface -> Element Msg
-interfaceForms id inputs results interface =
+interfaceForms : String -> Inputs -> Results -> Interface -> Bool -> Element Msg
+interfaceForms id inputs results interface isOpened =
     let
+
         nameEl =
-                    row [ fillWidth, centerX, padding 8 ] [ blockName "Service: ", blockValue <| text interface.name ]
+            row [ fillWidth, centerX, padding 8 ] [ blockName "Service: ", blockValue <| text interface.name ]
+        actionButton =
+            Input.button
+                [ padding 10, Background.blackAlpha 60 ]
+                { onPress = Just <| ShowInterface interface.name, label = text (if isOpened then "Hide" else "Show") }
         modules =
             interface.modules
+        modulesList = if (isOpened) then (modules |> List.map (\mod -> moduleForms id interface.name inputs results mod)) else [Element.none]
     in
-    column [ fillWidth, Background.blackAlpha 20, padding 10, spacing 10 ] ([nameEl] ++ (modules |> List.map (\mod -> moduleForms id interface.name inputs results mod)))
+    column [ fillWidth, Background.blackAlpha 20, padding 10, spacing 10 ] ([nameEl, actionButton] ++ modulesList)
 
 
 blockName : String -> Element Msg

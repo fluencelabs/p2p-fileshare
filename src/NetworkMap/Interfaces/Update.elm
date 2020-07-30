@@ -62,7 +62,7 @@ update msg model =
                 inputs =
                     interfacesToInputs interfaces
             in
-            ( { model | interfaces = Just interfaces, inputs = inputs }, Cmd.none )
+            ( { model | interfaces = interfaces, inputs = inputs }, Cmd.none )
 
         UpdateInput serviceId moduleId functionId idx input ->
             let
@@ -78,8 +78,15 @@ update msg model =
             in
             ( { model | results = updated }, Cmd.none )
 
+        ShowInterface serviceId ->
+            let
+                updated = model.isOpenedInterfaces |> Dict.update serviceId (\v -> Just (not (withDefault False v)))
+            in
+                ( { model | isOpenedInterfaces = updated }, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
+
 
 resultUpdate : String -> String -> Maybe (Dict String String) -> Maybe (Dict String String)
 resultUpdate value functionName old =
