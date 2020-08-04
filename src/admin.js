@@ -52,6 +52,13 @@ function setRootCert(newCert) {
     rootCert = newCert
 }
 
+let emptyNetworkMapEvent = {certs: null, id: null, interfaces: null, result: null, peerAppeared: null, wasmUploaded: null, modules: null};
+
+export function sendEventToNetworkMap(ev) {
+    let event = {...emptyNetworkMapEvent, ...ev}
+    app.ports.networkMapReceiver.send(event)
+}
+
 function sendCerts(id, certs) {
     let decoded = certs.map((cert) => {
         cert.chain = cert.chain.map((t) => {
@@ -63,11 +70,56 @@ function sendCerts(id, certs) {
         return cert;
     })
 
-    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, interfaces: null, result: null, id: id, peerAppeared: null});
+    sendEventToNetworkMap({event: "add_cert", certs: decoded, id: id});
 }
 
 export function initAdmin(adminApp) {
     app = adminApp;
+
+    app.ports.availableModulesRequest.subscribe(async ({command, id}) => {
+        let conn = getConnection();
+        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
+        else {
+            switch (command) {
+                case "get_modules":
+
+                    let modules = await conn.getAvailableModules(id);
+                    sendEventToNetworkMap({event: "show_modules", id: id, modules: modules});
+
+                    break;
+            }
+        }
+    });
+
+    app.ports.selectWasm.subscribe(async ({command, id, name}) => {
+        let conn = getConnection();
+        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
+        else {
+            switch (command) {
+                case "upload_wasm":
+                    if (name) {
+                        console.error("'name' is empty")
+                    }
+                    let input = document.createElement('input');
+                    input.type = 'file';
+
+                    input.onchange = async e => {
+                        let file = e.target.files[0];
+                        let arrayBuffer = await file.arrayBuffer();
+                        let array = new Uint8Array(arrayBuffer);
+
+                        let base64 = Buffer.from(array).toString('base64');
+                        await conn.addModule(base64, name, 100, [], undefined, [], id);
+
+                        sendEventToNetworkMap({event: "wasm_uploaded", id: id});
+                    }
+
+                    input.click();
+
+                    break;
+            }
+        }
+    });
 
     app.ports.interfacesRequest.subscribe(async ({command, id, call}) => {
         let conn = getConnection();
@@ -77,7 +129,7 @@ export function initAdmin(adminApp) {
             switch (command) {
                 case "get_active_interfaces":
                     result = await conn.getActiveInterfaces(id);
-                    app.ports.networkMapReceiver.send({event: "add_interfaces", certs: null, interfaces: result, id: id, peerAppeared: null, result: null});
+                    sendEventToNetworkMap({event: "add_interfaces", interfaces: result, id: id});
                     break;
                     // TODO
                 case "get_interface":
@@ -95,7 +147,7 @@ export function initAdmin(adminApp) {
                         fname: call.fname,
                         result: JSON.stringify(result, undefined, 2)
                     };
-                    app.ports.networkMapReceiver.send({event: "add_result", certs: null, result: callResult, id: id, peerAppeared: null, interfaces: null});
+                    sendEventToNetworkMap({event: "add_result", result: callResult, id: id});
 
                     break;
                 default:

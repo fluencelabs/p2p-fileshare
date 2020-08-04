@@ -19,7 +19,7 @@ import Hash from 'ipfs-only-hash';
 import bs58 from 'bs58';
 
 import Fluence from 'fluence';
-import {establishConnection, initAdmin} from "./admin"
+import {establishConnection, initAdmin, sendEventToNetworkMap} from "./admin"
 
 import {downloadBlob, getPreview, ipfsAdd, ipfsGet} from "./fileUtils";
 import {
@@ -121,7 +121,7 @@ function subsribeToAppear(app, conn, peerIdStr) {
 // call if we found out about any peers or relays in Fluence network
 export function peerAppearedEvent(app, peer, peerType, updateDate) {
     let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    app.ports.networkMapReceiver.send({event: "peer_appeared", certs: null, interfaces: null, id: null, result: null, peerAppeared});
+    sendEventToNetworkMap({event: "peer_appeared", peerAppeared})
 }
 
 function validateHash(hash) {

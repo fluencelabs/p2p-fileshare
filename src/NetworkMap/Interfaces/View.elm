@@ -37,9 +37,8 @@ view : Screen.Model -> Model -> Element Msg
 view screen model =
     let
         modulesEl =
-            (model.interfaces
+            model.interfaces
                 |> interfacesForms model.id model.inputs model.results model.isOpenedInterfaces
-            )
     in
     column [ fillWidth ]
         [ modulesEl ]
@@ -63,28 +62,47 @@ optionsView model =
         [ el [ alignRight, padding 5 ] <| btn
         ]
 
+
 interfacesForms : String -> Inputs -> Results -> Dict String Bool -> List Interface -> Element Msg
-interfacesForms id inputs results isOpenedInterfaces interfaces  =
+interfacesForms id inputs results isOpenedInterfaces interfaces =
     let
-        interfacesF = interfaces |> List.map (\i -> interfaceForms id inputs results i (withDefault False (isOpenedInterfaces |> Dict.get i.name)))
+        interfacesF =
+            interfaces |> List.map (\i -> interfaceForms id inputs results i (withDefault False (isOpenedInterfaces |> Dict.get i.name)))
     in
-        column [ fillWidth, spacing 10 ] interfacesF
+    column [ fillWidth, spacing 10 ] interfacesF
+
 
 interfaceForms : String -> Inputs -> Results -> Interface -> Bool -> Element Msg
 interfaceForms id inputs results interface isOpened =
     let
-
         nameEl =
             row [ fillWidth, centerX, padding 8 ] [ blockName "Service: ", blockValue <| text interface.name ]
+
         actionButton =
             Input.button
                 [ padding 10, Background.blackAlpha 60 ]
-                { onPress = Just <| ShowInterface interface.name, label = text (if isOpened then "Hide" else "Show") }
+                { onPress = Just <| ShowInterface interface.name
+                , label =
+                    text
+                        (if isOpened then
+                            "Hide"
+
+                         else
+                            "Show"
+                        )
+                }
+
         modules =
             interface.modules
-        modulesList = if (isOpened) then (modules |> List.map (\mod -> moduleForms id interface.name inputs results mod)) else [Element.none]
+
+        modulesList =
+            if isOpened then
+                modules |> List.map (\mod -> moduleForms id interface.name inputs results mod)
+
+            else
+                [ Element.none ]
     in
-    column [ fillWidth, Background.blackAlpha 20, padding 10, spacing 10 ] ([nameEl, actionButton] ++ modulesList)
+    column [ fillWidth, Background.blackAlpha 20, padding 10, spacing 10 ] ([ nameEl, actionButton ] ++ modulesList)
 
 
 blockName : String -> Element Msg
@@ -114,7 +132,7 @@ moduleForms id serviceId inputs results mod =
 
 getResult : String -> String -> String -> Results -> Maybe String
 getResult serviceId moduleId fname results =
-    results |> Dict.get (serviceId, moduleId, fname)
+    results |> Dict.get ( serviceId, moduleId, fname )
 
 
 functionForms : String -> Inputs -> Maybe String -> String -> String -> Function -> Element Msg
@@ -163,7 +181,7 @@ genInput serviceId moduleId functionId idx fieldType inputs =
 
 getInputText : String -> String -> String -> Int -> Inputs -> String
 getInputText serviceId moduleId functionId idx inputs =
-    case Dict.get (serviceId, moduleId, functionId) inputs of
+    case Dict.get ( serviceId, moduleId, functionId ) inputs of
         Just f ->
             Maybe.withDefault "" (Array.get idx f)
 

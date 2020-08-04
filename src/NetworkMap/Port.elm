@@ -19,12 +19,14 @@ limitations under the License.
 import Array exposing (Array)
 import Json.Decode exposing (Decoder, Value, array, decodeValue, field, list, string)
 import Maybe exposing (andThen, map2, withDefault)
+import NetworkMap.AvailableModules.Msg
 import NetworkMap.Certificates.Model exposing (Certificate)
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Interfaces.Model exposing (CallResult, Function, Interface, Module)
 import NetworkMap.Interfaces.Msg
 import NetworkMap.Model exposing (Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
+import NetworkMap.WasmUploader.Msg
 
 
 type alias Command =
@@ -36,8 +38,10 @@ type alias Event =
     , certs : Maybe (List Certificate)
     , interfaces : Maybe Json.Decode.Value
     , result : Maybe CallResult
+    , modules : Maybe (List String)
     , id : Maybe String
     , peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String }
+    , wasmUploaded : Maybe String
     }
 
 
@@ -88,6 +92,17 @@ eventToMsg event =
                     event.id
                     event.result
 
+            "show_modules" ->
+                map2
+                    (\id -> \result -> ModulesMsg id (NetworkMap.AvailableModules.Msg.ShowModules result))
+                    event.id
+                    event.modules
+
+            "wasm_uploaded" ->
+                Maybe.map
+                    (\id -> WasmUploaderMsg id NetworkMap.WasmUploader.Msg.WasmUploaded)
+                    event.id
+
             _ ->
                 Nothing
 
@@ -104,10 +119,7 @@ decodeJson id v =
                     Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterfaces <| value))
 
                 Err error ->
-                    let
-                        _ = Debug.log "alala" error
-                    in
-                     Nothing
+                    Nothing
     in
     msg
 

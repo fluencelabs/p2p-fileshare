@@ -29,9 +29,9 @@ getArgs : String -> String -> String -> Inputs -> Array Arg
 getArgs serviceId moduleName fname inputs =
     let
         args =
-            inputs |> Dict.get (serviceId, moduleName, fname)
+            inputs |> Dict.get ( serviceId, moduleName, fname )
     in
-        withDefault Array.empty args
+    withDefault Array.empty args
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -67,22 +67,23 @@ update msg model =
         UpdateInput serviceId moduleId functionId idx input ->
             let
                 updated =
-                    model.inputs |> Dict.update (serviceId, moduleId, functionId) (moduleUpdate input  idx)
+                    model.inputs |> Dict.update ( serviceId, moduleId, functionId ) (moduleUpdate input idx)
             in
             ( { model | inputs = updated }, Cmd.none )
 
         AddResult callResult ->
             let
                 updated =
-                    model.results |> Dict.insert (callResult.serviceId, callResult.moduleName, callResult.fname) callResult.result
+                    model.results |> Dict.insert ( callResult.serviceId, callResult.moduleName, callResult.fname ) callResult.result
             in
             ( { model | results = updated }, Cmd.none )
 
         ShowInterface serviceId ->
             let
-                updated = model.isOpenedInterfaces |> Dict.update serviceId (\v -> Just (not (withDefault False v)))
+                updated =
+                    model.isOpenedInterfaces |> Dict.update serviceId (\v -> Just (not (withDefault False v)))
             in
-                ( { model | isOpenedInterfaces = updated }, Cmd.none )
+            ( { model | isOpenedInterfaces = updated }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -104,20 +105,22 @@ resultUpdate value functionName old =
 
 interfacesToInputs : List Interface -> Inputs
 interfacesToInputs interfaces =
-    Dict.fromList (List.FlatMap.flatMap (\i -> ( modulesToInputs i.name i.modules )) interfaces)
+    Dict.fromList (List.FlatMap.flatMap (\i -> modulesToInputs i.name i.modules) interfaces)
 
 
 modulesToInputs : String -> List Module -> List Input
 modulesToInputs serviceId modules =
-    (List.FlatMap.flatMap (\m -> ( functionsToBlankInputs m.functions serviceId m.name )) modules)
+    List.FlatMap.flatMap (\m -> functionsToBlankInputs m.functions serviceId m.name) modules
+
 
 functionsToBlankInputs : List Function -> String -> String -> List Input
 functionsToBlankInputs functions serviceId moduleId =
-    (functions |> (List.map (\f -> inputTypesToBlankInputs f.input_types serviceId moduleId f.name )))
+    functions |> List.map (\f -> inputTypesToBlankInputs f.input_types serviceId moduleId f.name)
+
 
 inputTypesToBlankInputs : Array String -> String -> String -> String -> Input
 inputTypesToBlankInputs inputs serviceId moduleId functionId =
-    ((serviceId, moduleId, functionId), inputs)
+    ( ( serviceId, moduleId, functionId ), inputs )
 
 
 moduleUpdate : String -> Int -> Maybe (Array String) -> Maybe (Array String)
