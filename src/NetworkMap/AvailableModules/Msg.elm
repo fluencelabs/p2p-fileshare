@@ -19,4 +19,4 @@ limitations under the License.
 
 type Msg
     = GetAvailableModules String
-    | ShowModules (List String)
+    | SetModules (List String)

@@ -148,7 +148,7 @@ updateFocus model id =
     ( { model | network = updated }, cmd )
 
 
-liftMsg :
+updateAndLiftMsg :
     Model
     -> String
     -> msg
@@ -157,7 +157,7 @@ liftMsg :
     -> (String -> msg -> Msg)
     -> (String -> model -> Dict String NodeEntry -> Dict String NodeEntry)
     -> ( Model, Cmd Msg )
-liftMsg model id msg getModel updateModel liftMsgF updateNodeEntry =
+updateAndLiftMsg model id msg getModel updateModel liftMsgF updateNodeEntry =
     let
         node =
             model.network |> get id
@@ -175,22 +175,22 @@ liftMsg model id msg getModel updateModel liftMsgF updateNodeEntry =
 
 liftCertMsg : Model -> String -> CertificatesMsg.Msg -> ( Model, Cmd Msg )
 liftCertMsg model id msg =
-    liftMsg model id msg .certificates NetworkMap.Certificates.Update.update CertMsg updateDict
+    updateAndLiftMsg model id msg .certificates NetworkMap.Certificates.Update.update CertMsg updateDict
 
 
 liftModulesMsg : Model -> String -> AvailableModules.Msg -> ( Model, Cmd Msg )
 liftModulesMsg model id msg =
-    liftMsg model id msg .availableModules NetworkMap.AvailableModules.Update.update ModulesMsg updateAvailabeModules
+    updateAndLiftMsg model id msg .availableModules NetworkMap.AvailableModules.Update.update ModulesMsg updateAvailabeModules
 
 
 liftWasmUploaderMsg : Model -> String -> WasmUploaderMsg.Msg -> ( Model, Cmd Msg )
 liftWasmUploaderMsg model id msg =
-    liftMsg model id msg .wasmUploader NetworkMap.WasmUploader.Update.update WasmUploaderMsg updateWasmDict
+    updateAndLiftMsg model id msg .wasmUploader NetworkMap.WasmUploader.Update.update WasmUploaderMsg updateWasmDict
 
 
 liftInterfaceMsg : Model -> String -> InterfaceMsg.Msg -> ( Model, Cmd Msg )
 liftInterfaceMsg model id msg =
-    liftMsg model id msg .interfaces NetworkMap.Interfaces.Update.update InterfaceMsg updateIDict
+    updateAndLiftMsg model id msg .interfaces NetworkMap.Interfaces.Update.update InterfaceMsg updateIDict
 
 
 updateIEntry : Interfaces.Model -> NodeEntry -> NodeEntry

@@ -27,5 +27,5 @@ update msg model =
         GetAvailableModules id ->
             ( model, Port.availableModulesRequest { command = "get_modules", id = id, modules = Nothing } )
 
-        ShowModules modules ->
+        SetModules modules ->
             ( { model | modules = modules }, Cmd.none )

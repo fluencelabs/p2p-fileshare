@@ -94,7 +94,7 @@ eventToMsg event =
 
             "show_modules" ->
                 map2
-                    (\id -> \result -> ModulesMsg id (NetworkMap.AvailableModules.Msg.ShowModules result))
+                    (\id -> \result -> ModulesMsg id (NetworkMap.AvailableModules.Msg.SetModules result))
                     event.id
                     event.modules
 
