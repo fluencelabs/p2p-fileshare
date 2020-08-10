@@ -25,32 +25,36 @@ type alias Arg =
 
 
 type alias Call =
-    { moduleName : String, fname : String, args : Maybe (List Arg) }
+    { serviceId : String, moduleName : String, fname : String, args : Maybe (List Arg) }
 
 
 type alias CallResult =
-    { moduleName : String, fname : String, result : String }
+    { serviceId : String, moduleName : String, fname : String, result : String }
 
 
 type alias Function =
-    { input_types : Array String, output_types : Array String }
+    { name : String, input_types : Array String, output_types : Array String }
 
 
 type alias Module =
-    { functions : Dict String Function }
+    { name : String, functions : List Function }
 
 
 type alias Interface =
-    { modules : Dict String Module }
+    { name : String, modules : List Module }
+
+
+type alias Input =
+    ( ( String, String, String ), Array String )
 
 
 type alias Inputs =
-    Dict String (Dict String (Array String))
+    Dict ( String, String, String ) (Array String)
 
 
 type alias Results =
-    Dict String (Dict String String)
+    Dict ( String, String, String ) String
 
 
 type alias Model =
-    { id : String, interface : Maybe Interface, inputs : Inputs, results : Results }
+    { id : String, interfaces : List Interface, isOpenedInterfaces : Dict String Bool, inputs : Inputs, results : Results }

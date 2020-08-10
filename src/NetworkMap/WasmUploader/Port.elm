@@ -1,4 +1,4 @@
-module NetworkMap.Interfaces.Msg exposing (..)
+port module NetworkMap.WasmUploader.Port exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,14 +16,9 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Interfaces.Model exposing (Call, CallResult, Interface)
+
+type alias Command =
+    { command : String, id : String, name : String }
 
 
-type Msg
-    = GetInterfaces String
-    | AddInterfaces (List Interface)
-    | ShowInterface String
-    | AddResult CallResult
-    | CallFunction String String String String
-    | UpdateInput String String String Int String
-    | NoOp
+port selectWasm : Command -> Cmd msg

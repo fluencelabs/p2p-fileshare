@@ -17,8 +17,10 @@ limitations under the License.
 -}
 
 import Dict exposing (Dict)
+import NetworkMap.AvailableModules.Model as AvailableModules
 import NetworkMap.Certificates.Model as Certificates
 import NetworkMap.Interfaces.Model as Interfaces
+import NetworkMap.WasmUploader.Model as WasmUploader
 
 
 type PeerType
@@ -39,6 +41,8 @@ type alias NodeEntry =
     , appearencesNumber : Int
     , certificates : Certificates.Model
     , interfaces : Interfaces.Model
+    , availableModules : AvailableModules.Model
+    , wasmUploader : WasmUploader.Model
     , actionsOpened : Bool
     }
 

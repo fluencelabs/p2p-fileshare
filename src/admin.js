@@ -28,7 +28,6 @@ import {TrustGraph} from "fluence/dist/trust/trust_graph";
 import {nodeRootCert} from "fluence/dist/trust/misc";
 import {issue} from "fluence/dist/trust/certificate";
 import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
-import {createPeerAddress} from "fluence/dist/address";
 
 let Address4 = require('ip-address').Address4;
 
@@ -53,6 +52,13 @@ function setRootCert(newCert) {
     rootCert = newCert
 }
 
+let emptyNetworkMapEvent = {certs: null, id: null, interfaces: null, result: null, peerAppeared: null, wasmUploaded: null, modules: null};
+
+export function sendEventToNetworkMap(ev) {
+    let event = {...emptyNetworkMapEvent, ...ev}
+    app.ports.networkMapReceiver.send(event)
+}
+
 function sendCerts(id, certs) {
     let decoded = certs.map((cert) => {
         cert.chain = cert.chain.map((t) => {
@@ -64,11 +70,56 @@ function sendCerts(id, certs) {
         return cert;
     })
 
-    app.ports.networkMapReceiver.send({event: "add_cert", certs: decoded, interface: null, result: null, id: id, peerAppeared: null});
+    sendEventToNetworkMap({event: "add_cert", certs: decoded, id: id});
 }
 
 export function initAdmin(adminApp) {
     app = adminApp;
+
+    app.ports.availableModulesRequest.subscribe(async ({command, id}) => {
+        let conn = getConnection();
+        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
+        else {
+            switch (command) {
+                case "get_modules":
+
+                    let modules = await conn.getAvailableModules(id);
+                    sendEventToNetworkMap({event: "show_modules", id: id, modules: modules});
+
+                    break;
+            }
+        }
+    });
+
+    app.ports.selectWasm.subscribe(async ({command, id, name}) => {
+        let conn = getConnection();
+        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
+        else {
+            switch (command) {
+                case "upload_wasm":
+                    if (name) {
+                        console.error("'name' is empty")
+                    }
+                    let input = document.createElement('input');
+                    input.type = 'file';
+
+                    input.onchange = async e => {
+                        let file = e.target.files[0];
+                        let arrayBuffer = await file.arrayBuffer();
+                        let array = new Uint8Array(arrayBuffer);
+
+                        let base64 = Buffer.from(array).toString('base64');
+                        await conn.addModule(base64, name, 100, [], undefined, [], id);
+
+                        sendEventToNetworkMap({event: "wasm_uploaded", id: id});
+                    }
+
+                    input.click();
+
+                    break;
+            }
+        }
+    });
 
     app.ports.interfacesRequest.subscribe(async ({command, id, call}) => {
         let conn = getConnection();
@@ -76,27 +127,27 @@ export function initAdmin(adminApp) {
         else {
             let result;
             switch (command) {
+                case "get_active_interfaces":
+                    result = await conn.getActiveInterfaces(id);
+                    sendEventToNetworkMap({event: "add_interfaces", interfaces: result, id: id});
+                    break;
+                    // TODO
                 case "get_interface":
-                    if (getRelayPeerId() === id) {
-                        result = await conn.sendServiceLocalCallWaitResponse("get_interface", {});
-                    } else {
-                        let peerAddr = createPeerAddress(id);
+                    // TODO
+                    let serviceId = ""
+                    result = await conn.getInterface(serviceId, id);
 
-                        result = await conn.sendCallWaitResponse(peerAddr, {}, "get_interface");
-                    }
-
-                    app.ports.networkMapReceiver.send({event: "add_interface", certs: null, interface: result.interface, id: id, peerAppeared: null, result: null});
                     break;
                 case "call":
-                    if (getRelayPeerId() === id) {
-                        result = await conn.sendServiceLocalCallWaitResponse(call.moduleName, {}, call.fname);
-                    } else {
-                        let peerAddr = createPeerAddress(id);
-                        result = await conn.sendCallWaitResponse(peerAddr, call.args, call.moduleName, call.fname);
-                    }
+                    result = await conn.callService(id, call.serviceId, call.moduleName, {}, call.fname);
 
-                    let callResult = {moduleName: call.moduleName, fname: call.fname, result: JSON.stringify(result, undefined, 2)};
-                    app.ports.networkMapReceiver.send({event: "add_result", certs: null, result: callResult, id: id, peerAppeared: null, interface: null});
+                    const callResult = {
+                        serviceId: call.serviceId,
+                        moduleName: call.moduleName,
+                        fname: call.fname,
+                        result: JSON.stringify(result, undefined, 2)
+                    };
+                    sendEventToNetworkMap({event: "add_result", result: callResult, id: id});
 
                     break;
                 default:

@@ -20,6 +20,9 @@ import Array
 import Dict exposing (Dict, get)
 import Iso8601 exposing (fromTime)
 import Maybe exposing (map, withDefault)
+import NetworkMap.AvailableModules.Model as AvailableModules
+import NetworkMap.AvailableModules.Msg as AvailableModules
+import NetworkMap.AvailableModules.Update
 import NetworkMap.Certificates.Model as Certificates
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Certificates.Update
@@ -28,6 +31,9 @@ import NetworkMap.Interfaces.Msg as InterfaceMsg
 import NetworkMap.Interfaces.Update
 import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
+import NetworkMap.WasmUploader.Model as WasmUploader
+import NetworkMap.WasmUploader.Msg as WasmUploaderMsg
+import NetworkMap.WasmUploader.Update
 import Task exposing (perform)
 import Time
 import Tuple exposing (first, second)
@@ -51,7 +57,9 @@ update msg model =
                             , date = date
                             , appearencesNumber = 0
                             , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing, trusts = Dict.empty }
-                            , interfaces = { id = peer.id, interface = Nothing, inputs = Dict.empty, results = Dict.empty }
+                            , interfaces = { id = peer.id, interfaces = [], isOpenedInterfaces = Dict.empty, inputs = Dict.empty, results = Dict.empty }
+                            , availableModules = { id = peer.id, modules = [] }
+                            , wasmUploader = { id = peer.id, name = "", resultName = Nothing }
                             , actionsOpened = opened
                             }
 
@@ -92,6 +100,12 @@ update msg model =
 
         InterfaceMsg id intMsg ->
             liftInterfaceMsg model id intMsg
+
+        WasmUploaderMsg id wasmMsg ->
+            liftWasmUploaderMsg model id wasmMsg
+
+        ModulesMsg id moduleMsg ->
+            liftModulesMsg model id moduleMsg
 
         NoOp ->
             ( model, Cmd.none )
@@ -134,38 +148,49 @@ updateFocus model id =
     ( { model | network = updated }, cmd )
 
 
-liftCertMsg : Model -> String -> CertificatesMsg.Msg -> ( Model, Cmd Msg )
-liftCertMsg model id msg =
+updateAndLiftMsg :
+    Model
+    -> String
+    -> msg
+    -> (NodeEntry -> model)
+    -> (msg -> model -> ( model, Cmd msg ))
+    -> (String -> msg -> Msg)
+    -> (String -> model -> Dict String NodeEntry -> Dict String NodeEntry)
+    -> ( Model, Cmd Msg )
+updateAndLiftMsg model id msg getModel updateModel liftMsgF updateNodeEntry =
     let
         node =
             model.network |> get id
 
         result =
-            node |> map (\n -> NetworkMap.Certificates.Update.update msg n.certificates)
+            node |> map (\n -> updateModel msg (getModel n))
 
         updated =
             result
                 |> map
-                    (\tuple -> ( { model | network = updateDict id (first tuple) model.network }, Cmd.map (CertMsg id) (second tuple) ))
+                    (\tuple -> ( { model | network = updateNodeEntry id (first tuple) model.network }, Cmd.map (liftMsgF id) (second tuple) ))
     in
     updated |> withDefault ( model, Cmd.none )
+
+
+liftCertMsg : Model -> String -> CertificatesMsg.Msg -> ( Model, Cmd Msg )
+liftCertMsg model id msg =
+    updateAndLiftMsg model id msg .certificates NetworkMap.Certificates.Update.update CertMsg updateDict
+
+
+liftModulesMsg : Model -> String -> AvailableModules.Msg -> ( Model, Cmd Msg )
+liftModulesMsg model id msg =
+    updateAndLiftMsg model id msg .availableModules NetworkMap.AvailableModules.Update.update ModulesMsg updateAvailabeModules
+
+
+liftWasmUploaderMsg : Model -> String -> WasmUploaderMsg.Msg -> ( Model, Cmd Msg )
+liftWasmUploaderMsg model id msg =
+    updateAndLiftMsg model id msg .wasmUploader NetworkMap.WasmUploader.Update.update WasmUploaderMsg updateWasmDict
 
 
 liftInterfaceMsg : Model -> String -> InterfaceMsg.Msg -> ( Model, Cmd Msg )
 liftInterfaceMsg model id msg =
-    let
-        node =
-            model.network |> get id
-
-        result =
-            node |> map (\n -> NetworkMap.Interfaces.Update.update msg n.interfaces)
-
-        updated =
-            result
-                |> map
-                    (\tuple -> ( { model | network = updateIDict id (first tuple) model.network }, Cmd.map (InterfaceMsg id) (second tuple) ))
-    in
-    updated |> withDefault ( model, Cmd.none )
+    updateAndLiftMsg model id msg .interfaces NetworkMap.Interfaces.Update.update InterfaceMsg updateIDict
 
 
 updateIEntry : Interfaces.Model -> NodeEntry -> NodeEntry
@@ -173,9 +198,29 @@ updateIEntry interfaces entry =
     { entry | interfaces = interfaces }
 
 
+updateWasmEntry : WasmUploader.Model -> NodeEntry -> NodeEntry
+updateWasmEntry wasmUploader entry =
+    { entry | wasmUploader = wasmUploader }
+
+
+updateModulesEntry : AvailableModules.Model -> NodeEntry -> NodeEntry
+updateModulesEntry availableModules entry =
+    { entry | availableModules = availableModules }
+
+
 updateIDict : String -> Interfaces.Model -> Dict String NodeEntry -> Dict String NodeEntry
 updateIDict id model dict =
     Dict.update id (\nm -> map (updateIEntry model) nm) dict
+
+
+updateWasmDict : String -> WasmUploader.Model -> Dict String NodeEntry -> Dict String NodeEntry
+updateWasmDict id model dict =
+    Dict.update id (\nm -> map (updateWasmEntry model) nm) dict
+
+
+updateAvailabeModules : String -> AvailableModules.Model -> Dict String NodeEntry -> Dict String NodeEntry
+updateAvailabeModules id model dict =
+    Dict.update id (\nm -> map (updateModulesEntry model) nm) dict
 
 
 updateEntry : Certificates.Model -> NodeEntry -> NodeEntry

@@ -17,14 +17,16 @@ limitations under the License.
 -}
 
 import Array exposing (Array)
-import Json.Decode exposing (Decoder, Value, array, decodeValue, dict, field, map, string)
+import Json.Decode exposing (Decoder, Value, array, decodeValue, field, list, string)
 import Maybe exposing (andThen, map2, withDefault)
+import NetworkMap.AvailableModules.Msg
 import NetworkMap.Certificates.Model exposing (Certificate)
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Interfaces.Model exposing (CallResult, Function, Interface, Module)
 import NetworkMap.Interfaces.Msg
 import NetworkMap.Model exposing (Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
+import NetworkMap.WasmUploader.Msg
 
 
 type alias Command =
@@ -34,10 +36,12 @@ type alias Command =
 type alias Event =
     { event : String
     , certs : Maybe (List Certificate)
-    , interface : Maybe Json.Decode.Value
+    , interfaces : Maybe Json.Decode.Value
     , result : Maybe CallResult
+    , modules : Maybe (List String)
     , id : Maybe String
     , peerAppeared : Maybe { peer : Peer, peerType : String, updateDate : String }
+    , wasmUploaded : Maybe String
     }
 
 
@@ -75,11 +79,11 @@ eventToMsg event =
                     event.certs
                     event.id
 
-            "add_interface" ->
+            "add_interfaces" ->
                 withDefault Nothing <|
                     map2
                         (\interface -> \id -> decodeJson id interface)
-                        event.interface
+                        event.interfaces
                         event.id
 
             "add_result" ->
@@ -88,6 +92,17 @@ eventToMsg event =
                     event.id
                     event.result
 
+            "show_modules" ->
+                map2
+                    (\id -> \result -> ModulesMsg id (NetworkMap.AvailableModules.Msg.SetModules result))
+                    event.id
+                    event.modules
+
+            "wasm_uploaded" ->
+                Maybe.map
+                    (\id -> WasmUploaderMsg id NetworkMap.WasmUploader.Msg.WasmUploaded)
+                    event.id
+
             _ ->
                 Nothing
 
@@ -95,13 +110,13 @@ eventToMsg event =
 decodeJson : String -> Value -> Maybe Msg
 decodeJson id v =
     let
-        interface =
-            decodeValue (field "modules" <| dict decodeModule) v
+        interfaces =
+            decodeValue decodeInterfaces v
 
         msg =
-            case interface of
+            case interfaces of
                 Ok value ->
-                    Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterface <| { modules = value }))
+                    Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterfaces <| value))
 
                 Err error ->
                     Nothing
@@ -116,14 +131,29 @@ decodeStringList =
 
 decodeFunction : Decoder Function
 decodeFunction =
-    Json.Decode.map2 Function
+    Json.Decode.map3 Function
+        (field "name" string)
         (field "input_types" decodeStringList)
         (field "output_types" decodeStringList)
 
 
+decodeInterfaces : Decoder (List Interface)
+decodeInterfaces =
+    list decodeInterface
+
+
+decodeInterface : Decoder Interface
+decodeInterface =
+    Json.Decode.map2 Interface
+        (field "service_id" string)
+        (field "modules" (list decodeModule))
+
+
 decodeModule : Decoder Module
 decodeModule =
-    map Module (dict decodeFunction)
+    Json.Decode.map2 Module
+        (field "name" string)
+        (field "functions" (list decodeFunction))
 
 
 subscriptions : Model -> Sub Msg

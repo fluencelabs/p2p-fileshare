@@ -1,4 +1,4 @@
-module NetworkMap.Interfaces.Msg exposing (..)
+module NetworkMap.WasmUploader.Update exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,14 +16,19 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Interfaces.Model exposing (Call, CallResult, Interface)
+import NetworkMap.WasmUploader.Model exposing (Model)
+import NetworkMap.WasmUploader.Msg exposing (Msg(..))
+import NetworkMap.WasmUploader.Port as Port
 
 
-type Msg
-    = GetInterfaces String
-    | AddInterfaces (List Interface)
-    | ShowInterface String
-    | AddResult CallResult
-    | CallFunction String String String String
-    | UpdateInput String String String Int String
-    | NoOp
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        UploadWasm ->
+            ( model, Port.selectWasm { command = "upload_wasm", id = model.id, name = model.name } )
+
+        WasmUploaded ->
+            ( model, Cmd.none )
+
+        ChangeName name ->
+            ( { model | name = name }, Cmd.none )

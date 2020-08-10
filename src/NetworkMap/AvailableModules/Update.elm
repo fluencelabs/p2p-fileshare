@@ -1,4 +1,4 @@
-module NetworkMap.Interfaces.Msg exposing (..)
+module NetworkMap.AvailableModules.Update exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,14 +16,16 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Interfaces.Model exposing (Call, CallResult, Interface)
+import NetworkMap.AvailableModules.Model exposing (Model)
+import NetworkMap.AvailableModules.Msg exposing (Msg(..))
+import NetworkMap.AvailableModules.Port as Port
 
 
-type Msg
-    = GetInterfaces String
-    | AddInterfaces (List Interface)
-    | ShowInterface String
-    | AddResult CallResult
-    | CallFunction String String String String
-    | UpdateInput String String String Int String
-    | NoOp
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        GetAvailableModules id ->
+            ( model, Port.availableModulesRequest { command = "get_modules", id = id, modules = Nothing } )
+
+        SetModules modules ->
+            ( { model | modules = modules }, Cmd.none )

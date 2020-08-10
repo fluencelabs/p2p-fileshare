@@ -1,4 +1,4 @@
-module NetworkMap.Interfaces.Msg exposing (..)
+module NetworkMap.WasmUploader.Model exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,14 +16,16 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Interfaces.Model exposing (Call, CallResult, Interface)
+import Bytes exposing (Bytes)
+import File exposing (File)
 
 
-type Msg
-    = GetInterfaces String
-    | AddInterfaces (List Interface)
-    | ShowInterface String
-    | AddResult CallResult
-    | CallFunction String String String String
-    | UpdateInput String String String Int String
-    | NoOp
+type alias CalcHashProgress =
+    { file : File, bytes : Bytes }
+
+
+type alias Model =
+    { id : String
+    , name : String
+    , resultName : Maybe String
+    }

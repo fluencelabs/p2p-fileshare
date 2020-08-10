@@ -18,31 +18,32 @@ limitations under the License.
 
 import Array exposing (Array)
 import Dict exposing (Dict)
-import Maybe exposing (andThen)
-import NetworkMap.Interfaces.Model exposing (Arg, Function, Inputs, Model, Module)
+import List.FlatMap
+import Maybe exposing (withDefault)
+import NetworkMap.Interfaces.Model exposing (Arg, Function, Input, Inputs, Interface, Model, Module)
 import NetworkMap.Interfaces.Msg exposing (Msg(..))
 import NetworkMap.Interfaces.Port as Port
 
 
-getArgs : String -> String -> Inputs -> Array Arg
-getArgs moduleName fname inputs =
+getArgs : String -> String -> String -> Inputs -> Array Arg
+getArgs serviceId moduleName fname inputs =
     let
         args =
-            inputs |> Dict.get moduleName |> andThen (Dict.get fname)
+            inputs |> Dict.get ( serviceId, moduleName, fname )
     in
-    Maybe.withDefault Array.empty args
+    withDefault Array.empty args
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        GetInterface peerId ->
-            ( model, Port.interfacesRequest { command = "get_interface", id = Just peerId, call = Nothing } )
+        GetInterfaces peerId ->
+            ( model, Port.interfacesRequest { command = "get_active_interfaces", id = Just peerId, call = Nothing } )
 
-        CallFunction id moduleName fname ->
+        CallFunction id serviceId moduleName fname ->
             let
                 args =
-                    model.inputs |> getArgs moduleName fname
+                    model.inputs |> getArgs serviceId moduleName fname
 
                 argsM =
                     if Array.isEmpty args then
@@ -52,71 +53,78 @@ update msg model =
                         Just <| Array.toList args
 
                 call =
-                    { moduleName = moduleName, fname = fname, args = argsM }
+                    { serviceId = serviceId, moduleName = moduleName, fname = fname, args = argsM }
             in
             ( model, Port.interfacesRequest { command = "call", id = Just id, call = Just call } )
 
-        AddInterface interface ->
+        AddInterfaces interfaces ->
             let
                 inputs =
-                    modulesToInputs interface.modules
+                    interfacesToInputs interfaces
             in
-            ( { model | interface = Just interface, inputs = inputs }, Cmd.none )
+            ( { model | interfaces = interfaces, inputs = inputs }, Cmd.none )
 
-        UpdateInput moduleId functionId idx input ->
+        UpdateInput serviceId moduleId functionId idx input ->
             let
                 updated =
-                    model.inputs |> Dict.update moduleId (moduleUpdate input functionId idx)
+                    model.inputs |> Dict.update ( serviceId, moduleId, functionId ) (moduleUpdate input idx)
             in
             ( { model | inputs = updated }, Cmd.none )
 
         AddResult callResult ->
             let
                 updated =
-                    model.results |> Dict.update callResult.moduleName (resultUpdate callResult.result callResult.fname)
+                    model.results |> Dict.insert ( callResult.serviceId, callResult.moduleName, callResult.fname ) callResult.result
             in
             ( { model | results = updated }, Cmd.none )
+
+        ShowInterface serviceId ->
+            let
+                updated =
+                    model.isOpenedInterfaces |> Dict.update serviceId (\v -> Just (not (withDefault False v)))
+            in
+            ( { model | isOpenedInterfaces = updated }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
 
 
 resultUpdate : String -> String -> Maybe (Dict String String) -> Maybe (Dict String String)
-resultUpdate value fname old =
+resultUpdate value functionName old =
     case old of
         Maybe.Just o ->
-            Just (o |> Dict.insert fname value)
+            Just (o |> Dict.insert functionName value)
 
         Maybe.Nothing ->
             let
                 newDict =
                     Dict.empty
             in
-            Just (newDict |> Dict.insert fname value)
+            Just (newDict |> Dict.insert functionName value)
 
 
-modulesToInputs : Dict String Module -> Inputs
-modulesToInputs modules =
-    modules |> Dict.map (\_ -> \m -> functionsToBlankInputs m.functions)
+interfacesToInputs : List Interface -> Inputs
+interfacesToInputs interfaces =
+    Dict.fromList (List.FlatMap.flatMap (\i -> modulesToInputs i.name i.modules) interfaces)
 
 
-functionsToBlankInputs : Dict String Function -> Dict String (Array String)
-functionsToBlankInputs functions =
-    functions |> Dict.map (\_ -> \f -> Array.initialize (Array.length f.input_types) (always ""))
+modulesToInputs : String -> List Module -> List Input
+modulesToInputs serviceId modules =
+    List.FlatMap.flatMap (\m -> functionsToBlankInputs m.functions serviceId m.name) modules
 
 
-moduleUpdate : String -> String -> Int -> Maybe (Dict String (Array String)) -> Maybe (Dict String (Array String))
-moduleUpdate input functionId idx old =
-    case old of
-        Just o ->
-            Just (o |> Dict.update functionId (inputUpdate input idx))
-
-        Nothing ->
-            old
+functionsToBlankInputs : List Function -> String -> String -> List Input
+functionsToBlankInputs functions serviceId moduleId =
+    functions |> List.map (\f -> inputTypesToBlankInputs f.input_types serviceId moduleId f.name)
 
 
-inputUpdate : String -> Int -> Maybe (Array String) -> Maybe (Array String)
-inputUpdate input idx old =
+inputTypesToBlankInputs : Array String -> String -> String -> String -> Input
+inputTypesToBlankInputs inputs serviceId moduleId functionId =
+    ( ( serviceId, moduleId, functionId ), inputs )
+
+
+moduleUpdate : String -> Int -> Maybe (Array String) -> Maybe (Array String)
+moduleUpdate input idx old =
     case old of
         Just o ->
             Just (o |> Array.set idx input)
