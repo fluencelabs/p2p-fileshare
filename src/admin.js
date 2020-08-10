@@ -139,7 +139,7 @@ export function initAdmin(adminApp) {
 
                     break;
                 case "call":
-                    result = await conn.callService(id, call.serviceId, call.moduleName, {}, call.fname);
+                    result = await conn.callService(id, call.serviceId, call.moduleName, call.args, call.fname);
 
                     const callResult = {
                         serviceId: call.serviceId,
