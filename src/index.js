@@ -24,12 +24,12 @@ import {convertRelayForELM} from "./connectionReceiver";
 let path = window.location.pathname;
 
 let flags = {
-    isAdmin: false,
+    isAdmin: true,
     peerId: null,
     defaultPeerRelayInput: {
-        host: "relay02.fluence.dev",
-        pport: "19001",
-        peerId: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9",
+        host: "127.0.0.1",
+        pport: "9001",
+        peerId: "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt",
         privateKey: ""
     },
     relays: getRelays().map(convertRelayForELM),

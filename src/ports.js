@@ -34,13 +34,9 @@ import {
 import {peerEvent, relayEvent} from "./connectionReceiver";
 
 let relays = [
-    {peer: {id: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9", privateKey: null}, dns: "relay02.fluence.dev", pport: 19001},
-    {peer: {id: "12D3KooWHk9BjDQBUqnavciRPhAYFvqKBe4ZiPPvde7vDaqgn5er", privateKey: null}, dns: "relay02.fluence.dev", pport: 19002},
-    {peer: {id: "12D3KooWBUJifCTgaxAUrcM9JysqCcS4CS8tiYH5hExbdWCAoNwb", privateKey: null}, dns: "relay02.fluence.dev", pport: 19003},
-    {peer: {id: "12D3KooWJbJFaZ3k5sNd8DjQgg3aERoKtBAnirEvPV8yp76kEXHB", privateKey: null}, dns: "relay02.fluence.dev", pport: 19004},
-    {peer: {id: "12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb", privateKey: null}, dns: "relay02.fluence.dev", pport: 19005},
-    {peer: {id: "12D3KooWMhVpgfQxBLkQkJed8VFNvgN4iE6MD7xCybb1ZYWW2Gtz", privateKey: null}, dns: "relay02.fluence.dev", pport: 19990},
-    {peer: {id: "12D3KooWPnLxnY71JDxvB3zbjKu9k1BCYNthGZw6iGrLYsR1RnWM", privateKey: null}, dns: "relay02.fluence.dev", pport: 19100},
+    {peer: {id: "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt", privateKey: null}, dns: "127.0.0.1", pport: 9001},
+    {peer: {id: "12D3KooWGGv3ZkcbxNtM7jPzrtgxprd2Ws4zm9z1JkNSUwUgyaUN", privateKey: null}, dns: "127.0.0.1", pport: 9002},
+    {peer: {id: "12D3KooWSGS1XxVx2fiYM5U66HKtF81ypbzA3v71jLBUVLZSNSNi", privateKey: null}, dns: "127.0.0.1", pport: 9003}
 ];
 
 export function getRelays() {
