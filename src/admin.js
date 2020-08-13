@@ -127,7 +127,7 @@ export function initAdmin(adminApp) {
         else {
             switch (command) {
                 case "create_service":
-                    let serviceId = await conn.createService(id, context);
+                    let serviceId = await conn.createService(id, modules);
                     let createdInterface = await conn.getInterface(serviceId, id);
                     sendEventToNetworkMap({event: "add_interfaces", interfaces: [createdInterface], id: id});
                     break;

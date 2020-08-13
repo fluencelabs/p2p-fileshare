@@ -122,12 +122,11 @@ showNode screen nodeEntry =
                     , interfaceOptions nodeEntry
                     , wasmUploaderOptions nodeEntry
                     , availableModulesOptions nodeEntry
+                    , createServiceOptions screen nodeEntry
                     , certificates screen nodeEntry
                     , interfaces screen nodeEntry
                     , availableModules screen nodeEntry
-                    , createService screen nodeEntry
                     ]
-
                 else
                     [ Element.none ]
                )
@@ -159,9 +158,9 @@ availableModules screen node =
     liftView .availableModules (ModulesMsg node.peer.id) (NetworkMap.AvailableModules.View.view screen) <| node
 
 
-createService : Screen.Model -> NodeEntry -> Element Msg
-createService screen node =
-    liftView .createService (CreateServiceMsg node.peer.id) (NetworkMap.CreateService.View.view screen) <| node
+createServiceOptions : Screen.Model -> NodeEntry -> Element Msg
+createServiceOptions screen node =
+    liftView .createService (CreateServiceMsg node.peer.id) (NetworkMap.CreateService.View.optionsView screen) <| node
 
 
 availableModulesOptions : NodeEntry -> Element Msg
