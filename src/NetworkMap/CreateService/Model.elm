@@ -25,12 +25,12 @@ valuesA =
 
 
 type alias Model =
-    { id : String, modules : List String, multiselectA : Multiselect.Model }
+    { id : String, modules : List String, multiselect : Multiselect.Model }
 
 
 initModel : String -> Model
 initModel id =
     { id = id
     , modules = []
-    , multiselectA = Multiselect.initModel [] ("Modules" ++ id)
+    , multiselect = Multiselect.initModel [] ("Modules" ++ id)
     }

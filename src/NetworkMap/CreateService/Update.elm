@@ -31,7 +31,7 @@ update msg model =
         CreateService ->
             let
                 modulesPairs =
-                    Multiselect.getSelectedValues model.multiselectA
+                    Multiselect.getSelectedValues model.multiselect
 
                 modules =
                     List.map Tuple.first modulesPairs
@@ -44,16 +44,16 @@ update msg model =
                     List.map (\m -> ( m, m )) modules
 
                 newMultiselect =
-                    Multiselect.populateValues model.multiselectA pairs []
+                    Multiselect.populateValues model.multiselect pairs []
             in
-            ( { model | multiselectA = newMultiselect }, Cmd.none )
+            ( { model | multiselect = newMultiselect }, Cmd.none )
 
         UpdateMultiSelect msMsg ->
             let
                 a =
-                    model.multiselectA
+                    model.multiselect
 
                 ( subModel, subCmd, _ ) =
-                    Multiselect.update msMsg model.multiselectA
+                    Multiselect.update msMsg model.multiselect
             in
-            ( { model | multiselectA = subModel }, Cmd.map UpdateMultiSelect subCmd )
+            ( { model | multiselect = subModel }, Cmd.map UpdateMultiSelect subCmd )

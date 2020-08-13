@@ -14,23 +14,27 @@ import Screen.Model as Screen
 optionsView : Screen.Model -> Model -> Element Msg
 optionsView screen model =
     let
-        ms = Multiselect.view model.multiselectA
-        m = Html.map UpdateMultiSelect <| ms
+        multiselectView =
+            Multiselect.view model.multiselect
+
+        multiselectHtml =
+            Html.map UpdateMultiSelect <| multiselectView
+
         multiselect =
-            Element.html (m)
+            Element.html multiselectHtml
+
         btn =
-                    Input.button
-                        [ padding 10, Background.blackAlpha 60 ]
-                    <|
-                        { onPress = Just <| CreateService
-                        , label =
-                            Element.el
-                                []
-                                (Element.text "Create Service")
-                        }
+            Input.button
+                [ padding 10, Background.blackAlpha 60 ]
+            <|
+                { onPress = Just <| CreateService
+                , label =
+                    Element.el
+                        []
+                        (Element.text "Create Service")
+                }
     in
     row [ limitLayoutWidth, Background.white, centerX ]
-            [ el [ alignRight, padding 5 ] <| btn
-            , multiselect
-            ]
-
+        [ el [ alignRight, padding 5 ] <| btn
+        , multiselect
+        ]

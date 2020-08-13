@@ -112,15 +112,19 @@ update msg model =
             case moduleMsg of
                 AvailableModules.SetModules modules ->
                     let
-                        (updatedModel, _) = liftModulesMsg model id moduleMsg
-                        csMsg = CreateServiceMsg.UpdateModules modules
-                        (updatedModel2, _) = liftCreateServiceMsg updatedModel id csMsg
+                        ( updatedModel, _ ) =
+                            liftModulesMsg model id moduleMsg
+
+                        csMsg =
+                            CreateServiceMsg.UpdateModules modules
+
+                        ( updatedModel2, _ ) =
+                            liftCreateServiceMsg updatedModel id csMsg
                     in
-                        (updatedModel2, Cmd.none)
+                    ( updatedModel2, Cmd.none )
+
                 _ ->
                     liftModulesMsg model id moduleMsg
-
-
 
         CreateServiceMsg id csMsg ->
             liftCreateServiceMsg model id csMsg

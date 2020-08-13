@@ -127,6 +127,7 @@ showNode screen nodeEntry =
                     , interfaces screen nodeEntry
                     , availableModules screen nodeEntry
                     ]
+
                 else
                     [ Element.none ]
                )
