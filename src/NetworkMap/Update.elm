@@ -26,6 +26,9 @@ import NetworkMap.AvailableModules.Update
 import NetworkMap.Certificates.Model as Certificates
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Certificates.Update
+import NetworkMap.CreateService.Model as CreateService
+import NetworkMap.CreateService.Msg as CreateServiceMsg
+import NetworkMap.CreateService.Update
 import NetworkMap.Interfaces.Model as Interfaces
 import NetworkMap.Interfaces.Msg as InterfaceMsg
 import NetworkMap.Interfaces.Update
@@ -59,6 +62,7 @@ update msg model =
                             , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing, trusts = Dict.empty }
                             , interfaces = { id = peer.id, interfaces = [], isOpenedInterfaces = Dict.empty, inputs = Dict.empty, results = Dict.empty }
                             , availableModules = { id = peer.id, modules = [] }
+                            , createService = CreateService.initModel peer.id
                             , wasmUploader = { id = peer.id, name = "", resultName = Nothing }
                             , actionsOpened = opened
                             }
@@ -105,7 +109,25 @@ update msg model =
             liftWasmUploaderMsg model id wasmMsg
 
         ModulesMsg id moduleMsg ->
-            liftModulesMsg model id moduleMsg
+            case moduleMsg of
+                AvailableModules.SetModules modules ->
+                    let
+                        ( updatedModel, _ ) =
+                            liftModulesMsg model id moduleMsg
+
+                        csMsg =
+                            CreateServiceMsg.UpdateModules modules
+
+                        ( updatedModel2, _ ) =
+                            liftCreateServiceMsg updatedModel id csMsg
+                    in
+                    ( updatedModel2, Cmd.none )
+
+                _ ->
+                    liftModulesMsg model id moduleMsg
+
+        CreateServiceMsg id csMsg ->
+            liftCreateServiceMsg model id csMsg
 
         NoOp ->
             ( model, Cmd.none )
@@ -178,6 +200,11 @@ liftCertMsg model id msg =
     updateAndLiftMsg model id msg .certificates NetworkMap.Certificates.Update.update CertMsg updateDict
 
 
+liftCreateServiceMsg : Model -> String -> CreateServiceMsg.Msg -> ( Model, Cmd Msg )
+liftCreateServiceMsg model id msg =
+    updateAndLiftMsg model id msg .createService NetworkMap.CreateService.Update.update CreateServiceMsg updateCreateService
+
+
 liftModulesMsg : Model -> String -> AvailableModules.Msg -> ( Model, Cmd Msg )
 liftModulesMsg model id msg =
     updateAndLiftMsg model id msg .availableModules NetworkMap.AvailableModules.Update.update ModulesMsg updateAvailabeModules
@@ -208,6 +235,11 @@ updateModulesEntry availableModules entry =
     { entry | availableModules = availableModules }
 
 
+updateCreateServiceEntry : CreateService.Model -> NodeEntry -> NodeEntry
+updateCreateServiceEntry createService entry =
+    { entry | createService = createService }
+
+
 updateIDict : String -> Interfaces.Model -> Dict String NodeEntry -> Dict String NodeEntry
 updateIDict id model dict =
     Dict.update id (\nm -> map (updateIEntry model) nm) dict
@@ -221,6 +253,11 @@ updateWasmDict id model dict =
 updateAvailabeModules : String -> AvailableModules.Model -> Dict String NodeEntry -> Dict String NodeEntry
 updateAvailabeModules id model dict =
     Dict.update id (\nm -> map (updateModulesEntry model) nm) dict
+
+
+updateCreateService : String -> CreateService.Model -> Dict String NodeEntry -> Dict String NodeEntry
+updateCreateService id model dict =
+    Dict.update id (\nm -> map (updateCreateServiceEntry model) nm) dict
 
 
 updateEntry : Certificates.Model -> NodeEntry -> NodeEntry

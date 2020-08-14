@@ -84,7 +84,7 @@ export function initAdmin(adminApp) {
                 case "get_modules":
 
                     let modules = await conn.getAvailableModules(id);
-                    sendEventToNetworkMap({event: "show_modules", id: id, modules: modules});
+                    sendEventToNetworkMap({event: "set_modules", id: id, modules: modules});
 
                     break;
             }
@@ -121,7 +121,24 @@ export function initAdmin(adminApp) {
         }
     });
 
-    app.ports.interfacesRequest.subscribe(async ({command, id, call}) => {
+    app.ports.createServiceRequest.subscribe(async ({command, id, modules}) => {
+        let conn = getConnection();
+        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
+        else {
+            switch (command) {
+                case "create_service":
+                    let serviceId = await conn.createService(id, modules);
+                    let createdInterface = await conn.getInterface(serviceId, id);
+                    sendEventToNetworkMap({event: "add_interfaces", interfaces: [createdInterface], id: id});
+                    break;
+            default:
+                console.error("Received unknown interfacesRequest from the Elm app", command);
+            }
+        }
+
+    });
+
+    app.ports.interfacesRequest.subscribe(async ({command, id, call, context}) => {
         let conn = getConnection();
         if (!conn) console.error("Cannot handle interfacesRequest when not connected");
         else {
@@ -131,10 +148,8 @@ export function initAdmin(adminApp) {
                     result = await conn.getActiveInterfaces(id);
                     sendEventToNetworkMap({event: "add_interfaces", interfaces: result, id: id});
                     break;
-                    // TODO
                 case "get_interface":
                     // TODO
-                    let serviceId = ""
                     result = await conn.getInterface(serviceId, id);
 
                     break;
