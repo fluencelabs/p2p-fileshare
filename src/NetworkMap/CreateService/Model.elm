@@ -19,11 +19,6 @@ limitations under the License.
 import Multiselect
 
 
-valuesA : List ( String, String )
-valuesA =
-    []
-
-
 type alias Model =
     { id : String, modules : List String, multiselect : Multiselect.Model }
 
