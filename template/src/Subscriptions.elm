@@ -16,6 +16,8 @@ limitations under the License.
 
 -}
 
+import Conn.Port
+import FileSharing.Port
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import NetworkMap.Port

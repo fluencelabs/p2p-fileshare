@@ -20,15 +20,13 @@ import AppSelector.Model exposing (emptyAppSelector)
 import Config exposing (Config)
 import Conn.Model exposing (emptyConn)
 import Element
-import FileSharing.Model exposing (emptyFileSharing)
 import Msg exposing (Msg(..))
 import NetworkMap.Model exposing (emptyNetwork)
 import Screen.Model as Screen
 
 
 type alias Model =
-    { connectivity : Conn.Model.Model
-    , networkMap : NetworkMap.Model.Model
+    { networkMap : NetworkMap.Model.Model
     , screen : Screen.Model
     }
 
@@ -42,8 +40,7 @@ emptyModel config =
         device =
             Element.classifyDevice config.windowSize
     in
-    ( { connectivity = emptyConnModel
-      , networkMap = emptyNetwork
+    ( { networkMap = emptyNetwork
       , screen = { device = device, screenSize = config.windowSize }
       }
     , Cmd.map ConnMsg cmd

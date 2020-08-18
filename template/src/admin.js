@@ -24,15 +24,10 @@ import {
     setCurrentPeerId,
     to_multiaddr
 } from "./ports";
-import {TrustGraph} from "fluence/dist/trust/trust_graph";
-import {nodeRootCert} from "fluence/dist/trust/misc";
-import {issue} from "fluence/dist/trust/certificate";
 import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
 
 let Address4 = require('ip-address').Address4;
 
-let rootCert;
-let trustGraph;
 let app;
 let relayPeerId;
 
@@ -44,33 +39,11 @@ export function setRelayPeerId(peerId) {
     relayPeerId = peerId
 }
 
-function getRootCert() {
-    return rootCert;
-}
-
-function setRootCert(newCert) {
-    rootCert = newCert
-}
-
 let emptyNetworkMapEvent = {certs: null, id: null, interfaces: null, result: null, peerAppeared: null, wasmUploaded: null, modules: null};
 
 export function sendEventToNetworkMap(ev) {
     let event = {...emptyNetworkMapEvent, ...ev}
     app.ports.networkMapReceiver.send(event)
-}
-
-function sendCerts(id, certs) {
-    let decoded = certs.map((cert) => {
-        cert.chain = cert.chain.map((t) => {
-            let copied = {...t}
-            copied.issuedFor = t.issuedFor.toB58String();
-            return copied;
-        })
-
-        return cert;
-    })
-
-    sendEventToNetworkMap({event: "add_cert", certs: decoded, id: id});
 }
 
 export function initAdmin(adminApp) {
@@ -171,56 +144,6 @@ export function initAdmin(adminApp) {
         }
 
     });
-
-    app.ports.certificatesRequest.subscribe(async ({command, id}) => {
-        let cert;
-        if (!getConnection()) console.error("Cannot handle certificatesRequest when not connected");
-        else
-            switch (command) {
-                case "issue":
-                    cert = await addCertificate(id);
-                    sendCerts(id, [cert])
-                    break;
-                case "get_cert":
-                    let certs = await getCertificates(id);
-                    sendCerts(id, certs)
-                    break;
-                default:
-                    console.error("Received unknown fileRequest from the Elm app", command);
-
-            }
-    });
-}
-
-export async function getCertificates(peerId) {
-    let conn = getConnection();
-
-    if (!trustGraph) {
-        trustGraph = new TrustGraph(conn);
-    }
-
-    return await trustGraph.getCertificates(peerId);
-}
-
-export async function addCertificate(peerId) {
-    let conn = getConnection();
-
-    if (!trustGraph) {
-        trustGraph = new TrustGraph(conn);
-    }
-
-    if (!rootCert) {
-        setRootCert(await nodeRootCert(conn.selfPeerInfo.id));
-        await trustGraph.publishCertificates(conn.selfPeerInfo.id.toB58String(), [rootCert]);
-    }
-
-    let issuedAt = new Date();
-    let expiresAt = new Date();
-    expiresAt.setMonth(expiresAt.getMonth() + 1);
-
-    let issuedCert = await issue(conn.selfPeerInfo.id, PeerId.createFromB58String(peerId), getRootCert(), expiresAt.getTime(), issuedAt.getTime());
-    await trustGraph.publishCertificates(peerId, [issuedCert]);
-    return issuedCert;
 }
 
 export async function establishConnection(app, target) {

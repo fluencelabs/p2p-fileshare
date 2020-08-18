@@ -1,0 +1,41 @@
+{
+  "name": "template",
+  "version": "1.0.0",
+  "description": "``` npm install create-elm-app -g",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "elm-app start",
+    "build": "elm-app build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fix-typical-require": "replace-in-file \"const typical = require('typical')\" \"const typical = require('typical/dist/index')\" ./node_modules/ipld/src/index.js",
+    "postinstall": "npm run fix-typical-require"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fluencelabs/p2p-fileshare.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/fluencelabs/p2p-fileshare/issues"
+  },
+  "homepage": "https://github.com/fluencelabs/p2p-fileshare#readme",
+  "devDependencies": {
+    "create-elm-app": "4.2.24",
+    "replace-in-file": "^6.0.0",
+    "webpack": "^4.43.0",
+    "@babel/core": "^7.10.4"
+  },
+  "dependencies": {
+    "ipfs-http-client": "44.1.0",
+    "ipfs-only-hash": "2.0.1",
+    "peer-id": "0.13.12",
+    "fluence": "0.7.3",
+    "ip-address": "6.3.0",
+    "bs58": "4.0.1",
+    "regenerator-runtime": "^0.13.5"
+  }
+}

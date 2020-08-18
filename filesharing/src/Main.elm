@@ -44,9 +44,6 @@ init flags =
         initConn =
             em.connectivity
 
-        _ =
-            Maybe.andThen
-
         initPeerId =
             flags.peerId
 

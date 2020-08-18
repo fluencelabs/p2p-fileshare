@@ -62,7 +62,9 @@ admin : Model -> List (Element Msg)
 admin model =
     List.concat
         [ header model.screen
-        , Conn.View.showIfConnected model.connectivity
+        , [ connectivity model
+          ]
+            ++ Conn.View.showIfConnected model.connectivity
                 [ lazy networkMap model
                 ]
         ]
@@ -115,6 +117,11 @@ header screenI =
         , el [ height <| Element.px <| S.baseRem 0.5 ] Element.none
         ]
     ]
+
+
+connectivity : Model -> Element Msg
+connectivity model =
+    liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
 
 
 networkMap : Model -> Element Msg
