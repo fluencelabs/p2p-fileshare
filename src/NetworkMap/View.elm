@@ -26,6 +26,7 @@ import Ions.Border as B
 import Ions.Font as F
 import NetworkMap.AvailableModules.View
 import NetworkMap.Certificates.View
+import NetworkMap.CreateService.View
 import NetworkMap.Interfaces.View
 import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
@@ -117,7 +118,15 @@ showNode screen nodeEntry =
             ]
          ]
             ++ (if nodeEntry.actionsOpened then
-                    [ certificateOptions nodeEntry, interfaceOptions nodeEntry, wasmUploaderOptions nodeEntry, availableModulesOptions nodeEntry, certificates screen nodeEntry, interfaces screen nodeEntry, availableModules screen nodeEntry ]
+                    [ certificateOptions nodeEntry
+                    , interfaceOptions nodeEntry
+                    , wasmUploaderOptions nodeEntry
+                    , availableModulesOptions nodeEntry
+                    , createServiceOptions screen nodeEntry
+                    , certificates screen nodeEntry
+                    , interfaces screen nodeEntry
+                    , availableModules screen nodeEntry
+                    ]
 
                 else
                     [ Element.none ]
@@ -148,6 +157,11 @@ wasmUploaderOptions node =
 availableModules : Screen.Model -> NodeEntry -> Element Msg
 availableModules screen node =
     liftView .availableModules (ModulesMsg node.peer.id) (NetworkMap.AvailableModules.View.view screen) <| node
+
+
+createServiceOptions : Screen.Model -> NodeEntry -> Element Msg
+createServiceOptions screen node =
+    liftView .createService (CreateServiceMsg node.peer.id) (NetworkMap.CreateService.View.optionsView screen) <| node
 
 
 availableModulesOptions : NodeEntry -> Element Msg
