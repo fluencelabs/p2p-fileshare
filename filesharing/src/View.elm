@@ -62,15 +62,6 @@ demo model =
     List.concat [ header model.screen, [ connectivity model, fileSharing model ] ]
 
 
-admin : Model -> List (Element Msg)
-admin model =
-    List.concat
-        [ header model.screen
-        , [ connectivity model
-          ]
-        ]
-
-
 liftView :
     (Model -> model)
     -> (msg -> Msg)

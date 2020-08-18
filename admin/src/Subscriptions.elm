@@ -28,7 +28,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
-        , FileSharing.Port.subscriptions model.fileSharing |> Sub.map FileSharingMsg
         , NetworkMap.Port.subscriptions model.networkMap |> Sub.map NetworkMapMsg
         , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
         ]

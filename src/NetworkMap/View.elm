@@ -56,21 +56,17 @@ addPeerView screen networkModel =
 
 view : Screen.Model -> Model -> Element Msg
 view screen networkModel =
-    if networkModel.show then
-        let
-            sortedEntries =
-                List.sortBy .idx (Dict.values networkModel.network)
-        in
-        column (layoutBlock screen ++ [ blockBackground ]) <|
-            [ row [ fillWidth, F.white, F.size2, Background.gray, padding 10 ]
-                [ el [ centerX ] <| text "Network map"
-                ]
+    let
+        sortedEntries =
+            List.sortBy .idx (Dict.values networkModel.network)
+    in
+    column (layoutBlock screen ++ [ blockBackground ]) <|
+        [ row [ fillWidth, F.white, F.size2, Background.gray, padding 10 ]
+            [ el [ centerX ] <| text "Network map"
             ]
-                ++ addPeerView screen networkModel
-                ++ List.map (showNode screen) sortedEntries
-
-    else
-        Element.none
+        ]
+            ++ addPeerView screen networkModel
+            ++ List.map (showNode screen) sortedEntries
 
 
 peerTypeToString : PeerType -> String

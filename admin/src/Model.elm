@@ -28,11 +28,9 @@ import Screen.Model as Screen
 
 type alias Model =
     { connectivity : Conn.Model.Model
-    , fileSharing : FileSharing.Model.Model
     , networkMap : NetworkMap.Model.Model
     , appSelector : AppSelector.Model.Model
     , screen : Screen.Model
-    , isAdmin : Bool
     }
 
 
@@ -40,17 +38,15 @@ emptyModel : Config -> ( Model, Cmd Msg )
 emptyModel config =
     let
         ( emptyConnModel, cmd ) =
-            emptyConn config.isAdmin config.defaultPeerRelayInput config.relays
+            emptyConn True config.defaultPeerRelayInput config.relays
 
         device =
             Element.classifyDevice config.windowSize
     in
     ( { connectivity = emptyConnModel
-      , fileSharing = emptyFileSharing
-      , networkMap = emptyNetwork config.isAdmin
+      , networkMap = emptyNetwork
       , screen = { device = device, screenSize = config.windowSize }
       , appSelector = emptyAppSelector
-      , isAdmin = config.isAdmin
       }
     , Cmd.map ConnMsg cmd
     )

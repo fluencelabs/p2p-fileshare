@@ -50,13 +50,11 @@ type alias NodeEntry =
 type alias Model =
     { network : Dict String NodeEntry
     , peerInput : String
-    , show : Bool
     }
 
 
-emptyNetwork : Bool -> Model
-emptyNetwork isAdmin =
+emptyNetwork : Model
+emptyNetwork =
     { network = Dict.empty
     , peerInput = ""
-    , show = isAdmin
     }

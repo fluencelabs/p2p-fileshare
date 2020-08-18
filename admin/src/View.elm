@@ -16,11 +16,8 @@ limitations under the License.
 
 -}
 
-import AppSelector.Model exposing (App(..), appName)
-import AppSelector.View
 import Browser exposing (Document)
 import Conn.View
-import Dict exposing (Dict)
 import Element
     exposing
         ( Element
@@ -35,7 +32,6 @@ import Element
         )
 import Element.Font as Font
 import Element.Lazy exposing (lazy)
-import FileSharing.View
 import Html exposing (Html)
 import Ions.Font as F
 import Ions.Size as S
@@ -59,16 +55,7 @@ title _ =
 body : Model -> Html Msg
 body model =
     layout <|
-        if model.isAdmin then
-            admin model
-
-        else
-            demo model
-
-
-demo : Model -> List (Element Msg)
-demo model =
-    List.concat [ header model.screen, [ connectivity model, fileSharing model, networkMap model ] ]
+        admin model
 
 
 admin : Model -> List (Element Msg)
@@ -78,22 +65,9 @@ admin model =
         , [ connectivity model
           ]
             ++ Conn.View.showIfConnected model.connectivity
-                [ appSelector model
-                , selectedApp model (apps model)
+                [ lazy networkMap model
                 ]
         ]
-
-
-apps : Model -> Dict String (Element Msg)
-apps model =
-    let
-        appsList =
-            [ ( appName FileSharing, lazy fileSharing model ), ( appName NetworkMap, lazy networkMap model ) ]
-
-        dict =
-            Dict.fromList appsList
-    in
-    dict
 
 
 liftView :
@@ -150,21 +124,7 @@ connectivity model =
     liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
 
 
-selectedApp : Model -> Dict String (Element Msg) -> Element Msg
-selectedApp model appsDict =
-    AppSelector.View.showSelectedApp model.screen appsDict <| model.appSelector
-
-
-appSelector : Model -> Element Msg
-appSelector model =
-    liftView .appSelector AppSelectorMsg (AppSelector.View.showAppsList model.screen) <| model
-
-
 networkMap : Model -> Element Msg
 networkMap model =
     liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screen) <| model
 
-
-fileSharing : Model -> Element Msg
-fileSharing model =
-    liftView .fileSharing FileSharingMsg (FileSharing.View.view model.screen) <| model
