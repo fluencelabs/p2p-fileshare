@@ -37,4 +37,3 @@ main =
 init : Flags -> ( Model, Cmd Msg )
 init flags =
     emptyModel flags
-

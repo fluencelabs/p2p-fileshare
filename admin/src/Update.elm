@@ -51,6 +51,7 @@ updateNetworkMap =
 updateScreen =
     liftUpdate .screen (\s -> \m -> { m | screen = s }) ScreenMsg Screen.Update.update
 
+
 updateConn =
     liftUpdate .connectivity (\c -> \m -> { m | connectivity = c }) ConnMsg Conn.Update.update
 
@@ -58,7 +59,6 @@ updateConn =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-
         NetworkMapMsg m ->
             updateNetworkMap m model
 
@@ -70,5 +70,3 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
-
-

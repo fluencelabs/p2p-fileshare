@@ -62,7 +62,6 @@ admin model =
     List.concat
         [ header model.screen
         , [ lazy networkMap model ]
-
         ]
 
 
@@ -118,4 +117,3 @@ header screenI =
 networkMap : Model -> Element Msg
 networkMap model =
     liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screen) <| model
-

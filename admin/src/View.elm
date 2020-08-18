@@ -64,8 +64,8 @@ admin model =
         [ header model.screen
         , [ connectivity model ]
         , Conn.View.showIfConnected model.connectivity
-                [ lazy networkMap model
-                ]
+            [ lazy networkMap model
+            ]
         ]
 
 
@@ -122,7 +122,7 @@ networkMap : Model -> Element Msg
 networkMap model =
     liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screen) <| model
 
+
 connectivity : Model -> Element Msg
 connectivity model =
     liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
-

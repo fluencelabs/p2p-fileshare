@@ -54,7 +54,6 @@ updateScreen =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-
         NetworkMapMsg m ->
             updateNetworkMap m model
 
