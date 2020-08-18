@@ -24,4 +24,5 @@ import Screen.Msg
 type Msg
     = NoOp
     | NetworkMapMsg NetworkMap.Msg.Msg
+    | ConnMsg Conn.Msg.Msg
     | ScreenMsg Screen.Msg.Msg

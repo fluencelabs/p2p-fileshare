@@ -17,32 +17,10 @@
 import "regenerator-runtime";
 
 import Fluence from 'fluence';
-import {establishConnection, initAdmin, sendEventToNetworkMap} from "./admin"
+import {initAdmin} from "./admin"
 
-import {peerEvent, relayEvent} from "./connectionReceiver";
-
-let relays = [
-    {peer: {id: "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt", privateKey: null}, ip4: "127.0.0.1", pport: 9001}
-];
-
-export function getRelays() {
-    return relays;
-}
-
-// current state is here
-// TODO: maybe move it to a class?
-let currentPeerId;
 let conn;
-let knownFiles = {};
 let app;
-
-export function addRelay(app, relay) {
-    // TODO: if the same peerId with different ip addresses?
-    if (!relays.find(r => r.peer.id === relay.peer.id)) {
-        relayEvent("relay_discovered", relay)
-        relays.push(relay)
-    }
-}
 
 export function getApp() {
     return app
@@ -52,109 +30,20 @@ export function setApp(newApp) {
     app = newApp
 }
 
-export function getCurrentPeerId() {
-    return currentPeerId
-}
-
-export function setCurrentPeerId(peerId) {
-    currentPeerId = peerId;
-}
-
 export function setConnection(app, connection) {
-    // if we create new connection - reset all old file entries
-    knownFiles = {};
     conn = connection;
-
-    subsribeToAppear(app, conn, getCurrentPeerId())
 }
 
 export function getConnection() {
     return conn
 }
 
-export function to_multiaddr(relay) {
-    let host;
-    let protocol;
-    if (relay.host) {
-        host = "/ip4/" + relay.host;
-        protocol = "ws"
-    } else {
-        host = "/dns4/" + relay.dns;
-        protocol = "wss"
-    }
-    return `${host}/tcp/${relay.pport}/${protocol}/p2p/${relay.peer.id}`;
-}
-
-function subsribeToAppear(app, conn, peerIdStr) {
-    // subscribe for all outgoing calls to watch for all Fluence network members
-    conn.subscribe((args, target, replyTo) => {
-        let date = new Date().toISOString();
-        if (!!replyTo) {
-            for (const protocol of replyTo.protocols) {
-                if (protocol.protocol !== 'signature' && protocol.value !== peerIdStr) {
-                    peerAppearedEvent(app, protocol.value, protocol.protocol, date)
-                }
-            }
-        }
-    });
-}
-
-// call if we found out about any peers or relays in Fluence network
-export function peerAppearedEvent(app, peer, peerType, updateDate) {
-    let peerAppeared = { peer: {id: peer}, peerType, updateDate};
-    sendEventToNetworkMap({event: "peer_appeared", peerAppeared})
-}
-
 export default async function ports(app) {
-
     setApp(app)
+
+    let peerId = await Fluence.generatePeerId();
+    let conn = Fluence.connect("/ip4/127.0.0.1/tcp/9001/ws/p2p/12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt", peerId)
+    setConnection(app, conn);
+
     await initAdmin(app);
-
-    // add all relays from list as appeared
-    let date = new Date().toISOString();
-    for (const relay of relays) {
-        peerAppearedEvent(app, relay.peer.id, "peer", date)
-    }
-
-    /**
-     * Handle connection commands
-     */
-    app.ports.connRequest.subscribe(async ({command, id, connectTo}) => {
-        switch (command) {
-            case "set_relay":
-                let relay = relays.find(r => r.peer.id === id);
-                if (relay) {
-                    if (!getCurrentPeerId()) {
-                        break;
-                    }
-
-                    relayEvent("relay_connecting");
-                    // if the connection already established, connect to another node and save previous services and subscriptions
-                    if (conn) {
-                        conn.connect(to_multiaddr(relay));
-                    } else {
-                        setConnection(app, await Fluence.connect(to_multiaddr(relay), getCurrentPeerId()));
-                    }
-
-                    relayEvent("relay_connected", relay);
-                }
-
-                break;
-
-            case "generate_peer":
-                let peerId = await Fluence.generatePeerId();
-                currentPeerId = peerId;
-                let peerIdStr = peerId.toB58String();
-                peerEvent( "set_peer", {id: peerIdStr});
-                break;
-
-            case "connect_to":
-                await establishConnection(app, connectTo);
-
-                break;
-
-            default:
-                console.error("Received unknown connRequest from the Elm app", command);
-        }
-    });
 }

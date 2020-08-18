@@ -16,7 +16,6 @@ limitations under the License.
 
 -}
 
-import Conn.Update
 import Model exposing (Model)
 import Msg exposing (..)
 import NetworkMap.Update

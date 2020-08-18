@@ -16,7 +16,6 @@ limitations under the License.
 
 -}
 
-import Conn.Msg
 import NetworkMap.Msg
 import Screen.Msg
 

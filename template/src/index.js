@@ -18,8 +18,7 @@ import './main.css';
 import {Elm} from './Main.elm';
 import * as serviceWorker from './serviceWorker';
 
-import ports, {getRelays} from './ports';
-import {convertRelayForELM} from "./connectionReceiver";
+import ports from './ports';
 
 let flags = {
     peerId: null,
@@ -29,7 +28,7 @@ let flags = {
         peerId: "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt",
         privateKey: ""
     },
-    relays: getRelays().map(convertRelayForELM),
+    relays: [],
     windowSize: {
         width: window.innerWidth,
         height: window.innerHeight,

@@ -16,9 +16,7 @@ limitations under the License.
 
 -}
 
-import AppSelector.Model exposing (emptyAppSelector)
 import Config exposing (Config)
-import Conn.Model exposing (emptyConn)
 import Element
 import Msg exposing (Msg(..))
 import NetworkMap.Model exposing (emptyNetwork)
@@ -34,14 +32,11 @@ type alias Model =
 emptyModel : Config -> ( Model, Cmd Msg )
 emptyModel config =
     let
-        ( emptyConnModel, cmd ) =
-            emptyConn True config.defaultPeerRelayInput config.relays
-
         device =
             Element.classifyDevice config.windowSize
     in
     ( { networkMap = emptyNetwork
       , screen = { device = device, screenSize = config.windowSize }
       }
-    , Cmd.map ConnMsg cmd
+    , Cmd.none
     )
