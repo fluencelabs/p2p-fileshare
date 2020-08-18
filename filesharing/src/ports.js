@@ -168,7 +168,7 @@ export default async function ports(app) {
     });
 
     // TODO serviceId could be changed, get a new one on start with `getActiveInterfaces`
-    let multiaddrServiceId = "4a7a9034-474a-4d9c-8304-49a6441126c2";
+    let multiaddrServiceId = "c0365d76-b86c-4652-9de8-58d32b43aab8";
     let multiaddrModuleId = "ipfs_node.wasm";
     let multiaddrFname = "get_address";
 

@@ -68,7 +68,6 @@ export function setCurrentPeerId(peerId) {
 
 export function setConnection(app, connection) {
     // if we create new connection - reset all old file entries
-    resetEntries();
     knownFiles = {};
     conn = connection;
 
