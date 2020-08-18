@@ -19,6 +19,7 @@ limitations under the License.
 import Dict exposing (Dict)
 import NetworkMap.AvailableModules.Model as AvailableModules
 import NetworkMap.Certificates.Model as Certificates
+import NetworkMap.CreateService.Model as CreateService
 import NetworkMap.Interfaces.Model as Interfaces
 import NetworkMap.WasmUploader.Model as WasmUploader
 
@@ -42,6 +43,7 @@ type alias NodeEntry =
     , certificates : Certificates.Model
     , interfaces : Interfaces.Model
     , availableModules : AvailableModules.Model
+    , createService : CreateService.Model
     , wasmUploader : WasmUploader.Model
     , actionsOpened : Bool
     }
