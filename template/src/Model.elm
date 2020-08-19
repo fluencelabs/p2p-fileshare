@@ -20,10 +20,10 @@ import Config exposing (Config)
 import Dict
 import Element
 import Msg exposing (Msg(..))
-import NetworkMap.WasmUploader.Model
-import NetworkMap.CreateService.Model exposing (initModel)
 import NetworkMap.AvailableModules.Model
+import NetworkMap.CreateService.Model exposing (initModel)
 import NetworkMap.Interfaces.Model
+import NetworkMap.WasmUploader.Model
 import Screen.Model as Screen
 
 
@@ -41,7 +41,9 @@ emptyModel config =
     let
         device =
             Element.classifyDevice config.windowSize
-        peer = config.defaultPeerRelayInput.peerId
+
+        peer =
+            config.defaultPeerRelayInput.peerId
     in
     ( { wasmUploader = { id = peer, name = "", resultName = Nothing }
       , interface = { id = peer, interfaces = [], isOpenedInterfaces = Dict.empty, inputs = Dict.empty, results = Dict.empty }

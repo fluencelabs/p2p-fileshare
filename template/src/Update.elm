@@ -49,14 +49,18 @@ liftUpdate getModel setModel liftMsg updateComponent =
 updateInterface =
     liftUpdate .interface (\c -> \m -> { m | interface = c }) InterfaceMsg NetworkMap.Interfaces.Update.update
 
+
 updateAvailableModules =
     liftUpdate .availableModules (\c -> \m -> { m | availableModules = c }) AvailableModulesMsg NetworkMap.AvailableModules.Update.update
+
 
 updateWasmUploader =
     liftUpdate .wasmUploader (\c -> \m -> { m | wasmUploader = c }) WasmUploaderMsg NetworkMap.WasmUploader.Update.update
 
+
 updateCreateService =
     liftUpdate .createService (\c -> \m -> { m | createService = c }) CreateServiceMsg NetworkMap.CreateService.Update.update
+
 
 updateScreen =
     liftUpdate .screen (\s -> \m -> { m | screen = s }) ScreenMsg Screen.Update.update
@@ -65,7 +69,6 @@ updateScreen =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-
         InterfaceMsg m ->
             updateInterface m model
 
@@ -83,5 +86,3 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
-
-

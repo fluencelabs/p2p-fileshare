@@ -17,28 +17,37 @@ limitations under the License.
 -}
 
 import Json.Decode
+import Maybe exposing (map, withDefault)
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import NetworkMap.AvailableModules.Msg
 import NetworkMap.Interfaces.Model exposing (CallResult)
 import NetworkMap.Interfaces.Msg
 import NetworkMap.Interfaces.Port exposing (decodeInterfaceJson)
-import Maybe exposing (withDefault, map)
 import NetworkMap.WasmUploader.Msg
 import Screen.Subscriptions
+
 
 type alias InterfaceEvent =
     { event : String, interfaces : Maybe Json.Decode.Value, result : Maybe CallResult }
 
+
 type alias WasmUploaderEvent =
     { event : String, wasmUploaded : Maybe String }
+
 
 type alias AvailableModulesEvent =
     { event : String, modules : Maybe (List String) }
 
+
 port interfaceReceiver : (InterfaceEvent -> msg) -> Sub msg
+
+
 port wasmUploaderReceiver : (WasmUploaderEvent -> msg) -> Sub msg
+
+
 port availableModulesReceiver : (AvailableModulesEvent -> msg) -> Sub msg
+
 
 availableModulesEventToMsg : AvailableModulesEvent -> Msg
 availableModulesEventToMsg event =
@@ -48,8 +57,10 @@ availableModulesEventToMsg event =
                 map
                     (\result -> AvailableModulesMsg (NetworkMap.AvailableModules.Msg.SetModules result))
                     event.modules
+
             _ ->
                 Nothing
+
 
 wasmUploaderEventToMsg : WasmUploaderEvent -> Msg
 wasmUploaderEventToMsg event =
@@ -57,8 +68,10 @@ wasmUploaderEventToMsg event =
         case event.event of
             "wasm_uploaded" ->
                 Just (WasmUploaderMsg NetworkMap.WasmUploader.Msg.WasmUploaded)
+
             _ ->
                 Nothing
+
 
 interfaceEventToMsg : InterfaceEvent -> Msg
 interfaceEventToMsg event =
@@ -69,11 +82,14 @@ interfaceEventToMsg event =
                     map
                         (\interface -> Maybe.map InterfaceMsg (decodeInterfaceJson interface))
                         event.interfaces
+
             "add_result" ->
-                    map
-                        (\result -> (InterfaceMsg (NetworkMap.Interfaces.Msg.AddResult result)))
-                        event.result
-            _ -> Nothing
+                map
+                    (\result -> InterfaceMsg (NetworkMap.Interfaces.Msg.AddResult result))
+                    event.result
+
+            _ ->
+                Nothing
 
 
 subscriptions : Model -> Sub Msg

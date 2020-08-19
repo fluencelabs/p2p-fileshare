@@ -64,8 +64,14 @@ admin : Model -> List (Element Msg)
 admin model =
     List.concat
         [ header model.screen
-        , [ interfaceOptions model, wasmUploaderOptions model, availableModulesOptions model, createServiceOptions model
-          , interface model, wasmUploader model, availableModules model ]
+        , [ interfaceOptions model
+          , wasmUploaderOptions model
+          , availableModulesOptions model
+          , createServiceOptions model
+          , interface model
+          , wasmUploader model
+          , availableModules model
+          ]
         ]
 
 
@@ -122,25 +128,31 @@ interface : Model -> Element Msg
 interface model =
     liftView .interface InterfaceMsg (NetworkMap.Interfaces.View.view model.screen) <| model
 
+
 interfaceOptions : Model -> Element Msg
 interfaceOptions model =
     liftView .interface InterfaceMsg NetworkMap.Interfaces.View.optionsView <| model
+
 
 availableModules : Model -> Element Msg
 availableModules model =
     liftView .availableModules AvailableModulesMsg (NetworkMap.AvailableModules.View.view model.screen) <| model
 
+
 availableModulesOptions : Model -> Element Msg
 availableModulesOptions model =
     liftView .availableModules AvailableModulesMsg NetworkMap.AvailableModules.View.optionsView <| model
+
 
 wasmUploader : Model -> Element Msg
 wasmUploader model =
     liftView .wasmUploader WasmUploaderMsg (NetworkMap.WasmUploader.View.view model.screen) <| model
 
+
 wasmUploaderOptions : Model -> Element Msg
 wasmUploaderOptions model =
     liftView .wasmUploader WasmUploaderMsg NetworkMap.WasmUploader.View.optionsView <| model
+
 
 createServiceOptions : Model -> Element Msg
 createServiceOptions model =

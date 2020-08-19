@@ -18,8 +18,7 @@ limitations under the License.
 
 import Array exposing (Array)
 import Json.Decode exposing (Decoder, Value, array, decodeValue, field, list, string)
-import NetworkMap.Interfaces.Model exposing (Call)
-import NetworkMap.Interfaces.Model exposing (CallResult, Function, Interface, Module)
+import NetworkMap.Interfaces.Model exposing (Call, CallResult, Function, Interface, Module)
 import NetworkMap.Interfaces.Msg exposing (Msg(..))
 
 
@@ -28,6 +27,7 @@ type alias Command =
 
 
 port interfacesRequest : Command -> Cmd msg
+
 
 decodeInterfaceJson : Value -> Maybe Msg
 decodeInterfaceJson v =
@@ -44,6 +44,7 @@ decodeInterfaceJson v =
                     Nothing
     in
     msg
+
 
 decodeStringList : Decoder (Array String)
 decodeStringList =
