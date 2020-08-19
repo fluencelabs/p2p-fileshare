@@ -17,13 +17,14 @@ limitations under the License.
 -}
 
 import Array exposing (Array)
-import Json.Decode exposing (Decoder, Value, array, decodeValue, field, list, string)
+import Json.Decode exposing (Decoder, Value)
 import Maybe exposing (andThen, map2, withDefault)
 import NetworkMap.AvailableModules.Msg
 import NetworkMap.Certificates.Model exposing (Certificate)
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Interfaces.Model exposing (CallResult, Function, Interface, Module)
 import NetworkMap.Interfaces.Msg
+import NetworkMap.Interfaces.Port exposing (decodeInterfaceJson)
 import NetworkMap.Model exposing (Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
 import NetworkMap.WasmUploader.Msg
@@ -82,7 +83,7 @@ eventToMsg event =
             "add_interfaces" ->
                 withDefault Nothing <|
                     map2
-                        (\interface -> \id -> decodeJson id interface)
+                        (\interface -> \id -> Maybe.map (InterfaceMsg id) (decodeInterfaceJson interface))
                         event.interfaces
                         event.id
 
@@ -105,55 +106,6 @@ eventToMsg event =
 
             _ ->
                 Nothing
-
-
-decodeJson : String -> Value -> Maybe Msg
-decodeJson id v =
-    let
-        interfaces =
-            decodeValue decodeInterfaces v
-
-        msg =
-            case interfaces of
-                Ok value ->
-                    Just (InterfaceMsg id (NetworkMap.Interfaces.Msg.AddInterfaces <| value))
-
-                Err error ->
-                    Nothing
-    in
-    msg
-
-
-decodeStringList : Decoder (Array String)
-decodeStringList =
-    array string
-
-
-decodeFunction : Decoder Function
-decodeFunction =
-    Json.Decode.map3 Function
-        (field "name" string)
-        (field "input_types" decodeStringList)
-        (field "output_types" decodeStringList)
-
-
-decodeInterfaces : Decoder (List Interface)
-decodeInterfaces =
-    list decodeInterface
-
-
-decodeInterface : Decoder Interface
-decodeInterface =
-    Json.Decode.map2 Interface
-        (field "service_id" string)
-        (field "modules" (list decodeModule))
-
-
-decodeModule : Decoder Module
-decodeModule =
-    Json.Decode.map2 Module
-        (field "name" string)
-        (field "functions" (list decodeFunction))
 
 
 subscriptions : Model -> Sub Msg

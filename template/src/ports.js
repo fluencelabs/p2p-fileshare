@@ -21,6 +21,7 @@ import {initAdmin} from "./admin"
 
 let conn;
 let app;
+export const nodePeer = "12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt";
 
 export function getApp() {
     return app
@@ -42,7 +43,7 @@ export default async function ports(app) {
     setApp(app)
 
     let peerId = await Fluence.generatePeerId();
-    let conn = Fluence.connect("/ip4/127.0.0.1/tcp/9001/ws/p2p/12D3KooWQ8x4SMBmSSUrMzY2m13uzC7UoSyvHaDhTKx7hH8aXxpt", peerId)
+    let conn = await Fluence.connect("/ip4/127.0.0.1/tcp/9001/ws/p2p/" + nodePeer, peerId)
     setConnection(app, conn);
 
     await initAdmin(app);

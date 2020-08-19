@@ -17,14 +17,21 @@ limitations under the License.
 -}
 
 import Config exposing (Config)
+import Dict
 import Element
 import Msg exposing (Msg(..))
-import NetworkMap.Model exposing (emptyNetwork)
+import NetworkMap.WasmUploader.Model
+import NetworkMap.CreateService.Model exposing (initModel)
+import NetworkMap.AvailableModules.Model
+import NetworkMap.Interfaces.Model
 import Screen.Model as Screen
 
 
 type alias Model =
-    { networkMap : NetworkMap.Model.Model
+    { wasmUploader : NetworkMap.WasmUploader.Model.Model
+    , createService : NetworkMap.CreateService.Model.Model
+    , availableModules : NetworkMap.AvailableModules.Model.Model
+    , interface : NetworkMap.Interfaces.Model.Model
     , screen : Screen.Model
     }
 
@@ -34,8 +41,12 @@ emptyModel config =
     let
         device =
             Element.classifyDevice config.windowSize
+        peer = config.defaultPeerRelayInput.peerId
     in
-    ( { networkMap = emptyNetwork
+    ( { wasmUploader = { id = peer, name = "", resultName = Nothing }
+      , interface = { id = peer, interfaces = [], isOpenedInterfaces = Dict.empty, inputs = Dict.empty, results = Dict.empty }
+      , availableModules = { id = peer, modules = [] }
+      , createService = initModel peer
       , screen = { device = device, screenSize = config.windowSize }
       }
     , Cmd.none

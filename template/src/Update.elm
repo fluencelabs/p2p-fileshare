@@ -18,7 +18,10 @@ limitations under the License.
 
 import Model exposing (Model)
 import Msg exposing (..)
-import NetworkMap.Update
+import NetworkMap.AvailableModules.Update
+import NetworkMap.CreateService.Update
+import NetworkMap.Interfaces.Update
+import NetworkMap.WasmUploader.Update
 import Screen.Update
 
 
@@ -43,9 +46,17 @@ liftUpdate getModel setModel liftMsg updateComponent =
             )
 
 
-updateNetworkMap =
-    liftUpdate .networkMap (\c -> \m -> { m | networkMap = c }) NetworkMapMsg NetworkMap.Update.update
+updateInterface =
+    liftUpdate .interface (\c -> \m -> { m | interface = c }) InterfaceMsg NetworkMap.Interfaces.Update.update
 
+updateAvailableModules =
+    liftUpdate .availableModules (\c -> \m -> { m | availableModules = c }) AvailableModulesMsg NetworkMap.AvailableModules.Update.update
+
+updateWasmUploader =
+    liftUpdate .wasmUploader (\c -> \m -> { m | wasmUploader = c }) WasmUploaderMsg NetworkMap.WasmUploader.Update.update
+
+updateCreateService =
+    liftUpdate .createService (\c -> \m -> { m | createService = c }) CreateServiceMsg NetworkMap.CreateService.Update.update
 
 updateScreen =
     liftUpdate .screen (\s -> \m -> { m | screen = s }) ScreenMsg Screen.Update.update
@@ -54,11 +65,23 @@ updateScreen =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NetworkMapMsg m ->
-            updateNetworkMap m model
+
+        InterfaceMsg m ->
+            updateInterface m model
+
+        WasmUploaderMsg m ->
+            updateWasmUploader m model
+
+        AvailableModulesMsg m ->
+            updateAvailableModules m model
+
+        CreateServiceMsg m ->
+            updateCreateService m model
 
         ScreenMsg m ->
             updateScreen m model
 
         NoOp ->
             ( model, Cmd.none )
+
+

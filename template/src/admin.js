@@ -15,7 +15,7 @@
  */
 
 import {
-    getConnection
+    getConnection, nodePeer
 
 } from "./ports";
 
@@ -32,9 +32,19 @@ export function setRelayPeerId(peerId) {
 
 let emptyNetworkMapEvent = {certs: null, id: null, interfaces: null, result: null, peerAppeared: null, wasmUploaded: null, modules: null};
 
-export function sendEventToNetworkMap(ev) {
+export function sendEventToInterface(ev) {
     let event = {...emptyNetworkMapEvent, ...ev}
-    app.ports.networkMapReceiver.send(event)
+    app.ports.interfaceReceiver.send(event)
+}
+
+export function sendEventToWasmUploader(ev) {
+    let event = {...emptyNetworkMapEvent, ...ev}
+    app.ports.wasmUploaderReceiver.send(event)
+}
+
+export function sendEventToAvailableModules(ev) {
+    let event = {...emptyNetworkMapEvent, ...ev}
+    app.ports.availableModulesReceiver.send(event)
 }
 
 export function initAdmin(adminApp) {
@@ -48,7 +58,7 @@ export function initAdmin(adminApp) {
                 case "get_modules":
 
                     let modules = await conn.getAvailableModules(id);
-                    sendEventToNetworkMap({event: "set_modules", id: id, modules: modules});
+                    sendEventToAvailableModules({event: "set_modules", id: id, modules: modules});
 
                     break;
             }
@@ -75,7 +85,7 @@ export function initAdmin(adminApp) {
                         let base64 = Buffer.from(array).toString('base64');
                         await conn.addModule(base64, name, 100, [], undefined, [], id);
 
-                        sendEventToNetworkMap({event: "wasm_uploaded", id: id});
+                        sendEventToWasmUploader({event: "wasm_uploaded", id: id});
                     }
 
                     input.click();
@@ -93,7 +103,7 @@ export function initAdmin(adminApp) {
                 case "create_service":
                     let serviceId = await conn.createService(id, modules);
                     let createdInterface = await conn.getInterface(serviceId, id);
-                    sendEventToNetworkMap({event: "add_interfaces", interfaces: [createdInterface], id: id});
+                    sendEventToInterface({event: "add_interfaces", interfaces: [createdInterface], id: id});
                     break;
             default:
                 console.error("Received unknown interfacesRequest from the Elm app", command);
@@ -102,19 +112,19 @@ export function initAdmin(adminApp) {
 
     });
 
-    app.ports.interfacesRequest.subscribe(async ({command, id, call, context}) => {
+    app.ports.interfacesRequest.subscribe(async ({command, id, call}) => {
         let conn = getConnection();
         if (!conn) console.error("Cannot handle interfacesRequest when not connected");
         else {
             let result;
             switch (command) {
                 case "get_active_interfaces":
-                    result = await conn.getActiveInterfaces(id);
-                    sendEventToNetworkMap({event: "add_interfaces", interfaces: result, id: id});
+                    result = await conn.getActiveInterfaces(nodePeer);
+                    sendEventToInterface({event: "add_interfaces", interfaces: result, id: nodePeer});
                     break;
                 case "get_interface":
                     // TODO
-                    result = await conn.getInterface(serviceId, id);
+                    result = await conn.getInterface(serviceId, nodePeer);
 
                     break;
                 case "call":
@@ -126,7 +136,7 @@ export function initAdmin(adminApp) {
                         fname: call.fname,
                         result: JSON.stringify(result, undefined, 2)
                     };
-                    sendEventToNetworkMap({event: "add_result", result: callResult, id: id});
+                    sendEventToInterface({event: "add_result", result: callResult, id: id});
 
                     break;
                 default:

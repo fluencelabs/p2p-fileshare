@@ -36,7 +36,10 @@ import Ions.Font as F
 import Ions.Size as S
 import Model exposing (Model)
 import Msg exposing (..)
-import NetworkMap.View
+import NetworkMap.AvailableModules.View
+import NetworkMap.CreateService.View
+import NetworkMap.Interfaces.View
+import NetworkMap.WasmUploader.View
 import Palette exposing (fillWidth, h1, layout, layoutBlock, newTabLink, pSpacing)
 import Screen.Model as Screen
 
@@ -61,7 +64,8 @@ admin : Model -> List (Element Msg)
 admin model =
     List.concat
         [ header model.screen
-        , [ lazy networkMap model ]
+        , [ interfaceOptions model, wasmUploaderOptions model, availableModulesOptions model, createServiceOptions model
+          , interface model, wasmUploader model, availableModules model ]
         ]
 
 
@@ -114,6 +118,30 @@ header screenI =
     ]
 
 
-networkMap : Model -> Element Msg
-networkMap model =
-    liftView .networkMap NetworkMapMsg (NetworkMap.View.view model.screen) <| model
+interface : Model -> Element Msg
+interface model =
+    liftView .interface InterfaceMsg (NetworkMap.Interfaces.View.view model.screen) <| model
+
+interfaceOptions : Model -> Element Msg
+interfaceOptions model =
+    liftView .interface InterfaceMsg NetworkMap.Interfaces.View.optionsView <| model
+
+availableModules : Model -> Element Msg
+availableModules model =
+    liftView .availableModules AvailableModulesMsg (NetworkMap.AvailableModules.View.view model.screen) <| model
+
+availableModulesOptions : Model -> Element Msg
+availableModulesOptions model =
+    liftView .availableModules AvailableModulesMsg NetworkMap.AvailableModules.View.optionsView <| model
+
+wasmUploader : Model -> Element Msg
+wasmUploader model =
+    liftView .wasmUploader WasmUploaderMsg (NetworkMap.WasmUploader.View.view model.screen) <| model
+
+wasmUploaderOptions : Model -> Element Msg
+wasmUploaderOptions model =
+    liftView .wasmUploader WasmUploaderMsg NetworkMap.WasmUploader.View.optionsView <| model
+
+createServiceOptions : Model -> Element Msg
+createServiceOptions model =
+    liftView .createService CreateServiceMsg (NetworkMap.CreateService.View.optionsView model.screen) <| model
