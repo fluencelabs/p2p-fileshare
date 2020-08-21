@@ -20,17 +20,13 @@ import Config exposing (Config)
 import Dict
 import Element
 import Msg exposing (Msg(..))
-import NetworkMap.AvailableModules.Model
-import NetworkMap.CreateService.Model exposing (initModel)
 import NetworkMap.Interfaces.Model
-import NetworkMap.WasmUploader.Model
+import NetworkMap.Services.Model exposing (initModel)
 import Screen.Model as Screen
 
 
 type alias Model =
-    { wasmUploader : NetworkMap.WasmUploader.Model.Model
-    , createService : NetworkMap.CreateService.Model.Model
-    , availableModules : NetworkMap.AvailableModules.Model.Model
+    { services : NetworkMap.Services.Model.Model
     , interface : NetworkMap.Interfaces.Model.Model
     , screen : Screen.Model
     }
@@ -45,10 +41,8 @@ emptyModel config =
         peer =
             config.defaultPeerRelayInput.peerId
     in
-    ( { wasmUploader = { id = peer, name = "", resultName = Nothing }
-      , interface = { id = peer, interfaces = [], isOpenedInterfaces = Dict.empty, inputs = Dict.empty, results = Dict.empty }
-      , availableModules = { id = peer, modules = [] }
-      , createService = initModel peer
+    ( { interface = { id = peer, interfaces = [], isOpenedInterfaces = Dict.empty, inputs = Dict.empty, results = Dict.empty }
+      , services = initModel peer
       , screen = { device = device, screenSize = config.windowSize }
       }
     , Cmd.none

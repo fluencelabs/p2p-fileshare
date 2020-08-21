@@ -36,10 +36,8 @@ import Ions.Font as F
 import Ions.Size as S
 import Model exposing (Model)
 import Msg exposing (..)
-import NetworkMap.AvailableModules.View
-import NetworkMap.CreateService.View
 import NetworkMap.Interfaces.View
-import NetworkMap.WasmUploader.View
+import NetworkMap.Services.View
 import Palette exposing (fillWidth, h1, layout, layoutBlock, newTabLink, pSpacing)
 import Screen.Model as Screen
 
@@ -65,12 +63,8 @@ admin model =
     List.concat
         [ header model.screen
         , [ interfaceOptions model
-          , wasmUploaderOptions model
-          , availableModulesOptions model
-          , createServiceOptions model
+          , servicesOptions model
           , interface model
-          , wasmUploader model
-          , availableModules model
           ]
         ]
 
@@ -133,27 +127,6 @@ interfaceOptions : Model -> Element Msg
 interfaceOptions model =
     liftView .interface InterfaceMsg NetworkMap.Interfaces.View.optionsView <| model
 
-
-availableModules : Model -> Element Msg
-availableModules model =
-    liftView .availableModules AvailableModulesMsg (NetworkMap.AvailableModules.View.view model.screen) <| model
-
-
-availableModulesOptions : Model -> Element Msg
-availableModulesOptions model =
-    liftView .availableModules AvailableModulesMsg NetworkMap.AvailableModules.View.optionsView <| model
-
-
-wasmUploader : Model -> Element Msg
-wasmUploader model =
-    liftView .wasmUploader WasmUploaderMsg (NetworkMap.WasmUploader.View.view model.screen) <| model
-
-
-wasmUploaderOptions : Model -> Element Msg
-wasmUploaderOptions model =
-    liftView .wasmUploader WasmUploaderMsg NetworkMap.WasmUploader.View.optionsView <| model
-
-
-createServiceOptions : Model -> Element Msg
-createServiceOptions model =
-    liftView .createService CreateServiceMsg (NetworkMap.CreateService.View.optionsView model.screen) <| model
+servicesOptions : Model -> Element Msg
+servicesOptions model =
+    liftView .services ServicesMsg (NetworkMap.Services.View.optionsView model.screen) <| model

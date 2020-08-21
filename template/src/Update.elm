@@ -18,10 +18,8 @@ limitations under the License.
 
 import Model exposing (Model)
 import Msg exposing (..)
-import NetworkMap.AvailableModules.Update
-import NetworkMap.CreateService.Update
 import NetworkMap.Interfaces.Update
-import NetworkMap.WasmUploader.Update
+import NetworkMap.Services.Update
 import Screen.Update
 
 
@@ -50,16 +48,8 @@ updateInterface =
     liftUpdate .interface (\c -> \m -> { m | interface = c }) InterfaceMsg NetworkMap.Interfaces.Update.update
 
 
-updateAvailableModules =
-    liftUpdate .availableModules (\c -> \m -> { m | availableModules = c }) AvailableModulesMsg NetworkMap.AvailableModules.Update.update
-
-
-updateWasmUploader =
-    liftUpdate .wasmUploader (\c -> \m -> { m | wasmUploader = c }) WasmUploaderMsg NetworkMap.WasmUploader.Update.update
-
-
-updateCreateService =
-    liftUpdate .createService (\c -> \m -> { m | createService = c }) CreateServiceMsg NetworkMap.CreateService.Update.update
+updateServices =
+    liftUpdate .services (\c -> \m -> { m | services = c }) ServicesMsg NetworkMap.Services.Update.update
 
 
 updateScreen =
@@ -72,17 +62,12 @@ update msg model =
         InterfaceMsg m ->
             updateInterface m model
 
-        WasmUploaderMsg m ->
-            updateWasmUploader m model
-
-        AvailableModulesMsg m ->
-            updateAvailableModules m model
-
-        CreateServiceMsg m ->
-            updateCreateService m model
+        ServicesMsg m ->
+            updateServices m model
 
         ScreenMsg m ->
             updateScreen m model
 
         NoOp ->
             ( model, Cmd.none )
+

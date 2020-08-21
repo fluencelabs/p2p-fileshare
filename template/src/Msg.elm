@@ -16,17 +16,13 @@ limitations under the License.
 
 -}
 
-import NetworkMap.AvailableModules.Msg
-import NetworkMap.CreateService.Msg
 import NetworkMap.Interfaces.Msg
-import NetworkMap.WasmUploader.Msg
+import NetworkMap.Services.Msg
 import Screen.Msg
 
 
 type Msg
     = NoOp
     | InterfaceMsg NetworkMap.Interfaces.Msg.Msg
-    | CreateServiceMsg NetworkMap.CreateService.Msg.Msg
-    | WasmUploaderMsg NetworkMap.WasmUploader.Msg.Msg
-    | AvailableModulesMsg NetworkMap.AvailableModules.Msg.Msg
+    | ServicesMsg NetworkMap.Services.Msg.Msg
     | ScreenMsg Screen.Msg.Msg

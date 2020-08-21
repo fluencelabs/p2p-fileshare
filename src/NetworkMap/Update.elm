@@ -20,23 +20,17 @@ import Array
 import Dict exposing (Dict, get)
 import Iso8601 exposing (fromTime)
 import Maybe exposing (map, withDefault)
-import NetworkMap.AvailableModules.Model as AvailableModules
-import NetworkMap.AvailableModules.Msg as AvailableModules
-import NetworkMap.AvailableModules.Update
 import NetworkMap.Certificates.Model as Certificates
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Certificates.Update
-import NetworkMap.CreateService.Model as CreateService
-import NetworkMap.CreateService.Msg as CreateServiceMsg
-import NetworkMap.CreateService.Update
 import NetworkMap.Interfaces.Model as Interfaces
 import NetworkMap.Interfaces.Msg as InterfaceMsg
 import NetworkMap.Interfaces.Update
 import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
-import NetworkMap.WasmUploader.Model as WasmUploader
-import NetworkMap.WasmUploader.Msg as WasmUploaderMsg
-import NetworkMap.WasmUploader.Update
+import NetworkMap.Services.Model as Services
+import NetworkMap.Services.Msg as ServicesMsg
+import NetworkMap.Services.Update
 import Task exposing (perform)
 import Time
 import Tuple exposing (first, second)
@@ -61,9 +55,7 @@ update msg model =
                             , appearencesNumber = 0
                             , certificates = { id = peer.id, certificates = Array.empty, showCertState = Nothing, trusts = Dict.empty }
                             , interfaces = { id = peer.id, interfaces = [], isOpenedInterfaces = Dict.empty, inputs = Dict.empty, results = Dict.empty }
-                            , availableModules = { id = peer.id, modules = [] }
-                            , createService = CreateService.initModel peer.id
-                            , wasmUploader = { id = peer.id, name = "", resultName = Nothing }
+                            , services = Services.initModel peer.id
                             , actionsOpened = opened
                             }
 
@@ -105,29 +97,8 @@ update msg model =
         InterfaceMsg id intMsg ->
             liftInterfaceMsg model id intMsg
 
-        WasmUploaderMsg id wasmMsg ->
-            liftWasmUploaderMsg model id wasmMsg
-
-        ModulesMsg id moduleMsg ->
-            case moduleMsg of
-                AvailableModules.SetModules modules ->
-                    let
-                        ( updatedModel, _ ) =
-                            liftModulesMsg model id moduleMsg
-
-                        csMsg =
-                            CreateServiceMsg.UpdateModules modules
-
-                        ( updatedModel2, _ ) =
-                            liftCreateServiceMsg updatedModel id csMsg
-                    in
-                    ( updatedModel2, Cmd.none )
-
-                _ ->
-                    liftModulesMsg model id moduleMsg
-
-        CreateServiceMsg id csMsg ->
-            liftCreateServiceMsg model id csMsg
+        ServicesMsg id sMsg ->
+            liftServicesMsg model id sMsg
 
         NoOp ->
             ( model, Cmd.none )
@@ -200,19 +171,9 @@ liftCertMsg model id msg =
     updateAndLiftMsg model id msg .certificates NetworkMap.Certificates.Update.update CertMsg updateDict
 
 
-liftCreateServiceMsg : Model -> String -> CreateServiceMsg.Msg -> ( Model, Cmd Msg )
-liftCreateServiceMsg model id msg =
-    updateAndLiftMsg model id msg .createService NetworkMap.CreateService.Update.update CreateServiceMsg updateCreateService
-
-
-liftModulesMsg : Model -> String -> AvailableModules.Msg -> ( Model, Cmd Msg )
-liftModulesMsg model id msg =
-    updateAndLiftMsg model id msg .availableModules NetworkMap.AvailableModules.Update.update ModulesMsg updateAvailabeModules
-
-
-liftWasmUploaderMsg : Model -> String -> WasmUploaderMsg.Msg -> ( Model, Cmd Msg )
-liftWasmUploaderMsg model id msg =
-    updateAndLiftMsg model id msg .wasmUploader NetworkMap.WasmUploader.Update.update WasmUploaderMsg updateWasmDict
+liftServicesMsg : Model -> String -> ServicesMsg.Msg -> ( Model, Cmd Msg )
+liftServicesMsg model id msg =
+    updateAndLiftMsg model id msg .services NetworkMap.Services.Update.update ServicesMsg updateServices
 
 
 liftInterfaceMsg : Model -> String -> InterfaceMsg.Msg -> ( Model, Cmd Msg )
@@ -225,19 +186,9 @@ updateIEntry interfaces entry =
     { entry | interfaces = interfaces }
 
 
-updateWasmEntry : WasmUploader.Model -> NodeEntry -> NodeEntry
-updateWasmEntry wasmUploader entry =
-    { entry | wasmUploader = wasmUploader }
-
-
-updateModulesEntry : AvailableModules.Model -> NodeEntry -> NodeEntry
-updateModulesEntry availableModules entry =
-    { entry | availableModules = availableModules }
-
-
-updateCreateServiceEntry : CreateService.Model -> NodeEntry -> NodeEntry
-updateCreateServiceEntry createService entry =
-    { entry | createService = createService }
+updateServicesEntry : Services.Model -> NodeEntry -> NodeEntry
+updateServicesEntry services entry =
+    { entry | services = services }
 
 
 updateIDict : String -> Interfaces.Model -> Dict String NodeEntry -> Dict String NodeEntry
@@ -245,19 +196,9 @@ updateIDict id model dict =
     Dict.update id (\nm -> map (updateIEntry model) nm) dict
 
 
-updateWasmDict : String -> WasmUploader.Model -> Dict String NodeEntry -> Dict String NodeEntry
-updateWasmDict id model dict =
-    Dict.update id (\nm -> map (updateWasmEntry model) nm) dict
-
-
-updateAvailabeModules : String -> AvailableModules.Model -> Dict String NodeEntry -> Dict String NodeEntry
-updateAvailabeModules id model dict =
-    Dict.update id (\nm -> map (updateModulesEntry model) nm) dict
-
-
-updateCreateService : String -> CreateService.Model -> Dict String NodeEntry -> Dict String NodeEntry
-updateCreateService id model dict =
-    Dict.update id (\nm -> map (updateCreateServiceEntry model) nm) dict
+updateServices : String -> Services.Model -> Dict String NodeEntry -> Dict String NodeEntry
+updateServices id model dict =
+    Dict.update id (\nm -> map (updateServicesEntry model) nm) dict
 
 
 updateEntry : Certificates.Model -> NodeEntry -> NodeEntry

@@ -16,22 +16,18 @@ limitations under the License.
 
 -}
 
-import NetworkMap.AvailableModules.Msg
 import NetworkMap.Certificates.Msg
-import NetworkMap.CreateService.Msg
 import NetworkMap.Interfaces.Msg
 import NetworkMap.Model exposing (Peer, PeerType)
-import NetworkMap.WasmUploader.Msg
+import NetworkMap.Services.Msg
 
 
 type Msg
     = PeerAppeared Peer PeerType String Bool
     | OpenActions String
     | InterfaceMsg String NetworkMap.Interfaces.Msg.Msg
-    | WasmUploaderMsg String NetworkMap.WasmUploader.Msg.Msg
-    | ModulesMsg String NetworkMap.AvailableModules.Msg.Msg
+    | ServicesMsg String NetworkMap.Services.Msg.Msg
     | CertMsg String NetworkMap.Certificates.Msg.Msg
-    | CreateServiceMsg String NetworkMap.CreateService.Msg.Msg
     | ChangePeerInput String
     | AddPeerId
     | NoOp

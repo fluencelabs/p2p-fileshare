@@ -1,4 +1,4 @@
-module NetworkMap.AvailableModules.Model exposing (..)
+module NetworkMap.Services.Model exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,6 +16,18 @@ limitations under the License.
 
 -}
 
+import Multiselect
+
 
 type alias Model =
-    { id : String, modules : List String }
+    { id : String, modules : List String, multiselect : Multiselect.Model, moduleName : String, resultName : Maybe String }
+
+
+initModel : String -> Model
+initModel id =
+    { id = id
+    , modules = []
+    , moduleName = ""
+    , multiselect = Multiselect.initModel [] ("Modules" ++ id)
+    , resultName = Nothing
+    }

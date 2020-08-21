@@ -1,4 +1,4 @@
-module NetworkMap.WasmUploader.Msg exposing (..)
+port module NetworkMap.Services.Port exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -17,7 +17,8 @@ limitations under the License.
 -}
 
 
-type Msg
-    = UploadWasm
-    | WasmUploaded
-    | ChangeName String
+type alias Command =
+    { command : String, id : String, modules : Maybe (List String), name : Maybe String }
+
+
+port servicesRequest : Command -> Cmd msg

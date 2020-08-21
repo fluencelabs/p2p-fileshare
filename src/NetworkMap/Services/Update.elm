@@ -1,4 +1,4 @@
-module NetworkMap.CreateService.Update exposing (..)
+module NetworkMap.Services.Update exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -17,16 +17,16 @@ limitations under the License.
 -}
 
 import Multiselect
-import NetworkMap.CreateService.Model exposing (Model)
-import NetworkMap.CreateService.Msg exposing (Msg(..))
-import NetworkMap.CreateService.Port as Port
+import NetworkMap.Services.Model exposing (Model)
+import NetworkMap.Services.Msg exposing (Msg(..))
+import NetworkMap.Services.Port as Port
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetAvailableModules id ->
-            ( model, Port.createServiceRequest { command = "get_modules", id = id, modules = Nothing } )
+            ( model, Port.servicesRequest { command = "get_modules", id = id, modules = Nothing, name = Nothing } )
 
         CreateService ->
             let
@@ -36,7 +36,7 @@ update msg model =
                 modules =
                     List.map Tuple.first modulesPairs
             in
-            ( model, Port.createServiceRequest { command = "create_service", id = model.id, modules = Just modules } )
+            ( model, Port.servicesRequest { command = "create_service", id = model.id, modules = Just modules, name = Nothing } )
 
         UpdateModules modules ->
             let
@@ -46,14 +46,20 @@ update msg model =
                 newMultiselect =
                     Multiselect.populateValues model.multiselect pairs []
             in
-            ( { model | multiselect = newMultiselect }, Cmd.none )
+            ( { model | multiselect = newMultiselect, modules = modules }, Cmd.none )
 
         UpdateMultiSelect msMsg ->
             let
-                a =
-                    model.multiselect
-
                 ( subModel, subCmd, _ ) =
                     Multiselect.update msMsg model.multiselect
             in
             ( { model | multiselect = subModel }, Cmd.map UpdateMultiSelect subCmd )
+
+        UploadWasm ->
+            ( model, Port.servicesRequest { command = "upload_wasm", id = model.id, modules = Nothing, name = Just model.moduleName } )
+
+        WasmUploaded ->
+            ( model, Cmd.none )
+
+        ChangeName name ->
+            ( { model | moduleName = name }, Cmd.none )

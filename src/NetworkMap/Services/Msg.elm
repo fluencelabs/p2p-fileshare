@@ -1,4 +1,4 @@
-module NetworkMap.CreateService.Model exposing (..)
+module NetworkMap.Services.Msg exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -19,13 +19,11 @@ limitations under the License.
 import Multiselect
 
 
-type alias Model =
-    { id : String, modules : List String, multiselect : Multiselect.Model }
-
-
-initModel : String -> Model
-initModel id =
-    { id = id
-    , modules = []
-    , multiselect = Multiselect.initModel [] ("Modules" ++ id)
-    }
+type Msg
+    = GetAvailableModules String
+    | UpdateMultiSelect Multiselect.Msg
+    | UpdateModules (List String)
+    | CreateService
+    | UploadWasm
+    | WasmUploaded
+    | ChangeName String

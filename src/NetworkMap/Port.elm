@@ -19,7 +19,6 @@ limitations under the License.
 import Array exposing (Array)
 import Json.Decode exposing (Decoder, Value)
 import Maybe exposing (andThen, map2, withDefault)
-import NetworkMap.AvailableModules.Msg
 import NetworkMap.Certificates.Model exposing (Certificate)
 import NetworkMap.Certificates.Msg as CertificatesMsg
 import NetworkMap.Interfaces.Model exposing (CallResult, Function, Interface, Module)
@@ -27,7 +26,7 @@ import NetworkMap.Interfaces.Msg
 import NetworkMap.Interfaces.Port exposing (decodeInterfaceJson)
 import NetworkMap.Model exposing (Model, Peer, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
-import NetworkMap.WasmUploader.Msg
+import NetworkMap.Services.Msg
 
 
 type alias Command =
@@ -95,13 +94,13 @@ eventToMsg event =
 
             "set_modules" ->
                 map2
-                    (\id -> \result -> ModulesMsg id (NetworkMap.AvailableModules.Msg.SetModules result))
+                    (\id -> \result -> ServicesMsg id (NetworkMap.Services.Msg.UpdateModules result))
                     event.id
                     event.modules
 
             "wasm_uploaded" ->
                 Maybe.map
-                    (\id -> WasmUploaderMsg id NetworkMap.WasmUploader.Msg.WasmUploaded)
+                    (\id -> ServicesMsg id NetworkMap.Services.Msg.WasmUploaded)
                     event.id
 
             _ ->

@@ -24,13 +24,11 @@ import Element.Lazy exposing (lazy)
 import Ions.Background as Background
 import Ions.Border as B
 import Ions.Font as F
-import NetworkMap.AvailableModules.View
 import NetworkMap.Certificates.View
-import NetworkMap.CreateService.View
 import NetworkMap.Interfaces.View
 import NetworkMap.Model exposing (Model, NodeEntry, PeerType(..))
 import NetworkMap.Msg exposing (Msg(..))
-import NetworkMap.WasmUploader.View
+import NetworkMap.Services.View
 import Palette exposing (blockBackground, fillWidth, layoutBlock, limitLayoutWidth)
 import Screen.Model as Screen
 
@@ -116,12 +114,10 @@ showNode screen nodeEntry =
             ++ (if nodeEntry.actionsOpened then
                     [ certificateOptions nodeEntry
                     , interfaceOptions nodeEntry
-                    , wasmUploaderOptions nodeEntry
-                    , availableModulesOptions nodeEntry
-                    , createServiceOptions screen nodeEntry
+                    , servicesOptions screen nodeEntry
+                    , services screen nodeEntry
                     , certificates screen nodeEntry
                     , interfaces screen nodeEntry
-                    , availableModules screen nodeEntry
                     ]
 
                 else
@@ -135,34 +131,19 @@ interfaces screen node =
     liftView .interfaces (InterfaceMsg node.peer.id) (NetworkMap.Interfaces.View.view screen) <| node
 
 
+services : Screen.Model -> NodeEntry -> Element Msg
+services screen node =
+    liftView .services (ServicesMsg node.peer.id) (NetworkMap.Services.View.view screen) <| node
+
+
 interfaceOptions : NodeEntry -> Element Msg
 interfaceOptions node =
     liftView .interfaces (InterfaceMsg node.peer.id) NetworkMap.Interfaces.View.optionsView <| node
 
 
-wasmUploader : Screen.Model -> NodeEntry -> Element Msg
-wasmUploader screen node =
-    liftView .wasmUploader (WasmUploaderMsg node.peer.id) (NetworkMap.WasmUploader.View.view screen) <| node
-
-
-wasmUploaderOptions : NodeEntry -> Element Msg
-wasmUploaderOptions node =
-    liftView .wasmUploader (WasmUploaderMsg node.peer.id) NetworkMap.WasmUploader.View.optionsView <| node
-
-
-availableModules : Screen.Model -> NodeEntry -> Element Msg
-availableModules screen node =
-    liftView .availableModules (ModulesMsg node.peer.id) (NetworkMap.AvailableModules.View.view screen) <| node
-
-
-createServiceOptions : Screen.Model -> NodeEntry -> Element Msg
-createServiceOptions screen node =
-    liftView .createService (CreateServiceMsg node.peer.id) (NetworkMap.CreateService.View.optionsView screen) <| node
-
-
-availableModulesOptions : NodeEntry -> Element Msg
-availableModulesOptions node =
-    liftView .availableModules (ModulesMsg node.peer.id) NetworkMap.AvailableModules.View.optionsView <| node
+servicesOptions : Screen.Model -> NodeEntry -> Element Msg
+servicesOptions screen node =
+    liftView .services (ServicesMsg node.peer.id) (NetworkMap.Services.View.optionsView screen) <| node
 
 
 certificates : Screen.Model -> NodeEntry -> Element Msg

@@ -20,11 +20,10 @@ import Json.Decode
 import Maybe exposing (map, withDefault)
 import Model exposing (Model)
 import Msg exposing (Msg(..))
-import NetworkMap.AvailableModules.Msg
 import NetworkMap.Interfaces.Model exposing (CallResult)
 import NetworkMap.Interfaces.Msg
 import NetworkMap.Interfaces.Port exposing (decodeInterfaceJson)
-import NetworkMap.WasmUploader.Msg
+import NetworkMap.Services.Msg
 import Screen.Subscriptions
 
 
@@ -32,42 +31,27 @@ type alias InterfaceEvent =
     { event : String, interfaces : Maybe Json.Decode.Value, result : Maybe CallResult }
 
 
-type alias WasmUploaderEvent =
-    { event : String, wasmUploaded : Maybe String }
-
-
-type alias AvailableModulesEvent =
-    { event : String, modules : Maybe (List String) }
+type alias ServicesEvent =
+    { event : String, modules : Maybe (List String), wasmUploaded : Maybe String }
 
 
 port interfaceReceiver : (InterfaceEvent -> msg) -> Sub msg
 
 
-port wasmUploaderReceiver : (WasmUploaderEvent -> msg) -> Sub msg
+port servicesReceiver : (ServicesEvent -> msg) -> Sub msg
 
 
-port availableModulesReceiver : (AvailableModulesEvent -> msg) -> Sub msg
-
-
-availableModulesEventToMsg : AvailableModulesEvent -> Msg
-availableModulesEventToMsg event =
-    Maybe.withDefault NoOp <|
-        case event.event of
-            "set_modules" ->
-                map
-                    (\result -> AvailableModulesMsg (NetworkMap.AvailableModules.Msg.SetModules result))
-                    event.modules
-
-            _ ->
-                Nothing
-
-
-wasmUploaderEventToMsg : WasmUploaderEvent -> Msg
-wasmUploaderEventToMsg event =
+servicesEventToMsg : ServicesEvent -> Msg
+servicesEventToMsg event =
     Maybe.withDefault NoOp <|
         case event.event of
             "wasm_uploaded" ->
-                Just (WasmUploaderMsg NetworkMap.WasmUploader.Msg.WasmUploaded)
+                Just (ServicesMsg NetworkMap.Services.Msg.WasmUploaded)
+
+            "set_modules" ->
+                map
+                    (\result -> ServicesMsg (NetworkMap.Services.Msg.UpdateModules result))
+                    event.modules
 
             _ ->
                 Nothing
@@ -96,7 +80,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ interfaceReceiver interfaceEventToMsg
-        , wasmUploaderReceiver wasmUploaderEventToMsg
-        , availableModulesReceiver availableModulesEventToMsg
+        , servicesReceiver servicesEventToMsg
         , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
         ]
