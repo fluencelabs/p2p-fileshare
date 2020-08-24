@@ -17,7 +17,7 @@
 import "regenerator-runtime";
 
 import Fluence from 'fluence';
-import {initAdmin} from "./admin"
+import {initAdmin} from "./template"
 
 let conn;
 let app;
