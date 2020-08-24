@@ -28,6 +28,7 @@ import {TrustGraph} from "fluence/dist/trust/trust_graph";
 import {nodeRootCert} from "fluence/dist/trust/misc";
 import {issue} from "fluence/dist/trust/certificate";
 import {peerErrorEvent, peerEvent, relayEvent} from "./connectionReceiver";
+import {interfacesRequest, servicesRequest} from "../../src/handlers";
 
 let Address4 = require('ip-address').Address4;
 
@@ -76,99 +77,14 @@ function sendCerts(id, certs) {
 export function initAdmin(adminApp) {
     app = adminApp;
 
-    app.ports.availableModulesRequest.subscribe(async ({command, id}) => {
+    app.ports.servicesRequest.subscribe(async ({command, id, modules, name}) => {
         let conn = getConnection();
-        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
-        else {
-            switch (command) {
-                case "get_modules":
-
-                    let modules = await conn.getAvailableModules(id);
-                    sendEventToNetworkMap({event: "set_modules", id: id, modules: modules});
-
-                    break;
-            }
-        }
+        await servicesRequest(conn, id, command, modules, name, sendEventToNetworkMap, sendEventToNetworkMap, sendEventToNetworkMap)
     });
 
-    app.ports.selectWasm.subscribe(async ({command, id, name}) => {
+    app.ports.interfacesRequest.subscribe(async ({command, id, call}) => {
         let conn = getConnection();
-        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
-        else {
-            switch (command) {
-                case "upload_wasm":
-                    if (name) {
-                        console.error("'name' is empty")
-                    }
-                    let input = document.createElement('input');
-                    input.type = 'file';
-
-                    input.onchange = async e => {
-                        let file = e.target.files[0];
-                        let arrayBuffer = await file.arrayBuffer();
-                        let array = new Uint8Array(arrayBuffer);
-
-                        let base64 = Buffer.from(array).toString('base64');
-                        await conn.addModule(base64, name, 100, [], undefined, [], id);
-
-                        sendEventToNetworkMap({event: "wasm_uploaded", id: id});
-                    }
-
-                    input.click();
-
-                    break;
-            }
-        }
-    });
-
-    app.ports.createServiceRequest.subscribe(async ({command, id, modules}) => {
-        let conn = getConnection();
-        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
-        else {
-            switch (command) {
-                case "create_service":
-                    let serviceId = await conn.createService(id, modules);
-                    let createdInterface = await conn.getInterface(serviceId, id);
-                    sendEventToNetworkMap({event: "add_interfaces", interfaces: [createdInterface], id: id});
-                    break;
-            default:
-                console.error("Received unknown interfacesRequest from the Elm app", command);
-            }
-        }
-
-    });
-
-    app.ports.interfacesRequest.subscribe(async ({command, id, call, context}) => {
-        let conn = getConnection();
-        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
-        else {
-            let result;
-            switch (command) {
-                case "get_active_interfaces":
-                    result = await conn.getActiveInterfaces(id);
-                    sendEventToNetworkMap({event: "add_interfaces", interfaces: result, id: id});
-                    break;
-                case "get_interface":
-                    // TODO
-                    result = await conn.getInterface(serviceId, id);
-
-                    break;
-                case "call":
-                    result = await conn.callService(id, call.serviceId, call.moduleName, call.args, call.fname);
-
-                    const callResult = {
-                        serviceId: call.serviceId,
-                        moduleName: call.moduleName,
-                        fname: call.fname,
-                        result: JSON.stringify(result, undefined, 2)
-                    };
-                    sendEventToNetworkMap({event: "add_result", result: callResult, id: id});
-
-                    break;
-                default:
-                    console.error("Received unknown interfacesRequest from the Elm app", command);
-            }
-        }
+        await interfacesRequest(conn, command, id, call, sendEventToNetworkMap);
 
     });
 
