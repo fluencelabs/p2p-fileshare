@@ -39,37 +39,29 @@ export function sendEventToInterface(ev) {
 
 export function sendEventToWasmUploader(ev) {
     let event = {...emptyNetworkMapEvent, ...ev}
-    app.ports.wasmUploaderReceiver.send(event)
+    app.ports.servicesReceiver.send(event)
 }
 
 export function sendEventToAvailableModules(ev) {
     let event = {...emptyNetworkMapEvent, ...ev}
-    app.ports.availableModulesReceiver.send(event)
+    app.ports.interfaceReceiver.send(event)
 }
 
 export function initAdmin(adminApp) {
     app = adminApp;
 
-    app.ports.availableModulesRequest.subscribe(async ({command, id}) => {
+    app.ports.servicesRequest.subscribe(async ({command, modules, wasmUploaded}) => {
+        let id = nodePeer;
         let conn = getConnection();
         if (!conn) console.error("Cannot handle interfacesRequest when not connected");
         else {
             switch (command) {
                 case "get_modules":
 
-                    let modules = await conn.getAvailableModules(id);
-                    sendEventToAvailableModules({event: "set_modules", id: id, modules: modules});
+                    let receivedModules = await conn.getAvailableModules(id);
+                    sendEventToAvailableModules({event: "set_modules", id: id, modules: receivedModules});
 
                     break;
-            }
-        }
-    });
-
-    app.ports.selectWasm.subscribe(async ({command, id, name}) => {
-        let conn = getConnection();
-        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
-        else {
-            switch (command) {
                 case "upload_wasm":
                     if (name) {
                         console.error("'name' is empty")
@@ -91,25 +83,17 @@ export function initAdmin(adminApp) {
                     input.click();
 
                     break;
-            }
-        }
-    });
 
-    app.ports.createServiceRequest.subscribe(async ({command, id, modules}) => {
-        let conn = getConnection();
-        if (!conn) console.error("Cannot handle interfacesRequest when not connected");
-        else {
-            switch (command) {
                 case "create_service":
                     let serviceId = await conn.createService(id, modules);
                     let createdInterface = await conn.getInterface(serviceId, id);
                     sendEventToInterface({event: "add_interfaces", interfaces: [createdInterface], id: id});
                     break;
-            default:
-                console.error("Received unknown interfacesRequest from the Elm app", command);
+                default:
+                    console.error("Received unknown interfacesRequest from the Elm app", command);
+
             }
         }
-
     });
 
     app.ports.interfacesRequest.subscribe(async ({command, id, call}) => {
