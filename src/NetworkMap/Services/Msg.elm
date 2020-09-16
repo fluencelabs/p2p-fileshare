@@ -21,9 +21,11 @@ import Multiselect
 
 type Msg
     = GetAvailableModules String
-    | UpdateMultiSelect Multiselect.Msg
+    | UpdateModulesMultiSelect Multiselect.Msg
+    | UpdateBlueprintsMultiSelect Multiselect.Msg
     | UpdateModules (List String)
     | CreateService
+    | CreateBlueprint
     | UploadWasm
     | WasmUploaded
     | ChangeName String

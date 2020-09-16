@@ -81,10 +81,10 @@ optionsCreateServiceView : Screen.Model -> Model -> Element Msg
 optionsCreateServiceView screen model =
     let
         multiselectView =
-            Multiselect.view model.multiselect
+            Multiselect.view model.modulesMultiselect
 
         multiselectHtml =
-            Html.map UpdateMultiSelect <| multiselectView
+            Html.map UpdateModulesMultiSelect <| multiselectView
 
         multiselect =
             Element.html multiselectHtml

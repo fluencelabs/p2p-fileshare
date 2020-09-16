@@ -26,17 +26,27 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetAvailableModules id ->
-            ( model, Port.servicesRequest { command = "get_modules", id = id, modules = Nothing, name = Nothing } )
+            ( model, Port.servicesRequest { command = "get_modules", id = id, modules = Nothing, blueprints = Nothing, name = Nothing } )
 
         CreateService ->
             let
+                blueprintsPairs =
+                    Multiselect.getSelectedValues model.blueprintsMultiselect
+
+                blueprints =
+                    List.map Tuple.first blueprintsPairs
+            in
+            ( model, Port.servicesRequest { command = "create_service", id = model.id, blueprints = Just blueprints, modules = Nothing, name = Nothing } )
+
+        CreateBlueprint ->
+            let
                 modulesPairs =
-                    Multiselect.getSelectedValues model.multiselect
+                    Multiselect.getSelectedValues model.modulesMultiselect
 
                 modules =
                     List.map Tuple.first modulesPairs
             in
-            ( model, Port.servicesRequest { command = "create_service", id = model.id, modules = Just modules, name = Nothing } )
+            ( model, Port.servicesRequest { command = "create_blueprint", id = model.id, blueprints = Nothing, modules = Just modules, name = Nothing } )
 
         UpdateModules modules ->
             let
@@ -44,22 +54,31 @@ update msg model =
                     List.map (\m -> ( m, m )) modules
 
                 newMultiselect =
-                    Multiselect.populateValues model.multiselect pairs []
+                    Multiselect.populateValues model.modulesMultiselect pairs []
             in
-            ( { model | multiselect = newMultiselect, modules = modules }, Cmd.none )
+            ( { model | modulesMultiselect = newMultiselect, modules = modules }, Cmd.none )
 
-        UpdateMultiSelect msMsg ->
+        UpdateModulesMultiSelect msMsg ->
             let
                 ( subModel, subCmd, _ ) =
-                    Multiselect.update msMsg model.multiselect
+                    Multiselect.update msMsg model.modulesMultiselect
             in
-            ( { model | multiselect = subModel }, Cmd.map UpdateMultiSelect subCmd )
+            ( { model | modulesMultiselect = subModel }, Cmd.map UpdateModulesMultiSelect subCmd )
+
+        UpdateBlueprintsMultiSelect msMsg ->
+            let
+                ( subModel, subCmd, _ ) =
+                    Multiselect.update msMsg model.blueprintsMultiselect
+            in
+            ( { model | blueprintsMultiselect = subModel }, Cmd.map UpdateModulesMultiSelect subCmd )
 
         UploadWasm ->
-            ( model, Port.servicesRequest { command = "upload_wasm", id = model.id, modules = Nothing, name = Just model.moduleName } )
+            ( model, Port.servicesRequest { command = "upload_wasm", id = model.id, blueprints = Nothing, modules = Nothing, name = Just model.moduleName } )
 
         WasmUploaded ->
             ( model, Cmd.none )
 
         ChangeName name ->
             ( { model | moduleName = name }, Cmd.none )
+
+

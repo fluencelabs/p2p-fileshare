@@ -18,7 +18,7 @@ limitations under the License.
 
 
 type alias Command =
-    { command : String, id : String, modules : Maybe (List String), name : Maybe String }
+    { command : String, id : String, blueprints : Maybe (List String), modules : Maybe (List String), name : Maybe String }
 
 
 port servicesRequest : Command -> Cmd msg
