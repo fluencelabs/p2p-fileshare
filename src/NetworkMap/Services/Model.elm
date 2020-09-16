@@ -20,9 +20,14 @@ import Multiselect
 
 
 type alias Model =
-    { id : String, modules : List String, blueprints : List String
+    { id : String
+    , modules : List String
+    , blueprints : List String
     , modulesMultiselect : Multiselect.Model
-    , blueprintsMultiselect : Multiselect.Model, moduleName : String, resultName : Maybe String }
+    , blueprintsMultiselect : Multiselect.Model
+    , moduleName : String
+    , resultName : Maybe String
+    }
 
 
 initModel : String -> Model

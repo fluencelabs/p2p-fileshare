@@ -80,5 +80,3 @@ update msg model =
 
         ChangeName name ->
             ( { model | moduleName = name }, Cmd.none )
-
-

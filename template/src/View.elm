@@ -127,6 +127,7 @@ interfaceOptions : Model -> Element Msg
 interfaceOptions model =
     liftView .interface InterfaceMsg NetworkMap.Interfaces.View.optionsView <| model
 
+
 servicesOptions : Model -> Element Msg
 servicesOptions model =
     liftView .services ServicesMsg (NetworkMap.Services.View.optionsView model.screen) <| model
