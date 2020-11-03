@@ -4,8 +4,14 @@
 version: 2
 jobs:
   empty:
+    docker:
+      # A simple Elm 0.19 docker - https://github.com/simonh1000/docker-elm
+      - image: hotbelgo/docker-elm
+
+    working_directory: ~/repo
+
     steps:
-      -checkout
+      - checkout
   build:
     docker:
       # A simple Elm 0.19 docker - https://github.com/simonh1000/docker-elm
