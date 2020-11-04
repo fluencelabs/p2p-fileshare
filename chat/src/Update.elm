@@ -16,9 +16,11 @@ limitations under the License.
 
 -}
 
+import Chat.Msg
 import Chat.Update
+import Conn.Msg
 import Conn.Update
-import Model exposing (Model)
+import Model exposing (Model, Status(..))
 import Msg exposing (..)
 import Screen.Update
 
@@ -62,10 +64,25 @@ update msg model =
             updateScreen m model
 
         ConnMsg m ->
-            updateConn m model
+            case m of
+                Conn.Msg.RelayConnected relay ->
+                    let
+                        (mod, cmd) = updateConn m model
+                    in
+                        ( {mod | status = Connected }, cmd)
+
+                _ ->
+                    updateConn m model
 
         ChatMsg m ->
-                updateChat m model
+            case m of
+                Chat.Msg.ConnectedToChat ->
+                    let
+                        (mod, cmd) = updateChat m model
+                    in
+                        ( {mod | status = Connected }, cmd)
+                _ ->
+                    updateChat m model
 
         NoOp ->
             ( model, Cmd.none )

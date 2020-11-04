@@ -15,3 +15,6 @@ update msg model =
 
         CreateChat ->
             ( model, Cmd.none )
+
+        ConnectedToChat ->
+            ( model, Cmd.none )

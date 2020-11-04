@@ -4,3 +4,4 @@ type Msg
     = SetChatId String
     | JoinChat
     | CreateChat
+    | ConnectedToChat
