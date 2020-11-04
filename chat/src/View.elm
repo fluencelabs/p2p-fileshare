@@ -54,16 +54,14 @@ title _ =
 body : Model -> Html Msg
 body model =
     layout <|
-        admin model
+        chat model
 
 
-admin : Model -> List (Element Msg)
-admin model =
+chat : Model -> List (Element Msg)
+chat model =
     List.concat
         [ header model.screen
         , [ connectivity model ]
-        , Conn.View.showIfConnected model.connectivity
-            [ ]
         ]
 
 

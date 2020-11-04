@@ -1,5 +1,4 @@
 const path = require('path');
-const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
@@ -7,7 +6,7 @@ module.exports = {
         app: ['./src/index.ts']
     },
     resolve: {
-        extensions: ['.js', '.ts']
+        extensions: ['.js', '.ts', ".elm"]
     },
     devServer: {
         contentBase: './bundle',
@@ -18,10 +17,23 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
-                loader: 'ts-loader',
-                exclude: /node_modules/
-            }
+                test: /\.html$/,
+                exclude: /node_modules/,
+                loader: "file-loader?name=[name].[ext]"
+            },
+            {
+                test: [/\.elm$/],
+                exclude: [/elm-stuff/, /node_modules/],
+                use: [
+                    { loader: "elm-hot-webpack-loader" },
+                    {
+                        loader: "elm-webpack-loader",
+                        options:
+                            { debug: true, forceWatch: true }
+                    }
+                ]
+            },
+            { test: /\.ts$/, loader: "ts-loader" }
         ]
     },
     mode: "development",
@@ -33,7 +45,11 @@ module.exports = {
         new CopyWebpackPlugin([{
             from: './*.html'
         }]),
-        new webpack.HotModuleReplacementPlugin()
-    ]
+        // new webpack.HotModuleReplacementPlugin()
+    ],
+    serve: {
+        inline: true,
+        stats: "errors-only"
+    }
 };
 

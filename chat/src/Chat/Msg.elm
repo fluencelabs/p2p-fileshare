@@ -1,0 +1,1 @@
+module Chat.Msg exposing (..)

@@ -16,7 +16,8 @@
     "strictNullChecks": false,
     "esModuleInterop": true,
     "declarationMap": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "allowJs": true
   },
   "exclude": [
     "node_modules",
