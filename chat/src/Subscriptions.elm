@@ -1,4 +1,4 @@
-module NetworkMap.Msg exposing (Msg(..))
+module Subscriptions exposing (subscriptions)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,18 +16,15 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Certificates.Msg
-import NetworkMap.Interfaces.Msg
-import NetworkMap.Model exposing (Peer, PeerType)
-import NetworkMap.Services.Msg
+import Conn.Port
+import Model exposing (Model)
+import Msg exposing (Msg(..))
+import Screen.Subscriptions
 
 
-type Msg
-    = PeerAppeared Peer PeerType String Bool
-    | OpenActions String
-    | InterfaceMsg String NetworkMap.Interfaces.Msg.Msg
-    | ServicesMsg String NetworkMap.Services.Msg.Msg
-    | CertMsg String NetworkMap.Certificates.Msg.Msg
-    | ChangePeerInput String
-    | AddPeerId
-    | NoOp
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
+        , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
+        ]

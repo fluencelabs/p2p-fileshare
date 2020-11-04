@@ -1,4 +1,4 @@
-module NetworkMap.Msg exposing (Msg(..))
+module Main exposing (..)
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,18 +16,24 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Certificates.Msg
-import NetworkMap.Interfaces.Msg
-import NetworkMap.Model exposing (Peer, PeerType)
-import NetworkMap.Services.Msg
+import Browser exposing (Document)
+import Config exposing (Flags)
+import Model exposing (Model, emptyModel)
+import Msg exposing (Msg(..))
+import Subscriptions exposing (subscriptions)
+import Update exposing (update)
+import View exposing (view)
 
 
-type Msg
-    = PeerAppeared Peer PeerType String Bool
-    | OpenActions String
-    | InterfaceMsg String NetworkMap.Interfaces.Msg.Msg
-    | ServicesMsg String NetworkMap.Services.Msg.Msg
-    | CertMsg String NetworkMap.Certificates.Msg.Msg
-    | ChangePeerInput String
-    | AddPeerId
-    | NoOp
+main =
+    Browser.document
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    emptyModel flags

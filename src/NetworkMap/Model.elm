@@ -17,11 +17,9 @@ limitations under the License.
 -}
 
 import Dict exposing (Dict)
-import NetworkMap.AvailableModules.Model as AvailableModules
 import NetworkMap.Certificates.Model as Certificates
-import NetworkMap.CreateService.Model as CreateService
 import NetworkMap.Interfaces.Model as Interfaces
-import NetworkMap.WasmUploader.Model as WasmUploader
+import NetworkMap.Services.Model as Services
 
 
 type PeerType
@@ -42,9 +40,7 @@ type alias NodeEntry =
     , appearencesNumber : Int
     , certificates : Certificates.Model
     , interfaces : Interfaces.Model
-    , availableModules : AvailableModules.Model
-    , createService : CreateService.Model
-    , wasmUploader : WasmUploader.Model
+    , services : Services.Model
     , actionsOpened : Bool
     }
 
@@ -52,13 +48,11 @@ type alias NodeEntry =
 type alias Model =
     { network : Dict String NodeEntry
     , peerInput : String
-    , show : Bool
     }
 
 
-emptyNetwork : Bool -> Model
-emptyNetwork isAdmin =
+emptyNetwork : Model
+emptyNetwork =
     { network = Dict.empty
     , peerInput = ""
-    , show = isAdmin
     }

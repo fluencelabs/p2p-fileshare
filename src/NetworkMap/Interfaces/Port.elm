@@ -16,7 +16,10 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Interfaces.Model exposing (Call)
+import Array exposing (Array)
+import Json.Decode exposing (Decoder, Value, array, decodeValue, field, list, string)
+import NetworkMap.Interfaces.Model exposing (Call, CallResult, Function, Interface, Module)
+import NetworkMap.Interfaces.Msg exposing (Msg(..))
 
 
 type alias Command =
@@ -24,3 +27,52 @@ type alias Command =
 
 
 port interfacesRequest : Command -> Cmd msg
+
+
+decodeInterfaceJson : Value -> Maybe Msg
+decodeInterfaceJson v =
+    let
+        interfaces =
+            decodeValue decodeInterfaces v
+
+        msg =
+            case interfaces of
+                Ok value ->
+                    Just (AddInterfaces <| value)
+
+                Err error ->
+                    Nothing
+    in
+    msg
+
+
+decodeStringList : Decoder (Array String)
+decodeStringList =
+    array string
+
+
+decodeFunction : Decoder Function
+decodeFunction =
+    Json.Decode.map3 Function
+        (field "name" string)
+        (field "input_types" decodeStringList)
+        (field "output_types" decodeStringList)
+
+
+decodeInterfaces : Decoder (List Interface)
+decodeInterfaces =
+    list decodeInterface
+
+
+decodeInterface : Decoder Interface
+decodeInterface =
+    Json.Decode.map2 Interface
+        (field "service_id" string)
+        (field "modules" (list decodeModule))
+
+
+decodeModule : Decoder Module
+decodeModule =
+    Json.Decode.map2 Module
+        (field "name" string)
+        (field "functions" (list decodeFunction))

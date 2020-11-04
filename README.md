@@ -29,7 +29,7 @@ And that's it: no complex connections, traffic management, and whatnot. IPFS han
 ## The code
 There are a JS and the Elm parts of code. JS is where all business logic, function calls, and gear-turning happens, and Elm is where all the UI stuff is defined. 
 
-If diving into the code, it's better to start with [ports.js](src/ports.js). That's the boundary between business logic and UI, and should be pretty self-explanatory. Or it will be one day 🙏.
+If diving into the code, it's better to start with [ports.js](admin/src/ports.js). That's the boundary between business logic and UI, and should be pretty self-explanatory. Or it will be one day 🙏.
 
 ## Running it
 ```

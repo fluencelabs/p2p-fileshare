@@ -1,4 +1,4 @@
-module NetworkMap.Msg exposing (Msg(..))
+module Msg exposing (Msg(..))
 
 {-| Copyright 2020 Fluence Labs Limited
 
@@ -16,18 +16,13 @@ limitations under the License.
 
 -}
 
-import NetworkMap.Certificates.Msg
 import NetworkMap.Interfaces.Msg
-import NetworkMap.Model exposing (Peer, PeerType)
 import NetworkMap.Services.Msg
+import Screen.Msg
 
 
 type Msg
-    = PeerAppeared Peer PeerType String Bool
-    | OpenActions String
-    | InterfaceMsg String NetworkMap.Interfaces.Msg.Msg
-    | ServicesMsg String NetworkMap.Services.Msg.Msg
-    | CertMsg String NetworkMap.Certificates.Msg.Msg
-    | ChangePeerInput String
-    | AddPeerId
-    | NoOp
+    = NoOp
+    | InterfaceMsg NetworkMap.Interfaces.Msg.Msg
+    | ServicesMsg NetworkMap.Services.Msg.Msg
+    | ScreenMsg Screen.Msg.Msg
