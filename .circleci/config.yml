@@ -3,7 +3,7 @@
 
 version: 2
 jobs:
-  empty:
+  build:
     docker:
       # A simple Elm 0.19 docker - https://github.com/simonh1000/docker-elm
       - image: hotbelgo/docker-elm
@@ -43,4 +43,4 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - empty
+      - build
