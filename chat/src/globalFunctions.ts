@@ -4,7 +4,7 @@ import {peerIdToSeed, seedToPeerId} from "fluence/dist/seed";
 import {SQLITE_BS64} from "../../artifacts/sqliteBs64";
 import {HISTORY_BS64} from "../../artifacts/historyBs64";
 import {USER_LIST_BS64} from "../../artifacts/userListBs64";
-import {CHAT_PEER_ID, HISTORY_BLUEPRINT, relays, USER_LIST_BLUEPRINT} from "./index";
+import {CHAT_PEER_ID, HISTORY_BLUEPRINT, relays, USER_LIST_BLUEPRINT} from "./main";
 import Fluence from "fluence";
 
 export let currentChat: FluenceChat | undefined = undefined;

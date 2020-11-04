@@ -2,7 +2,7 @@ import {FluenceClient} from "fluence/dist/fluenceClient";
 import {registerService} from "fluence/dist/globalState";
 import {Service} from "fluence/dist/service";
 import {build} from "fluence/dist/particle";
-import {CHAT_PEER_ID} from "./index";
+import {CHAT_PEER_ID} from "./main";
 
 export const HISTORY_NAME = "history"
 export const USER_LIST_NAME = "user-list"
