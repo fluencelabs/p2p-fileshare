@@ -17,7 +17,8 @@
 // import './main.css';
 import {Elm} from './Main.elm';
 import * as serviceWorker from './serviceWorker';
-import ports, {convertRelayForELM, getRelays} from "./ports";
+import ports, {getRelays} from "./ports";
+import {convertRelayForELM} from "./utils";
 
 let flags: any = {
     peerId: null,
