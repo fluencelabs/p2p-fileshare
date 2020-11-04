@@ -18,3 +18,18 @@ update msg model =
 
         ConnectedToChat ->
             ( model, Cmd.none )
+
+        NewMember peerId name ->
+            ( model, Cmd.none )
+
+        NewMsg peerId m ->
+            ( model, Cmd.none )
+
+        NameChaged peerId name ->
+            ( model, Cmd.none )
+
+        RelayChanged peerId relay ->
+            ( model, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )
