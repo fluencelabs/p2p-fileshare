@@ -17,6 +17,7 @@ limitations under the License.
 -}
 
 import Browser exposing (Document)
+import Chat.View
 import Conn.View
 import Element
     exposing
@@ -56,13 +57,29 @@ body model =
     layout <|
         chat model
 
+mainmView : Model -> List (Element Msg)
+mainmView model =
+    case model.status of
+        Model.Init ->
+            [connectivity model]
+
+        Model.Connected ->
+            [chatConn model]
+
+        Model.JoinedToChat ->
+            [chatTalk model]
+
+
+
 
 chat : Model -> List (Element Msg)
 chat model =
-    List.concat
-        [ header model.screen
-        , [ connectivity model ]
-        ]
+    let mainView = mainmView model
+    in
+        List.concat
+            [ header model.screen
+            , mainView
+            ]
 
 
 liftView :
@@ -117,3 +134,11 @@ header screenI =
 connectivity : Model -> Element Msg
 connectivity model =
     liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
+
+chatConn : Model -> Element Msg
+chatConn model =
+    liftView .chat ChatMsg (Chat.View.connectionView model.screen) <| model
+
+chatTalk : Model -> Element Msg
+chatTalk model =
+    liftView .chat ChatMsg (Chat.View.talkView model.screen) <| model

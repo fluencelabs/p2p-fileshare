@@ -16,6 +16,7 @@ limitations under the License.
 
 -}
 
+import Chat.Update
 import Conn.Update
 import Model exposing (Model)
 import Msg exposing (..)
@@ -50,6 +51,9 @@ updateScreen =
 updateConn =
     liftUpdate .connectivity (\c -> \m -> { m | connectivity = c }) ConnMsg Conn.Update.update
 
+updateChat =
+    liftUpdate .chat (\c -> \m -> { m | chat = c }) ChatMsg Chat.Update.update
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -59,6 +63,9 @@ update msg model =
 
         ConnMsg m ->
             updateConn m model
+
+        ChatMsg m ->
+                updateChat m model
 
         NoOp ->
             ( model, Cmd.none )
