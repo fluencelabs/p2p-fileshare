@@ -21,7 +21,7 @@ import Chat.Msg exposing (Msg(..))
 
 
 type alias Command =
-    { command : String }
+    { command : String, chatId : Maybe String, name : Maybe String }
 
 
 type alias Event =
@@ -31,12 +31,7 @@ type alias Event =
 port chatRequest : Command -> Cmd msg
 
 
-command : String -> Command
-command c =
-    { command = c }
-
-
-port portReceiver : (Event -> msg) -> Sub msg
+port chatReceiver : (Event -> msg) -> Sub msg
 
 
 eventToMsg : Event -> Msg
@@ -64,4 +59,4 @@ eventToMsg event =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    portReceiver eventToMsg
+    chatReceiver eventToMsg

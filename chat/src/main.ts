@@ -1,7 +1,6 @@
 import Fluence from "fluence/dist/fluence";
 
 import {createChat, currentChat, joinChat, publishBlueprint} from "./globalFunctions";
-import './main.css';
 
 // change these constants in different environment
 export const HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";

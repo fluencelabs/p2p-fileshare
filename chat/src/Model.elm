@@ -23,13 +23,18 @@ import Element
 import Msg exposing (Msg(..))
 import Screen.Model as Screen
 
-type Status = Init | Connected | JoinedToChat
+
+type Status
+    = Init
+    | Connected
+    | JoinedToChat
+
 
 type alias Model =
     { connectivity : Conn.Model.Model
     , chat : Chat.Model.Model
     , screen : Screen.Model
-    , status: Status
+    , status : Status
     }
 
 

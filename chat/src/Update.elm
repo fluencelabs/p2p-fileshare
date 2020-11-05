@@ -53,6 +53,7 @@ updateScreen =
 updateConn =
     liftUpdate .connectivity (\c -> \m -> { m | connectivity = c }) ConnMsg Conn.Update.update
 
+
 updateChat =
     liftUpdate .chat (\c -> \m -> { m | chat = c }) ChatMsg Chat.Update.update
 
@@ -67,9 +68,10 @@ update msg model =
             case m of
                 Conn.Msg.RelayConnected relay ->
                     let
-                        (mod, cmd) = updateConn m model
+                        ( mod, cmd ) =
+                            updateConn m model
                     in
-                        ( {mod | status = Connected }, cmd)
+                    ( { mod | status = Connected }, cmd )
 
                 _ ->
                     updateConn m model
@@ -78,9 +80,11 @@ update msg model =
             case m of
                 Chat.Msg.ConnectedToChat ->
                     let
-                        (mod, cmd) = updateChat m model
+                        ( mod, cmd ) =
+                            updateChat m model
                     in
-                        ( {mod | status = Connected }, cmd)
+                    ( { mod | status = JoinedToChat }, cmd )
+
                 _ ->
                     updateChat m model
 

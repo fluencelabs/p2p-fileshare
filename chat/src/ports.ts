@@ -1,7 +1,6 @@
-import * as PeerId from "peer-id";
-import {FluenceClient} from "fluence/dist/fluenceClient";
 import {connectionHandler} from "./connection";
 import {convertRelayForELM} from "./utils";
+import {chatHandler} from "./chat";
 
 interface Peer {
     id: string,
@@ -59,31 +58,12 @@ export function relayEvent(name: string, relay?: Relay) {
     getApp().ports.connReceiver.send(ev);
 }
 
-export function setConnection(app: any, connection: FluenceClient) {
-    conn = connection;
-}
-
-export function getConnection() {
-    return conn
-}
-
 let app: any;
-let relayPeerId: string;
-let currentPeerId: PeerId
-let conn: FluenceClient
 
 // new peer is generated
 export function peerEvent(name: string, peer: Peer) {
     let peerToSend: Peer = {privateKey: null, ...peer};
     getApp().ports.connReceiver.send({event: name, relay: null, errorMsg: null, peer: peerToSend});
-}
-
-export function getCurrentPeerId() {
-    return currentPeerId
-}
-
-export function setCurrentPeerId(peerId: PeerId) {
-    currentPeerId = peerId;
 }
 
 export function setApp(newApp: any) {
@@ -94,10 +74,6 @@ export function getApp(): any {
     return app;
 }
 
-export function setRelayPeerId(peerId: string) {
-    relayPeerId = peerId
-}
-
 export default async function ports(app: any) {
 
     setApp(app)
@@ -106,4 +82,6 @@ export default async function ports(app: any) {
      * Handle connection commands
      */
     app.ports.connRequest.subscribe(connectionHandler);
+
+    app.ports.chatRequest.subscribe(chatHandler(app))
 }

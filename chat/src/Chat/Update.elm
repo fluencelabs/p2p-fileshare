@@ -2,6 +2,8 @@ module Chat.Update exposing (..)
 
 import Chat.Model exposing (Model)
 import Chat.Msg exposing (Msg(..))
+import Chat.Port
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -9,12 +11,14 @@ update msg model =
         SetChatId chatId ->
             ( { model | chatId = chatId }, Cmd.none )
 
+        SetName name ->
+            ( { model | name = name }, Cmd.none )
+
         JoinChat ->
-            --( model, Conn.Port.connRequest { command = "connect_to", id = Nothing, connectTo = Just model.relayInput } )
-            ( model, Cmd.none )
+            ( model, Chat.Port.chatRequest { command = "join", chatId = Just model.chatId, name = Just model.name } )
 
         CreateChat ->
-            ( model, Cmd.none )
+            ( model, Chat.Port.chatRequest { command = "create", chatId = Nothing, name = Just model.name } )
 
         ConnectedToChat ->
             ( model, Cmd.none )
@@ -25,7 +29,7 @@ update msg model =
         NewMsg peerId m ->
             ( model, Cmd.none )
 
-        NameChaged peerId name ->
+        NameChanged peerId name ->
             ( model, Cmd.none )
 
         RelayChanged peerId relay ->

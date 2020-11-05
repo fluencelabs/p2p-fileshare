@@ -3,14 +3,31 @@ import {peerIdToSeed, seedToPeerId} from "fluence/dist/seed";
 import Fluence from "fluence";
 import {
     addRelay, getApp,
-    getConnection,
-    getCurrentPeerId, getRelays,
     peerErrorEvent, peerEvent, Relay,
-    relayEvent, setConnection, setCurrentPeerId,
-    setRelayPeerId
+    relayEvent
 } from "./ports";
 import {to_multiaddr} from "./utils";
+
 let Address4 = require('ip-address').Address4;
+
+let relayMultiaddr: string | undefined = undefined
+let peerId: PeerId | undefined = undefined
+
+export function getRelayMultiaddr(): string {
+    return relayMultiaddr
+}
+
+export function getPeerId(): PeerId {
+    return peerId
+}
+
+function setRelayMultiaddr(newRelay: string) {
+    relayMultiaddr = newRelay
+}
+
+function setPeerId(newPeerId: PeerId) {
+    peerId = newPeerId
+}
 
 export interface Target {
     host: string,
@@ -50,8 +67,6 @@ export async function establishConnection(app: any, target: Target) {
                 await PeerId.createFromB58String(target.peerId);
             }
 
-            setRelayPeerId(target.peerId);
-
             if (errorMsg) {
                 peerErrorEvent(errorMsg);
                 return;
@@ -79,21 +94,13 @@ export async function establishConnection(app: any, target: Target) {
             let relay: Relay = {
                 host: host,
                 pport: port,
-                peer: { id: target.peerId, privateKey: null },
+                peer: {id: target.peerId, privateKey: null},
                 dns: dns
             }
             addRelay(app, relay);
 
-            if (getCurrentPeerId() === peerId) {
-                let con = getConnection();
-                await con.connect(to_multiaddr(relay));
-            } else {
-                setCurrentPeerId(peerId);
-                peerEvent("set_peer", {id: peerId.toB58String(), privateKey: privateKey});
-
-                let conn = await Fluence.connect(to_multiaddr(relay), peerId);
-                setConnection(app, conn);
-            }
+            setPeerId(peerId);
+            setRelayMultiaddr(to_multiaddr(relay))
 
             relayEvent("relay_connected", relay);
         }
@@ -103,34 +110,12 @@ export async function establishConnection(app: any, target: Target) {
     }
 }
 
-export const connectionHandler = async ({command, id, connectTo}: {command: string, id: string, connectTo: Target}) => {
+export const connectionHandler = async ({command, id, connectTo}: { command: string, id: string, connectTo: Target }) => {
     switch (command) {
-        case "set_relay":
-            let relay = getRelays().find(r => r.peer.id === id);
-            if (relay) {
-                if (!getCurrentPeerId()) {
-                    break;
-                }
-
-                relayEvent("relay_connecting");
-                let conn = getConnection()
-                // if the connection already established, connect to another node and save previous services and subscriptions
-                if (conn) {
-                    await conn.connect(to_multiaddr(relay));
-                } else {
-                    setConnection(getApp(), await Fluence.connect(to_multiaddr(relay), getCurrentPeerId()));
-                }
-
-                relayEvent("relay_connected", relay);
-            }
-
-            break;
-
         case "generate_peer":
             let peerId = await Fluence.generatePeerId();
-            setCurrentPeerId(peerId);
             let peerIdStr = peerId.toB58String();
-            peerEvent( "set_peer", {id: peerIdStr});
+            peerEvent("set_peer", {id: peerIdStr});
             break;
 
         case "connect_to":
