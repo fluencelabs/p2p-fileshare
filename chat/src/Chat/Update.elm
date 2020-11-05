@@ -14,26 +14,23 @@ update msg model =
         SetName name ->
             ( { model | name = name }, Cmd.none )
 
+        SetCurrentMessage message ->
+            ( { model | currentMsg = message }, Cmd.none )
+
         JoinChat ->
-            ( model, Chat.Port.chatRequest { command = "join", chatId = Just model.chatId, name = Just model.name } )
+            ( model, Chat.Port.chatRequest { command = "join", chatId = Just model.chatId, name = Just model.name, msg = Nothing } )
 
         CreateChat ->
-            ( model, Chat.Port.chatRequest { command = "create", chatId = Nothing, name = Just model.name } )
+            ( model, Chat.Port.chatRequest { command = "create", chatId = Nothing, name = Just model.name, msg = Nothing } )
+
+        SendMessage ->
+            ( model, Chat.Port.chatRequest { command = "send_message", chatId = Nothing, name = Just model.name, msg = Just model.currentMsg } )
 
         ConnectedToChat ->
             ( model, Cmd.none )
 
-        NewMember peerId name ->
-            ( model, Cmd.none )
-
-        NewMsg peerId m ->
-            ( model, Cmd.none )
-
-        NameChanged peerId name ->
-            ( model, Cmd.none )
-
-        RelayChanged peerId relay ->
-            ( model, Cmd.none )
+        NewMsg name m ->
+            ( { model | messages = { msg = m, name = name } :: model.messages }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )

@@ -3,6 +3,7 @@ import {registerService} from "fluence/dist/globalState";
 import {Service} from "fluence/dist/service";
 import {build} from "fluence/dist/particle";
 import {CHAT_PEER_ID} from "./main";
+import {sendEventMessage} from "./chat";
 
 export const HISTORY_NAME = "history"
 export const USER_LIST_NAME = "user-list"
@@ -62,7 +63,7 @@ export class FluenceChat {
                     name = this.members.find(m => m.clientId === v[2])?.name
                 }
                 if (name) {
-                    console.log(`${decodeURIComponent(name)}: ${decodeURIComponent(v[1])}`)
+                    FluenceChat.notifyNewMessage(name, v[1])
                 }
             })
 
@@ -78,7 +79,9 @@ export class FluenceChat {
         service.registerFunction("add", (args: any[]) => {
             let m = this.members.find(m => m.clientId === args[0])
             if (m) {
-                console.log(`${decodeURIComponent(m.name)}: ${decodeURIComponent(args[1])}`)
+                FluenceChat.notifyNewMessage(m.name, args[1])
+            } else if (args[0] === this.client.selfPeerIdStr) {
+                FluenceChat.notifyNewMessage("Me", args[1])
             }
             return {}
         })
@@ -161,26 +164,34 @@ export class FluenceChat {
         this.members = this.members.filter(m => m.clientId !== clientId)
     }
 
-    private static printNameChanged(oldName: string, name: string) {
-        console.log(`Member '${decodeURIComponent(oldName)}' changed name to '${decodeURIComponent(name)}'.`)
+    private static notifyNameChanged(oldName: string, name: string) {
+        sendEventMessage(`Member '${decodeURIComponent(oldName)}' changed name to '${decodeURIComponent(name)}'.`, "")
     }
 
-    private static printRelayChanged(relay: string) {
-        console.log(`Member '${relay}' changed its relay address.'.`)
+    private static notifyRelayChanged(relay: string) {
+        sendEventMessage(`Member '${relay}' changed its relay address.'.`, "")
+    }
+
+    private static notifyNewMessage(name: string, msg: string) {
+        sendEventMessage(decodeURIComponent(msg), decodeURIComponent(name))
+    }
+
+    private static notifyNewMember(name: string) {
+        sendEventMessage(`Member joined: ${decodeURIComponent(name)}.`, "")
     }
 
     private addMember(member: Member) {
         if (member.clientId !== this.client.selfPeerIdStr) {
             let oldMember = this.members.find((m) => m.clientId === member.clientId)
             if (!oldMember) {
-                console.log(`Member joined: ${decodeURIComponent(member.name)}.`)
+                FluenceChat.notifyNewMember(member.name)
             } else {
                 if (oldMember.name !== member.name) {
-                    FluenceChat.printNameChanged(oldMember.name, member.name);
+                    FluenceChat.notifyNameChanged(oldMember.name, member.name);
                 }
 
                 if (oldMember.relay !== member.relay) {
-                    FluenceChat.printRelayChanged(member.relay)
+                    FluenceChat.notifyRelayChanged(member.relay)
                 }
             }
             this.members = this.members.filter(m => m.clientId !== member.clientId)

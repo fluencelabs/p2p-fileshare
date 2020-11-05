@@ -16,6 +16,7 @@ limitations under the License.
 
 -}
 
+import Chat.Port
 import Conn.Port
 import Model exposing (Model)
 import Msg exposing (Msg(..))
@@ -26,5 +27,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
+        , Chat.Port.subscriptions model.chat |> Sub.map ChatMsg
         , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
         ]

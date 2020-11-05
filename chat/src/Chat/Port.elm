@@ -21,7 +21,7 @@ import Chat.Msg exposing (Msg(..))
 
 
 type alias Command =
-    { command : String, chatId : Maybe String, name : Maybe String }
+    { command : String, chatId : Maybe String, name : Maybe String, msg : Maybe String }
 
 
 type alias Event =
@@ -41,17 +41,8 @@ eventToMsg event =
             "connected" ->
                 Just ConnectedToChat
 
-            "new_member" ->
-                Nothing
-
             "new_msg" ->
-                Nothing
-
-            "name_changed" ->
-                Nothing
-
-            "relay_changed" ->
-                Nothing
+                Maybe.map2 NewMsg event.name event.msg
 
             _ ->
                 Nothing

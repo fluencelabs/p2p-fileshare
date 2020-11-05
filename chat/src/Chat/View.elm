@@ -51,17 +51,41 @@ connectionView screen model =
 
 talkView : Screen.Model -> Model -> Element Msg
 talkView screen model =
-    column []
-        [ messageView "Petya" "Privet!"
-        , messageView "Vasya" "Kak dela?"
-        , messageView "Petya" "Horosho! A u tebya?"
-        , messageView "Vasya" "Vporyadke!"
-        ]
+    column [] (messageSender model :: messagesView model)
+
+
+messagesView : Model -> List (Element Msg)
+messagesView model =
+    model.messages |> List.map (\m -> messageView m.name m.msg)
 
 
 messageView : String -> String -> Element Msg
 messageView name message =
     column []
-        [ row [] [ el [ width (fillPortion 2), letterSpacing, Font.bold, F.black ] <| Element.text name ]
-        , row [] [ el [ width (fillPortion 2), letterSpacing, F.black ] <| Element.text message ]
+        [ column []
+            [ row [] [ el [ width (fillPortion 2), letterSpacing, Font.bold, F.black ] <| Element.text name ]
+            , row [] [ el [ width (fillPortion 2), letterSpacing, F.black ] <| Element.text message ]
+            ]
+        ]
+
+
+messageSender : Model -> Element Msg
+messageSender model =
+    column []
+        [ row [ fillWidth, centerX ]
+            [ el [ width (fillPortion 2), letterSpacing, F.gray ] <| Element.text "MESSAGE"
+            , Input.text [ width (fillPortion 5) ]
+                { onChange = SetCurrentMessage
+                , text = model.currentMsg
+                , placeholder = Maybe.map (Input.placeholder []) Nothing
+                , label = Input.labelHidden "MESSAGE"
+                }
+            ]
+        , row [ fillWidth, centerX ]
+            [ Input.button (accentButton ++ [ width (fillPortion 3), paddingXY 0 (S.baseRem 0.5), Font.center ])
+                { onPress = Just <| SendMessage
+                , label = text "Send Message"
+                }
+            , el [ width (fillPortion 5) ] none
+            ]
         ]

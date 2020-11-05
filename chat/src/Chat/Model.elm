@@ -1,8 +1,8 @@
 module Chat.Model exposing (..)
 
 
-type alias Member =
-    { peerId : String
+type alias Message =
+    { msg : String
     , name : String
     }
 
@@ -10,10 +10,11 @@ type alias Member =
 type alias Model =
     { chatId : String
     , name : String
-    , members : List Member
+    , messages : List Message
+    , currentMsg : String
     }
 
 
 emptyChatModel : Model
 emptyChatModel =
-    { chatId = "", name = "", members = [] }
+    { chatId = "", name = "", messages = [], currentMsg = "" }
