@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "inlineSources": true,
+    "noImplicitAny": true,
+    "strictFunctionTypes": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "pretty": true,
+    "target": "es2018",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "esModuleInterop": true,
+    "declarationMap": true,
+    "baseUrl": ".",
+    "allowJs": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "bundle"
+  ],
+  "include": ["src/**/*"]
+}
