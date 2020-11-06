@@ -19,6 +19,8 @@ import {Elm} from './Main.elm';
 import * as serviceWorker from './serviceWorker';
 import ports, {getRelays} from "./ports";
 import {convertRelayForELM} from "./utils";
+import {publishBlueprint} from "./globalFunctions";
+import {relays} from "./main";
 
 let flags: any = {
     peerId: null,
@@ -50,3 +52,19 @@ let app = Elm.Main.init({
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
+
+declare global {
+    interface Window {
+        joinChat: any;
+        chat: any
+        createChat: any;
+        relays: any;
+        scenario: any;
+        connectToChat: any;
+        getMembersCheck: any;
+        publishBlueprint: any;
+    }
+}
+
+window.relays = relays;
+window.publishBlueprint = publishBlueprint;

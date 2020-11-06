@@ -3,8 +3,8 @@ import Fluence from "fluence/dist/fluence";
 import {createChat, currentChat, joinChat, publishBlueprint} from "./globalFunctions";
 
 // change these constants in different environment
-export const HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";
-export const USER_LIST_BLUEPRINT = "c1a4da29-4ec2-4af0-b614-21f5098d33ff";
+export const HISTORY_BLUEPRINT = "1cee6c9d-aa0c-4f75-86a0-b5e7fbfd437e";
+export const USER_LIST_BLUEPRINT = "8ac9cad4-7c5d-43a9-9615-214652142319";
 
 // parameters from `fluence-playground` local network
 export let relays = [
@@ -69,24 +69,7 @@ chat.printGetHistoryScript()
 chat.printJoinScript()
 `)
 
-declare global {
-    interface Window {
-        joinChat: any;
-        chat: any
-        createChat: any;
-        relays: any;
-        scenario: any;
-        connectToChat: any;
-        getMembersCheck: any;
-        publishBlueprint: any;
-    }
-}
 
-window.joinChat = joinChat;
-window.createChat = createChat;
-window.relays = relays;
-window.chat = currentChat;
-window.publishBlueprint = publishBlueprint;
 
 
 

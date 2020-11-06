@@ -16,7 +16,7 @@ limitations under the License.
 
 -}
 
-import Chat.Model exposing (Model)
+import Chat.Model exposing (Message, Model)
 import Chat.Msg exposing (Msg(..))
 
 
@@ -25,7 +25,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, msg : Maybe String, name : Maybe String, relay : Maybe String }
+    { event : String, msg : Maybe Message }
 
 
 port chatRequest : Command -> Cmd msg
@@ -42,7 +42,7 @@ eventToMsg event =
                 Just ConnectedToChat
 
             "new_msg" ->
-                Maybe.map2 NewMsg event.name event.msg
+                Maybe.map NewMsg event.msg
 
             _ ->
                 Nothing

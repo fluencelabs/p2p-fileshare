@@ -4,6 +4,7 @@ module Chat.Model exposing (..)
 type alias Message =
     { msg : String
     , name : String
+    , id : Int
     }
 
 

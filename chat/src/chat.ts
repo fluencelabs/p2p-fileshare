@@ -1,4 +1,4 @@
-import {FluenceChat} from "./fluenceChat";
+import {ElmMessage, FluenceChat, Message} from "./fluenceChat";
 import {createChat, joinChat} from "./globalFunctions";
 import {getPeerId, getRelayMultiaddr} from "./connection";
 import {peerIdToSeed} from "fluence/dist/seed";
@@ -12,30 +12,24 @@ function setChat(newChat: FluenceChat) {
 
 export interface ChatEvent {
     event: string,
-    msg: string | null,
-    name: string | null,
-    relay: string | null
+    msg: ElmMessage | null
 }
 
 function emptyEvent(event: string): ChatEvent {
-    return {event, msg: null, name: null, relay: null}
+    return {event, msg: null}
 }
 
-function createEvent(event: string, msg?: string, name?: string, relay?: string): ChatEvent {
+function createEvent(event: string, msg?: ElmMessage): ChatEvent {
     if (msg === undefined) { msg = null }
-    if (name === undefined) { name = null }
-    if (relay === undefined) { relay = null }
 
     return {
         event,
-        msg,
-        name,
-        relay
+        msg
     }
 }
 
-export function sendEventMessage(msg: string, name: string) {
-    getApp().ports.chatReceiver.send(createEvent("new_msg", msg, name))
+export function sendEventMessage(msg: ElmMessage) {
+    getApp().ports.chatReceiver.send(createEvent("new_msg", msg))
 }
 
 export function sendChatEvent(event: ChatEvent) {
@@ -75,7 +69,7 @@ export function chatHandler(app: any) {
                     break;
                 }
 
-                await chat.sendMessage(msg);
+                await chat.sendMessage(msg, 0);
                 break;
         }
 

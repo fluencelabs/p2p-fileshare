@@ -1,5 +1,6 @@
 module Chat.Msg exposing (..)
 
+import Chat.Model exposing (Message)
 
 type Msg
     = SetChatId String
@@ -9,5 +10,5 @@ type Msg
     | SendMessage
     | CreateChat
     | ConnectedToChat
-    | NewMsg String String
+    | NewMsg Message
     | NoOp

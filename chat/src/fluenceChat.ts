@@ -15,6 +15,20 @@ export interface Member {
     name: string
 }
 
+export interface Message {
+    author: string,
+    body: string,
+    id: number,
+    reply_to: number
+}
+
+export interface ElmMessage {
+    msg: string,
+    name: string,
+    id: number
+}
+
+
 export class FluenceChat {
     client: FluenceClient
     historyId: string
@@ -60,15 +74,17 @@ export class FluenceChat {
         })
 
         service.registerFunction("all_msgs", (args: any[]) => {
-            args[0].forEach((v: any) => {
+            args[0].forEach((v: Message) => {
+                console.log("all msgs:")
+                console.log(v)
                 let name;
-                if (v[2] === this.client.selfPeerIdStr) {
+                if (v.author === this.client.selfPeerIdStr) {
                     name = "Me"
                 } else {
-                    name = this.members.find(m => m.clientId === v[2])?.name
+                    name = this.members.find(m => m.clientId === v.author)?.name
                 }
                 if (name) {
-                    FluenceChat.notifyNewMessage(name, v[1])
+                    FluenceChat.notifyNewMessage({name: decodeURIComponent(name), msg: v.body, id: v.id})
                 }
             })
 
@@ -82,11 +98,13 @@ export class FluenceChat {
         })
 
         service.registerFunction("add", (args: any[]) => {
+            console.log("msg:")
+            console.log(args)
             let m = this.members.find(m => m.clientId === args[0])
             if (m) {
-                FluenceChat.notifyNewMessage(m.name, args[1])
+                FluenceChat.notifyNewMessage({name: m.name, msg: args[1] as string, id: args[2] as number})
             } else if (args[0] === this.client.selfPeerIdStr) {
-                FluenceChat.notifyNewMessage("Me", args[1])
+                FluenceChat.notifyNewMessage({name: "Me", msg: args[1], id: args[2]})
             }
             return {}
         })
@@ -170,19 +188,19 @@ export class FluenceChat {
     }
 
     private static notifyNameChanged(oldName: string, name: string) {
-        sendEventMessage(`Member '${decodeURIComponent(oldName)}' changed name to '${decodeURIComponent(name)}'.`, "")
+        sendEventMessage({msg: `Member '${decodeURIComponent(oldName)}' changed name to '${decodeURIComponent(name)}'.`, name: "", id: 0})
     }
 
     private static notifyRelayChanged(relay: string) {
-        sendEventMessage(`Member '${relay}' changed its relay address.'.`, "")
+        sendEventMessage({msg: `Member '${relay}' changed its relay address.'.`, name: "", id: 0})
     }
 
-    private static notifyNewMessage(name: string, msg: string) {
-        sendEventMessage(decodeURIComponent(msg), decodeURIComponent(name))
+    private static notifyNewMessage(msg: ElmMessage) {
+        sendEventMessage(msg)
     }
 
     private static notifyNewMember(name: string) {
-        sendEventMessage(`Member joined: ${decodeURIComponent(name)}.`, "")
+        sendEventMessage({msg: `Member joined: ${decodeURIComponent(name)}.`, name: "", id: 0})
     }
 
     private addMember(member: Member) {
@@ -251,12 +269,14 @@ export class FluenceChat {
     /**
      * Send message to chat. Notice all connected members.
      * @param msg
+     * @param replyTo
      */
-    async sendMessage(msg: string) {
-        let script = this.genScript(this.historyId, "add", ["author", "msg"])
+    async sendMessage(msg: string, replyTo: number) {
+        let script = this.genScript(this.historyId, "add", ["author", "msg", "reply_to"])
         let data = new Map()
         data.set("author", this.client.selfPeerIdStr)
         data.set("msg", encodeURIComponent(msg))
+        data.set("reply_to", replyTo)
 
         let particle = await build(this.client.selfPeerId, script, data, 600000)
         await this.client.sendParticle(particle)

@@ -29,8 +29,8 @@ update msg model =
         ConnectedToChat ->
             ( model, Cmd.none )
 
-        NewMsg name m ->
-            ( { model | messages = { msg = m, name = name } :: model.messages }, Cmd.none )
+        NewMsg m ->
+            ( { model | messages = m :: model.messages }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
