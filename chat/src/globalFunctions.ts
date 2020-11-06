@@ -1,9 +1,9 @@
 import {FluenceChat, HISTORY_NAME, USER_LIST_NAME} from "./fluenceChat";
 import {FluenceClient} from "fluence/dist/fluenceClient";
 import {peerIdToSeed, seedToPeerId} from "fluence/dist/seed";
-import {SQLITE_BS64} from "../../../fluence-chat-example/artifacts/sqliteBs64";
-import {HISTORY_BS64} from "../../../fluence-chat-example/artifacts/historyBs64";
-import {USER_LIST_BS64} from "../../../fluence-chat-example/artifacts/userListBs64";
+import {SQLITE_BS64} from "../../artifacts/sqliteBs64";
+import {HISTORY_BS64} from "../../artifacts/historyBs64";
+import {USER_LIST_BS64} from "../../artifacts/userListBs64";
 import {CHAT_PEER_ID, HISTORY_BLUEPRINT, relays, USER_LIST_BLUEPRINT} from "./main";
 import Fluence from "fluence";
 
