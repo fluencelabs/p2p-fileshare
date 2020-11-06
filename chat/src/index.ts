@@ -23,7 +23,7 @@ import {convertRelayForELM} from "./utils";
 let flags: any = {
     peerId: null,
     defaultPeerRelayInput: {
-        host: "138.197.177.2",
+        host: "134.209.186.43",
         pport: "9001",
         peerId: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9",
         privateKey: ""

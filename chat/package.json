@@ -9,7 +9,7 @@
   "author": "Fluence Labs",
   "license": "MIT",
   "dependencies": {
-    "fluence": "0.7.62"
+    "fluence": "0.7.63"
   },
   "devDependencies": {
     "clean-webpack-plugin": "3.0.0",

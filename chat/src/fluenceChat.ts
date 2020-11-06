@@ -38,17 +38,22 @@ export class FluenceChat {
         // register service with function that will handle incoming messages from a chat
         let service = new Service(this.chatId)
         service.registerFunction("join", (args: any[]) => {
-            let m;
-            if (Array.isArray(args[0])) {
-                m = args[0]
+            let member: Member;
+            if (typeof args[0] !== 'object') {
+                member = {
+                    clientId: args[0],
+                    relay: args[1],
+                    sig: args[2],
+                    name: args[3]
+                }
             } else {
-                m = args
-            }
-            let member = {
-                clientId: m[0],
-                relay: m[1],
-                sig: m[2],
-                name: m[3]
+                let m = args[0]
+                member = {
+                    clientId: m.peer_id,
+                    relay: m.relay_id,
+                    sig: m.signature,
+                    name: m.name
+                }
             }
             this.addMember(member);
             return {}
@@ -289,8 +294,8 @@ export class FluenceChat {
             (fold members m
                 (par 
                     (seq 
-                        (call m.$.[1] ("identity" "") [] void[])
-                        (call m.$.[0] ("${this.chatId}" "${funcName}") [${argsStr}] void3[])                            
+                        (call m.$.["relay_id"] ("identity" "") [] void[])
+                        (call m.$.["peer_id"] ("${this.chatId}" "${funcName}") [${argsStr}] void3[])                            
                     )                        
                     (next m)
                 )                
