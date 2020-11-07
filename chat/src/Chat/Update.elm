@@ -32,5 +32,9 @@ update msg model =
         NewMsg m ->
             ( { model | messages = m :: model.messages }, Cmd.none )
 
+        SetReplyTo maybeId ->
+            ( { model | replyTo = maybeId }, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
+

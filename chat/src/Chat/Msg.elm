@@ -11,4 +11,5 @@ type Msg
     | CreateChat
     | ConnectedToChat
     | NewMsg Message
+    | SetReplyTo (Maybe Int)
     | NoOp

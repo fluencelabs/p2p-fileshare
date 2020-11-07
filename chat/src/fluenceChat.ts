@@ -25,7 +25,8 @@ export interface Message {
 export interface ElmMessage {
     msg: string,
     name: string,
-    id: number
+    id: number,
+    replyTo: number
 }
 
 
@@ -83,8 +84,14 @@ export class FluenceChat {
                 } else {
                     name = this.members.find(m => m.clientId === v.author)?.name
                 }
+                let replyTo;
+                if (v.reply_to) {
+                    replyTo = v.reply_to
+                } else {
+                    replyTo = null;
+                }
                 if (name) {
-                    FluenceChat.notifyNewMessage({name: decodeURIComponent(name), msg: v.body, id: v.id})
+                    FluenceChat.notifyNewMessage({name: decodeURIComponent(name), msg: v.body, id: v.id, replyTo})
                 }
             })
 
@@ -100,11 +107,16 @@ export class FluenceChat {
         service.registerFunction("add", (args: any[]) => {
             console.log("msg:")
             console.log(args)
-            let m = this.members.find(m => m.clientId === args[0])
+            let [id, pid, msg, replyTo] = args
+            let m = this.members.find(m => m.clientId === pid)
+
+            if (replyTo === 0) {
+                replyTo = null;
+            }
             if (m) {
-                FluenceChat.notifyNewMessage({name: m.name, msg: args[1] as string, id: args[2] as number})
-            } else if (args[0] === this.client.selfPeerIdStr) {
-                FluenceChat.notifyNewMessage({name: "Me", msg: args[1], id: args[2]})
+                FluenceChat.notifyNewMessage({name: m.name, msg: msg as string, id: id, replyTo})
+            } else if (args[1] === this.client.selfPeerIdStr) {
+                FluenceChat.notifyNewMessage({name: "Me", msg: msg, id, replyTo})
             }
             return {}
         })
@@ -188,11 +200,11 @@ export class FluenceChat {
     }
 
     private static notifyNameChanged(oldName: string, name: string) {
-        sendEventMessage({msg: `Member '${decodeURIComponent(oldName)}' changed name to '${decodeURIComponent(name)}'.`, name: "", id: 0})
+        sendEventMessage({msg: `Member '${decodeURIComponent(oldName)}' changed name to '${decodeURIComponent(name)}'.`, name: "", id: 0, replyTo: null})
     }
 
     private static notifyRelayChanged(relay: string) {
-        sendEventMessage({msg: `Member '${relay}' changed its relay address.'.`, name: "", id: 0})
+        sendEventMessage({msg: `Member '${relay}' changed its relay address.'.`, name: "", id: 0, replyTo: null})
     }
 
     private static notifyNewMessage(msg: ElmMessage) {
@@ -200,7 +212,7 @@ export class FluenceChat {
     }
 
     private static notifyNewMember(name: string) {
-        sendEventMessage({msg: `Member joined: ${decodeURIComponent(name)}.`, name: "", id: 0})
+        sendEventMessage({msg: `Member joined: ${decodeURIComponent(name)}.`, name: "", id: 0, replyTo: null})
     }
 
     private addMember(member: Member) {
@@ -272,7 +284,29 @@ export class FluenceChat {
      * @param replyTo
      */
     async sendMessage(msg: string, replyTo: number) {
-        let script = this.genScript(this.historyId, "add", ["author", "msg", "reply_to"])
+        let chatPeerId = CHAT_PEER_ID
+        let relay = this.client.connection.nodePeerId.toB58String();
+        let script = `
+(seq
+    (call "${relay}" ("identity" "") [] void1[])
+    (seq
+        (call "${chatPeerId}" ("${this.historyId}" "add") [author msg reply_to] id)
+        (seq
+            (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
+            (fold members m
+                (par 
+                    (seq 
+                        (call m.$.["relay_id"] ("identity" "") [] void[])
+                        (call m.$.["peer_id"] ("${this.chatId}" "add") [id author msg reply_to] void3[])                            
+                    )                        
+                    (next m)
+                )                
+            )
+        )
+    )
+)
+                `
+
         let data = new Map()
         data.set("author", this.client.selfPeerIdStr)
         data.set("msg", encodeURIComponent(msg))

@@ -1,12 +1,15 @@
 module Chat.View exposing (..)
 
-import Chat.Model exposing (Model)
+import Chat.Model exposing (Message, Model)
 import Chat.Msg exposing (Msg(..))
-import Element exposing (Element, centerX, column, el, fillPortion, none, paddingXY, row, text, width)
+import Element exposing (Element, centerX, column, el, fillPortion, mouseOver, none, paddingXY, row, text, width)
+import Element.Events as Events
 import Element.Font as Font
 import Element.Input as Input
+import Ions.Background as BG
 import Ions.Font as F
 import Ions.Size as S
+import Maybe exposing (map, withDefault)
 import Palette exposing (accentButton, fillWidth, letterSpacing)
 import Screen.Model as Screen
 
@@ -56,17 +59,27 @@ talkView screen model =
 
 messagesView : Model -> List (Element Msg)
 messagesView model =
-    model.messages |> List.map (\m -> messageView m.name m.msg)
+    model.messages |> List.map (messageView model)
 
 
-messageView : String -> String -> Element Msg
-messageView name message =
-    column []
-        [ column []
-            [ row [] [ el [ width (fillPortion 2), letterSpacing, Font.bold, F.black ] <| Element.text name ]
-            , row [] [ el [ width (fillPortion 2), letterSpacing, F.black ] <| Element.text message ]
+messageView : Model -> Message -> Element Msg
+messageView model message =
+    let
+        selected = model.replyTo |> map (\r -> r == message.id) |> withDefault False
+        replyToEvent =
+            if selected then
+                [ Events.onClick ( SetReplyTo Nothing ), BG.washedRed, Element.pointer ]
+            else if message.id == 0 then
+                []
+            else
+                [ Events.onClick ( SetReplyTo (Just message.id) ), mouseOver [ BG.washedRed ], Element.pointer ]
+    in
+        column []
+            [ column (replyToEvent ++ [ paddingXY 7 10, fillWidth ])
+                [ row [] [ el [ width (fillPortion 2), letterSpacing, Font.bold, F.black ] <| Element.text message.name ]
+                , row [] [ el [ width (fillPortion 2), letterSpacing, F.black ] <| Element.text message.msg ]
+                ]
             ]
-        ]
 
 
 messageSender : Model -> Element Msg
