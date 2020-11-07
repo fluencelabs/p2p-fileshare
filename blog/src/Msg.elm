@@ -24,5 +24,5 @@ import Screen.Msg
 type Msg
     = NoOp
     | ConnMsg Conn.Msg.Msg
-    | ChatMsg Blog.Msg.Msg
+    | BlogMsg Blog.Msg.Msg
     | ScreenMsg Screen.Msg.Msg

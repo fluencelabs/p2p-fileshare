@@ -16,7 +16,6 @@ limitations under the License.
 
 -}
 
-import Blog.Msg
 import Blog.Update
 import Conn.Msg
 import Conn.Update
@@ -55,7 +54,7 @@ updateConn =
 
 
 updateChat =
-    liftUpdate .chat (\c -> \m -> { m | chat = c }) ChatMsg Blog.Update.update
+    liftUpdate .blog (\c -> \m -> { m | blog = c }) BlogMsg Blog.Update.update
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -76,17 +75,8 @@ update msg model =
                 _ ->
                     updateConn m model
 
-        ChatMsg m ->
-            case m of
-                Blog.Msg.ConnectedToChat ->
-                    let
-                        ( mod, cmd ) =
-                            updateChat m model
-                    in
-                    ( { mod | status = JoinedToChat }, cmd )
-
-                _ ->
-                    updateChat m model
+        BlogMsg m ->
+            updateChat m model
 
         NoOp ->
             ( model, Cmd.none )

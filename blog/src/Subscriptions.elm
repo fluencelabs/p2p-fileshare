@@ -27,6 +27,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
-        , Blog.Port.subscriptions model.chat |> Sub.map ChatMsg
+        , Blog.Port.subscriptions model.blog |> Sub.map BlogMsg
         , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
         ]

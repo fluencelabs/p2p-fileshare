@@ -16,7 +16,7 @@ limitations under the License.
 
 -}
 
-import Blog.Model exposing (emptyChatModel)
+import Blog.Model exposing (emptyBlogModel)
 import Config exposing (Config)
 import Conn.Model exposing (emptyConn)
 import Element
@@ -27,12 +27,11 @@ import Screen.Model as Screen
 type Status
     = Init
     | Connected
-    | JoinedToChat
 
 
 type alias Model =
     { connectivity : Conn.Model.Model
-    , chat : Blog.Model.Model
+    , blog : Blog.Model.Model
     , screen : Screen.Model
     , status : Status
     }
@@ -49,7 +48,7 @@ emptyModel config =
     in
     ( { connectivity = emptyConnModel
       , screen = { device = device, screenSize = config.windowSize }
-      , chat = emptyChatModel
+      , blog = emptyBlogModel
       , status = Init
       }
     , Cmd.map ConnMsg cmd

@@ -21,28 +21,28 @@ import Blog.Msg exposing (Msg(..))
 
 
 type alias Command =
-    { command : String, chatId : Maybe String, name : Maybe String, msg : Maybe String }
+    { command : String, text: Maybe String, name: Maybe String, id: Maybe Int }
 
 
 type alias Event =
-    { event : String, msg : Maybe String, name : Maybe String, relay : Maybe String }
+    { event : String, text : Maybe String, name : Maybe String, id : Maybe Int }
 
 
-port chatRequest : Command -> Cmd msg
+port blogRequest : Command -> Cmd msg
 
 
-port chatReceiver : (Event -> msg) -> Sub msg
+port blogReceiver : (Event -> msg) -> Sub msg
 
 
 eventToMsg : Event -> Msg
 eventToMsg event =
     Maybe.withDefault NoOp <|
         case event.event of
-            "connected" ->
-                Just ConnectedToChat
+            "new_comment" ->
+                Maybe.map3 NewComment event.id event.name event.text
 
-            "new_msg" ->
-                Maybe.map2 NewMsg event.name event.msg
+            "new_post" ->
+                Maybe.map2 NewPost event.id event.text
 
             _ ->
                 Nothing
@@ -50,4 +50,4 @@ eventToMsg event =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    chatReceiver eventToMsg
+    blogReceiver eventToMsg

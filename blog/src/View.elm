@@ -55,7 +55,7 @@ title _ =
 body : Model -> Html Msg
 body model =
     layout <|
-        chat model
+        blogView model
 
 
 mainmView : Model -> List (Element Msg)
@@ -65,14 +65,12 @@ mainmView model =
             [ connectivity model ]
 
         Model.Connected ->
-            [ chatConn model ]
-
-        Model.JoinedToChat ->
-            [ chatTalk model ]
+            [ blog model ]
 
 
-chat : Model -> List (Element Msg)
-chat model =
+
+blogView : Model -> List (Element Msg)
+blogView model =
     let
         mainView =
             mainmView model
@@ -137,11 +135,6 @@ connectivity model =
     liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
 
 
-chatConn : Model -> Element Msg
-chatConn model =
-    liftView .chat ChatMsg (Blog.View.connectionView model.screen) <| model
-
-
-chatTalk : Model -> Element Msg
-chatTalk model =
-    liftView .chat ChatMsg (Blog.View.talkView model.screen) <| model
+blog : Model -> Element Msg
+blog model =
+    liftView .blog BlogMsg (Blog.View.blogView model.screen) <| model

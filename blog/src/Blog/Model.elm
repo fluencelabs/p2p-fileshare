@@ -1,20 +1,25 @@
 module Blog.Model exposing (..)
 
+type alias Comment =
+    { msg: String
+    , name: String
+    }
 
-type alias Message =
-    { msg : String
-    , name : String
+type alias Post =
+    { id: Int
+    , text : String
+    , comments : List Comment
     }
 
 
 type alias Model =
-    { chatId : String
-    , name : String
-    , messages : List Message
-    , currentMsg : String
+    { posts : List Post
+    , currentName : String
+    , currentText : String
+    , isOwner: Bool
     }
 
 
-emptyChatModel : Model
-emptyChatModel =
-    { chatId = "", name = "", messages = [], currentMsg = "" }
+emptyBlogModel : Model
+emptyBlogModel =
+    { posts = [], currentName = "", currentText = "", isOwner = True }
