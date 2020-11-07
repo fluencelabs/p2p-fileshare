@@ -2,6 +2,7 @@ module Chat.Msg exposing (..)
 
 import Chat.Model exposing (Message)
 
+
 type Msg
     = SetChatId String
     | SetName String

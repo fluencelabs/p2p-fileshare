@@ -21,7 +21,7 @@ import Chat.Msg exposing (Msg(..))
 
 
 type alias Command =
-    { command : String, chatId : Maybe String, name : Maybe String, msg : Maybe String }
+    { command : String, chatId : Maybe String, name : Maybe String, msg : Maybe String, replyTo : Maybe Int }
 
 
 type alias Event =

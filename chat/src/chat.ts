@@ -33,11 +33,12 @@ export function sendEventMessage(msg: ElmMessage) {
 }
 
 export function sendChatEvent(event: ChatEvent) {
-    getApp().ports.chatReceiver.send(emptyEvent("connected"))
+    getApp().ports.chatReceiver.send(event)
 }
 
 export function chatHandler(app: any) {
-    return async ({command, chatId, name, msg}: {command: string, chatId?: string, name?: string, msg?: string}) => {
+    return async ({command, chatId, name, msg, replyTo}:
+                      {command: string, chatId?: string, name?: string, msg?: string, replyTo?: number}) => {
         switch (command) {
             case "join":
                 if (!chatId) {
@@ -69,7 +70,11 @@ export function chatHandler(app: any) {
                     break;
                 }
 
-                await chat.sendMessage(msg, 0);
+                if (!replyTo) {
+                    replyTo = 0
+                }
+
+                await chat.sendMessage(msg, replyTo);
                 break;
         }
 

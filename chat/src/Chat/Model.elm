@@ -14,7 +14,7 @@ type alias Model =
     , name : String
     , messages : List Message
     , currentMsg : String
-    , replyTo: Maybe Int
+    , replyTo : Maybe Int
     }
 
 

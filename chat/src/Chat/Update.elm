@@ -18,13 +18,37 @@ update msg model =
             ( { model | currentMsg = message }, Cmd.none )
 
         JoinChat ->
-            ( model, Chat.Port.chatRequest { command = "join", chatId = Just model.chatId, name = Just model.name, msg = Nothing } )
+            ( model
+            , Chat.Port.chatRequest
+                { command = "join"
+                , chatId = Just model.chatId
+                , name = Just model.name
+                , msg = Nothing
+                , replyTo = Nothing
+                }
+            )
 
         CreateChat ->
-            ( model, Chat.Port.chatRequest { command = "create", chatId = Nothing, name = Just model.name, msg = Nothing } )
+            ( model
+            , Chat.Port.chatRequest
+                { command = "create"
+                , chatId = Nothing
+                , name = Just model.name
+                , msg = Nothing
+                , replyTo = Nothing
+                }
+            )
 
         SendMessage ->
-            ( model, Chat.Port.chatRequest { command = "send_message", chatId = Nothing, name = Just model.name, msg = Just model.currentMsg } )
+            ( { model | currentMsg = "", replyTo = Nothing }
+            , Chat.Port.chatRequest
+                { command = "send_message"
+                , chatId = Nothing
+                , name = Just model.name
+                , msg = Just model.currentMsg
+                , replyTo = model.replyTo
+                }
+            )
 
         ConnectedToChat ->
             ( model, Cmd.none )
@@ -37,4 +61,3 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
-

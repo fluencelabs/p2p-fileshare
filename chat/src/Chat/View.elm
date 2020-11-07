@@ -62,24 +62,56 @@ messagesView model =
     model.messages |> List.map (messageView model)
 
 
+replyView : List Message -> Int -> Element Msg
+replyView messages replyToId =
+    let
+        replyToMessage =
+            messages |> List.filter (\m -> m.id == replyToId) |> List.head
+    in
+    case replyToMessage of
+        Just message ->
+            column []
+                [ column []
+                    [ row [] [ el [ width (fillPortion 2), letterSpacing, Font.bold, F.gray ] <| Element.text ("| " ++ message.name) ]
+                    , row [] [ el [ width (fillPortion 2), letterSpacing, F.gray ] <| Element.text ("| " ++ message.msg) ]
+                    ]
+                ]
+
+        Nothing ->
+            Element.none
+
+
 messageView : Model -> Message -> Element Msg
 messageView model message =
     let
-        selected = model.replyTo |> map (\r -> r == message.id) |> withDefault False
+        repliedTo =
+            case message.replyTo of
+                Just replyToId ->
+                    replyView model.messages replyToId
+
+                Nothing ->
+                    Element.none
+
+        selected =
+            model.replyTo |> map (\r -> r == message.id) |> withDefault False
+
         replyToEvent =
             if selected then
-                [ Events.onClick ( SetReplyTo Nothing ), BG.washedRed, Element.pointer ]
+                [ Events.onClick (SetReplyTo Nothing), BG.washedRed, Element.pointer ]
+
             else if message.id == 0 then
                 []
+
             else
-                [ Events.onClick ( SetReplyTo (Just message.id) ), mouseOver [ BG.washedRed ], Element.pointer ]
+                [ Events.onClick (SetReplyTo (Just message.id)), mouseOver [ BG.washedRed ], Element.pointer ]
     in
-        column []
-            [ column (replyToEvent ++ [ paddingXY 7 10, fillWidth ])
-                [ row [] [ el [ width (fillPortion 2), letterSpacing, Font.bold, F.black ] <| Element.text message.name ]
-                , row [] [ el [ width (fillPortion 2), letterSpacing, F.black ] <| Element.text message.msg ]
-                ]
+    column []
+        [ column (replyToEvent ++ [ paddingXY 7 10, fillWidth ])
+            [ repliedTo
+            , row [] [ el [ width (fillPortion 2), letterSpacing, Font.bold, F.black ] <| Element.text message.name ]
+            , row [] [ el [ width (fillPortion 2), letterSpacing, F.black ] <| Element.text message.msg ]
             ]
+        ]
 
 
 messageSender : Model -> Element Msg
