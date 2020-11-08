@@ -122,7 +122,7 @@ export async function publishBlueprint() {
     await cl.addModule(HISTORY_NAME, HISTORY_BS64, undefined, 20000);
     await cl.addModule(USER_LIST_NAME, USER_LIST_BS64, undefined, 20000);
 
-    let blueprintIdHistory = await cl.addBlueprint("user_list", ["sqlite", HISTORY_NAME])
+    let blueprintIdHistory = await cl.addBlueprint("history", ["sqlite", HISTORY_NAME])
     let blueprintIdUserList = await cl.addBlueprint("user_list", ["sqlite", USER_LIST_NAME])
     console.log(`BLUEPRINT HISTORY ID: ${blueprintIdHistory}`)
     console.log(`BLUEPRINT USER LIST ID: ${blueprintIdUserList}`)

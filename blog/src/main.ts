@@ -1,9 +1,10 @@
 import Fluence from "fluence/dist/fluence";
 
-import {createChat, currentChat, joinChat, publishBlueprint} from "./globalFunctions";
+import {createBlog, currentChat, joinBlog, publishBlueprint} from "./globalFunctions";
 
 // change these constants in different environment
-export const HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";
+export const POSTS_HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";
+export const COMMENTS_HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";
 export const USER_LIST_BLUEPRINT = "c1a4da29-4ec2-4af0-b614-21f5098d33ff";
 
 // parameters from `fluence-playground` local network
@@ -38,7 +39,7 @@ export let relays = [
     }
 ]
 
-export const CHAT_PEER_ID = relays[1].peerId;
+export const BLOG_PEER_ID = relays[1].peerId;
 
 Fluence.setLogLevel('error')
 
@@ -82,8 +83,8 @@ declare global {
     }
 }
 
-window.joinChat = joinChat;
-window.createChat = createChat;
+window.joinChat = joinBlog;
+window.createChat = createBlog;
 window.relays = relays;
 window.chat = currentChat;
 window.publishBlueprint = publishBlueprint;

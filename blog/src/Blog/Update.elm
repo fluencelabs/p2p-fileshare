@@ -35,7 +35,7 @@ update msg model =
         SendComment id ->
             ( { model | currentText = "", currentName = "" }
                 , Blog.Port.blogRequest
-                    { command = "send_post"
+                    { command = "send_comment"
                     , text = Just model.currentText
                     , id = Just id
                     , name = Just model.currentName

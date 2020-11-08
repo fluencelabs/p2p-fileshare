@@ -1,6 +1,6 @@
 import {connectionHandler} from "./connection";
 import {convertRelayForELM} from "./utils";
-import {chatHandler} from "./chat";
+import {chatHandler} from "./blog";
 
 interface Peer {
     id: string,
