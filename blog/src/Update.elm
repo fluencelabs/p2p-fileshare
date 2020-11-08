@@ -16,6 +16,7 @@ limitations under the License.
 
 -}
 
+import Blog.Msg
 import Blog.Update
 import Conn.Msg
 import Conn.Update
@@ -53,7 +54,7 @@ updateConn =
     liftUpdate .connectivity (\c -> \m -> { m | connectivity = c }) ConnMsg Conn.Update.update
 
 
-updateChat =
+updateBlog =
     liftUpdate .blog (\c -> \m -> { m | blog = c }) BlogMsg Blog.Update.update
 
 
@@ -76,7 +77,16 @@ update msg model =
                     updateConn m model
 
         BlogMsg m ->
-            updateChat m model
+            case m of
+                Blog.Msg.Joined ->
+                    let
+                        ( mod, cmd ) =
+                            updateBlog m model
+                    in
+                    ( { mod | status = Joined }, cmd )
+
+                _ ->
+                    updateBlog m model
 
         NoOp ->
             ( model, Cmd.none )

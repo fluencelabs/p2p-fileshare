@@ -1,11 +1,13 @@
 import Fluence from "fluence/dist/fluence";
 
-import {createBlog, currentChat, joinBlog, publishBlueprint} from "./globalFunctions";
+import {createBlog, currentBlog, joinBlog, publishBlueprint} from "./globalFunctions";
 
 // change these constants in different environment
 export const POSTS_HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";
 export const COMMENTS_HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";
 export const USER_LIST_BLUEPRINT = "c1a4da29-4ec2-4af0-b614-21f5098d33ff";
+
+export const BLOG_ID = ""
 
 // parameters from `fluence-playground` local network
 export let relays = [
@@ -69,25 +71,6 @@ chat.printSendMessageScript()
 chat.printGetHistoryScript()
 chat.printJoinScript()
 `)
-
-declare global {
-    interface Window {
-        joinChat: any;
-        chat: any
-        createChat: any;
-        relays: any;
-        scenario: any;
-        connectToChat: any;
-        getMembersCheck: any;
-        publishBlueprint: any;
-    }
-}
-
-window.joinChat = joinBlog;
-window.createChat = createBlog;
-window.relays = relays;
-window.chat = currentChat;
-window.publishBlueprint = publishBlueprint;
 
 
 

@@ -27,6 +27,7 @@ import Screen.Model as Screen
 type Status
     = Init
     | Connected
+    | Joined
 
 
 type alias Model =
@@ -34,6 +35,7 @@ type alias Model =
     , blog : Blog.Model.Model
     , screen : Screen.Model
     , status : Status
+    , admin : Bool
     }
 
 
@@ -48,8 +50,9 @@ emptyModel config =
     in
     ( { connectivity = emptyConnModel
       , screen = { device = device, screenSize = config.windowSize }
-      , blog = emptyBlogModel
+      , blog = emptyBlogModel config.admin
       , status = Init
+      , admin = config.admin
       }
     , Cmd.map ConnMsg cmd
     )

@@ -19,9 +19,17 @@ import {Elm} from './Main.elm';
 import * as serviceWorker from './serviceWorker';
 import ports, {getRelays} from "./ports";
 import {convertRelayForELM} from "./utils";
+import {createBlog, joinBlog, publishBlueprint} from "./globalFunctions";
+import {BLOG_ID, relays} from "./main";
+
+let isAdmin: boolean = false;
+if (window.location.pathname === "/admin") {
+    isAdmin = true;
+}
 
 let flags: any = {
     peerId: null,
+    admin: isAdmin,
     defaultPeerRelayInput: {
         host: "134.209.186.43",
         pport: "9001",
@@ -44,9 +52,27 @@ let app = Elm.Main.init({
     await ports(app).catch((e: any) => {
         console.error(e)
     });
+
+    if (isAdmin) {
+        let blogId = ""
+        let seed = ""
+        await joinBlog("", BLOG_ID, seed)
+    }
 })();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
+
+declare global {
+    interface Window {
+        createBlog: any;
+        relays: any;
+        publishBlueprint: any;
+    }
+}
+
+window.createBlog = createBlog;
+window.relays = relays;
+window.publishBlueprint = publishBlueprint;

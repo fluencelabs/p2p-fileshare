@@ -7,7 +7,7 @@ import {USER_LIST_BS64} from "../../artifacts/userListBs64";
 import {BLOG_PEER_ID, COMMENTS_HISTORY_BLUEPRINT, relays, USER_LIST_BLUEPRINT} from "./main";
 import Fluence from "fluence";
 
-export let currentChat: FluenceBlog | undefined = undefined;
+export let currentBlog: FluenceBlog | undefined = undefined;
 
 function chatIdToHistoryId(chatId: string) {
     return chatId + "_history"
@@ -49,7 +49,7 @@ export async function createBlog(name: string, seed?: string, relayAddress?: str
     let chat =  new FluenceBlog(cl, blogId, historyId, userListId, BLOG_PEER_ID, name, cl.connection.nodePeerId.toB58String());
     await chat.join();
 
-    currentChat = chat;
+    currentBlog = chat;
 
     return chat;
 }
@@ -66,15 +66,15 @@ export async function getInfo(chatId: string): Promise<{ historyId: string; user
 
 // Throws an error if the chat client been already created.
 function checkCurrentBlog() {
-    if (currentChat) {
+    if (currentBlog) {
         throw new Error("Chat is already created. Use 'chat' variable to use it. Or refresh page to create a new one.")
     }
 }
 
 // Join to existed chat. New peer id will be generated with empty 'seed'. Random relay address will be used with empty 'relayAddress'
-export async function joinBlog(name: string, chatId: string, seed?: string, relayAddress?: string): Promise<FluenceBlog> {
+export async function joinBlog(name: string, blogId: string, seed?: string, relayAddress?: string): Promise<FluenceBlog> {
     checkCurrentBlog();
-    let info = await getInfo(chatId)
+    let info = await getInfo(blogId)
 
     if (!relayAddress) {
         relayAddress = getRandomRelayAddr()
@@ -83,12 +83,12 @@ export async function joinBlog(name: string, chatId: string, seed?: string, rela
 
     let cl = await connect(relayAddress, true, seed);
 
-    let blog = new FluenceBlog(cl, chatId, info.historyId, info.userListId, BLOG_PEER_ID, name, cl.connection.nodePeerId.toB58String());
+    let blog = new FluenceBlog(cl, blogId, info.historyId, info.userListId, BLOG_PEER_ID, name, cl.connection.nodePeerId.toB58String());
     console.log("You joined to chat.")
     await blog.join();
     await blog.getHistory();
 
-    currentChat = blog;
+    currentBlog = blog;
 
     return blog;
 }

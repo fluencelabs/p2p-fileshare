@@ -21,7 +21,7 @@ import Blog.Msg exposing (Msg(..))
 
 
 type alias Command =
-    { command : String, text: Maybe String, name: Maybe String, id: Maybe Int }
+    { command : String, text : Maybe String, name : Maybe String, id : Maybe Int }
 
 
 type alias Event =
@@ -42,6 +42,9 @@ eventToMsg event =
                 Maybe.map3 NewComment event.id event.name event.text
 
             "new_post" ->
+                Maybe.map2 NewPost event.id event.text
+
+            "join" ->
                 Maybe.map2 NewPost event.id event.text
 
             _ ->

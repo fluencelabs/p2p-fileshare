@@ -1,5 +1,7 @@
 import {FluenceBlog} from "./fluenceBlog";
 import {getApp} from "./ports";
+import {joinBlog} from "./globalFunctions";
+import {BLOG_ID} from "./main";
 
 let blog: FluenceBlog | undefined = undefined;
 
@@ -67,6 +69,9 @@ export function chatHandler(app: any) {
 
                 await blog.sendPost(text);
                 break;
+
+            case "join":
+                await joinBlog(name, BLOG_ID)
         }
 
     }

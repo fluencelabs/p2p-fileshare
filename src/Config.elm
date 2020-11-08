@@ -6,7 +6,12 @@ import Conn.Relay exposing (Relay, RelayInput)
 
 
 type alias Config =
-    { peerId : Maybe String, defaultPeerRelayInput : RelayInput, relays : List Relay, windowSize : { width : Int, height : Int } }
+    { peerId : Maybe String
+    , admin: Bool
+    , defaultPeerRelayInput : RelayInput
+    , relays : List Relay
+    , windowSize : { width : Int, height : Int }
+    }
 
 
 type alias Flags =

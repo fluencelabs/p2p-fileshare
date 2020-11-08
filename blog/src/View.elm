@@ -16,8 +16,8 @@ limitations under the License.
 
 -}
 
-import Browser exposing (Document)
 import Blog.View
+import Browser exposing (Document)
 import Conn.View
 import Element
     exposing
@@ -65,8 +65,14 @@ mainmView model =
             [ connectivity model ]
 
         Model.Connected ->
-            [ blog model ]
+            if model.admin then
+                [ blog model ]
 
+            else
+                [ blogJoin model ]
+
+        Model.Joined ->
+            [ blog model ]
 
 
 blogView : Model -> List (Element Msg)
@@ -138,3 +144,8 @@ connectivity model =
 blog : Model -> Element Msg
 blog model =
     liftView .blog BlogMsg (Blog.View.blogView model.screen) <| model
+
+
+blogJoin : Model -> Element Msg
+blogJoin model =
+    liftView .blog BlogMsg Blog.View.joinView <| model
