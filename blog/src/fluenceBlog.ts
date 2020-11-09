@@ -82,13 +82,16 @@ export class FluenceBlog {
      * Call 'join' service and send notifications to all members.
      */
     async join() {
-        let script = this.genScript(this.userListId, "join", ["user", "relay", "sig", "name"])
+        let script = this.genScript(this.userListId, "join", ["user"])
 
         let data = new Map()
-        data.set("user", this.client.selfPeerIdStr)
-        data.set("relay", this.client.connection.nodePeerId.toB58String())
-        data.set("sig", this.client.selfPeerIdStr)
-        data.set("name", encodeURIComponent(this.name))
+        let user = {
+            peer_id: this.client.selfPeerIdStr,
+            relay_id: this.client.connection.nodePeerId.toB58String(),
+            signature: this.client.selfPeerIdStr,
+            name: this.name
+        }
+        data.set("user", user)
 
         let particle = await build(this.client.selfPeerId, script, data, 600000)
         await this.client.sendParticle(particle)
@@ -160,7 +163,7 @@ export class FluenceBlog {
             (call "${chatPeerId}" ("${this.userListId}" "get_user") [author] user)
             (seq
                 (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
-                (fold members m
+                (fold members.$.["users"] m
                     (par 
                         (seq 
                             (call m.$.["relay_id"] ("identity" "") [] void[])
@@ -194,7 +197,7 @@ export class FluenceBlog {
         (call "${chatPeerId}" ("${this.historyId}" "add") [author, msg, zero] void2[])       
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
-            (fold members m
+            (fold members.$.["users"] m
                 (par 
                     (seq 
                         (call m.$.["relay_id"] ("identity" "") [] void[])
@@ -216,14 +219,6 @@ export class FluenceBlog {
         await this.client.sendParticle(particle)
     }
 
-    printJoinScript() {
-        console.log(this.genScript(this.userListId, "join", ["user", "relay", "sig", "name"]))
-    }
-
-    printGetHistoryScript() {
-        console.log(this.getHistoryScript())
-    }
-
     /**
      * Generate a script that will pass arguments to remote service and will send notifications to all chat members.
      * @param serviceId service to send
@@ -241,7 +236,7 @@ export class FluenceBlog {
         (call "${chatPeerId}" ("${serviceId}" "${funcName}") [${argsStr}] void2[])
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
-            (fold members m
+            (fold members.$.["users"] m
                 (par 
                     (seq 
                         (call m.$.["relay_id"] ("identity" "") [] void[])

@@ -115,13 +115,13 @@ export async function publishBlueprint() {
     let pid = await Fluence.generatePeerId();
     let cl = await Fluence.connect(relays[1].multiaddr, pid);
 
-    await cl.addModule("sqlite", SQLITE_BS64, undefined, 20000);
+    await cl.addModule("sqlite3", SQLITE_BS64, undefined, 20000);
     await cl.addModule(HISTORY_NAME, HISTORY_BS64, undefined, 20000);
     await cl.addModule(USER_LIST_NAME, USER_LIST_BS64, undefined, 20000);
 
-    let blueprintIdPostsHistory = await cl.addBlueprint("post_history", ["sqlite", HISTORY_NAME])
-    let blueprintIdCommentsHistory = await cl.addBlueprint("comment_history", ["sqlite", HISTORY_NAME])
-    let blueprintIdUserList = await cl.addBlueprint("user_list", ["sqlite", USER_LIST_NAME])
+    let blueprintIdPostsHistory = await cl.addBlueprint("post_history", ["sqlite3", HISTORY_NAME])
+    let blueprintIdCommentsHistory = await cl.addBlueprint("comment_history", ["sqlite3", HISTORY_NAME])
+    let blueprintIdUserList = await cl.addBlueprint("user_list", ["sqlite3", USER_LIST_NAME])
     console.log(`BLUEPRINT POSTS HISTORY ID: ${blueprintIdPostsHistory}`)
     console.log(`BLUEPRINT COMMENTS HISTORY ID: ${blueprintIdCommentsHistory}`)
     console.log(`BLUEPRINT USER LIST ID: ${blueprintIdUserList}`)

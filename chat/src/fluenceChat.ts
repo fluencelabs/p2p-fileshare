@@ -54,21 +54,13 @@ export class FluenceChat {
         let service = new Service(this.chatId)
         service.registerFunction("join", (args: any[]) => {
             let member: Member;
-            if (typeof args[0] !== 'object') {
-                member = {
-                    clientId: args[0],
-                    relay: args[1],
-                    sig: args[2],
-                    name: args[3]
-                }
-            } else {
-                let m = args[0]
-                member = {
-                    clientId: m.peer_id,
-                    relay: m.relay_id,
-                    sig: m.signature,
-                    name: m.name
-                }
+
+            let m = args[0]
+            member = {
+                clientId: m.peer_id,
+                relay: m.relay_id,
+                sig: m.signature,
+                name: m.name
             }
             this.addMember(member);
             return {}
@@ -91,7 +83,7 @@ export class FluenceChat {
                     replyTo = null;
                 }
                 if (name) {
-                    FluenceChat.notifyNewMessage({name: decodeURIComponent(name), msg: v.body, id: v.id, replyTo})
+                    FluenceChat.notifyNewMessage({name: name, msg: v.body, id: v.id, replyTo})
                 }
             })
 
@@ -128,13 +120,16 @@ export class FluenceChat {
      * Call 'join' service and send notifications to all members.
      */
     async join() {
-        let script = this.genScript(this.userListId, "join", ["user", "relay", "sig", "name"])
+        let script = this.genScript(this.userListId, "join", ["user"])
 
         let data = new Map()
-        data.set("user", this.client.selfPeerIdStr)
-        data.set("relay", this.client.connection.nodePeerId.toB58String())
-        data.set("sig", this.client.selfPeerIdStr)
-        data.set("name", encodeURIComponent(this.name))
+        let user = {
+            peer_id: this.client.selfPeerIdStr,
+            relay_id: this.client.connection.nodePeerId.toB58String(),
+            signature: this.client.selfPeerIdStr,
+            name: this.name
+        }
+        data.set("user", user)
 
         let particle = await build(this.client.selfPeerId, script, data, 600000)
         await this.client.sendParticle(particle)
@@ -142,9 +137,9 @@ export class FluenceChat {
 
     printMembers() {
         console.log("Members:")
-        console.log(encodeURIComponent(this.name))
+        console.log(this.name)
         this.members.forEach((m) => {
-            console.log(encodeURIComponent(m.name))
+            console.log(m.name)
         })
     }
 
@@ -159,7 +154,7 @@ export class FluenceChat {
                     (call "${relay}" ("identity" "") [] void1[])
                     (seq
                         (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
-                        (fold members m
+                        (fold members.$.["users"] m
                             (par
                                 (seq
                                     (call "${relay}" ("identity" "") [] void[])
@@ -200,7 +195,7 @@ export class FluenceChat {
     }
 
     private static notifyNameChanged(oldName: string, name: string) {
-        sendEventMessage({msg: `Member '${decodeURIComponent(oldName)}' changed name to '${decodeURIComponent(name)}'.`, name: "", id: 0, replyTo: null})
+        sendEventMessage({msg: `Member '${oldName}' changed name to '${name}'.`, name: "", id: 0, replyTo: null})
     }
 
     private static notifyRelayChanged(relay: string) {
@@ -212,7 +207,7 @@ export class FluenceChat {
     }
 
     private static notifyNewMember(name: string) {
-        sendEventMessage({msg: `Member joined: ${decodeURIComponent(name)}.`, name: "", id: 0, replyTo: null})
+        sendEventMessage({msg: `Member joined: ${name}.`, name: "", id: 0, replyTo: null})
     }
 
     private addMember(member: Member) {
@@ -234,23 +229,6 @@ export class FluenceChat {
         }
     }
 
-    /**
-     * Quit from chat.
-     */
-    async quit() {
-        let user = this.client.selfPeerIdStr;
-        let script = this.genScript(this.historyId, "delete", ["user", "signature"])
-
-        let data = new Map()
-        data.set("user", user)
-        data.set("signature", user)
-
-        let particle = await build(this.client.selfPeerId, script, data, 600000)
-        await this.client.sendParticle(particle)
-
-        console.log("You left chat.")
-    }
-
     private getHistoryScript(): string {
         let chatPeerId = CHAT_PEER_ID;
         let relay = this.client.connection.nodePeerId.toB58String();
@@ -262,7 +240,7 @@ export class FluenceChat {
         (call "${chatPeerId}" ("${this.historyId}" "get_all") [] messages)                       
         (seq
             (call "${relay}" ("identity" "") [] void[])
-            (call "${this.client.selfPeerIdStr}" ("${this.chatId}" "all_msgs") [messages] void3[])                            
+            (call "${this.client.selfPeerIdStr}" ("${this.chatId}" "all_msgs") [messages.$.["messages"]] void3[])                            
         )                                                                           
     )
 )
@@ -293,7 +271,7 @@ export class FluenceChat {
         (call "${chatPeerId}" ("${this.historyId}" "add") [author msg reply_to] id)
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
-            (fold members m
+            (fold members.$.["users"] m
                 (par 
                     (seq 
                         (call m.$.["relay_id"] ("identity" "") [] void[])
@@ -309,23 +287,15 @@ export class FluenceChat {
 
         let data = new Map()
         data.set("author", this.client.selfPeerIdStr)
-        data.set("msg", encodeURIComponent(msg))
+        data.set("msg", msg)
         data.set("reply_to", replyTo)
 
         let particle = await build(this.client.selfPeerId, script, data, 600000)
         await this.client.sendParticle(particle)
     }
 
-    printJoinScript() {
-        console.log(this.genScript(this.userListId, "join", ["user", "relay", "sig", "name"]))
-    }
-
     printGetHistoryScript() {
         console.log(this.getHistoryScript())
-    }
-
-    printSendMessageScript() {
-        console.log(this.genScript(this.historyId, "add", ["author", "msg"]))
     }
 
     /**
@@ -345,7 +315,7 @@ export class FluenceChat {
         (call "${chatPeerId}" ("${serviceId}" "${funcName}") [${argsStr}] void2[])
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
-            (fold members m
+            (fold members.$.["users"] m
                 (par 
                     (seq 
                         (call m.$.["relay_id"] ("identity" "") [] void[])
