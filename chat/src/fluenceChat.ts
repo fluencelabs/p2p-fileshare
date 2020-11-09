@@ -151,14 +151,14 @@ export class FluenceChat {
         let relay = this.client.connection.nodePeerId.toB58String();
         let script = `
                 (seq
-                    (call "${relay}" ("identity" "") [] void1[])
+                    (call "${relay}" ("identity" "") [])
                     (seq
                         (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
                         (fold members.$.["users"] m
                             (par
                                 (seq
                                     (call "${relay}" ("identity" "") [] void[])
-                                    (call "${this.client.selfPeerIdStr}" ("${this.chatId}" "join") [m] void3[])                            
+                                    (call "${this.client.selfPeerIdStr}" ("${this.chatId}" "join") [m])                            
                                 )                        
                                 (next m)
                             )    
@@ -235,12 +235,12 @@ export class FluenceChat {
 
         return `
 (seq
-    (call "${relay}" ("identity" "") [] void1[])
+    (call "${relay}" ("identity" "") [])
     (seq
         (call "${chatPeerId}" ("${this.historyId}" "get_all") [] messages)                       
         (seq
             (call "${relay}" ("identity" "") [] void[])
-            (call "${this.client.selfPeerIdStr}" ("${this.chatId}" "all_msgs") [messages.$.["messages"]] void3[])                            
+            (call "${this.client.selfPeerIdStr}" ("${this.chatId}" "all_msgs") [messages.$.["messages"]])                            
         )                                                                           
     )
 )
@@ -266,7 +266,7 @@ export class FluenceChat {
         let relay = this.client.connection.nodePeerId.toB58String();
         let script = `
 (seq
-    (call "${relay}" ("identity" "") [] void1[])
+    (call "${relay}" ("identity" "") [])
     (seq
         (call "${chatPeerId}" ("${this.historyId}" "add") [author msg reply_to] id)
         (seq
@@ -274,8 +274,8 @@ export class FluenceChat {
             (fold members.$.["users"] m
                 (par 
                     (seq 
-                        (call m.$.["relay_id"] ("identity" "") [] void[])
-                        (call m.$.["peer_id"] ("${this.chatId}" "add") [id.$.["msg_id"] author msg reply_to] void3[])                            
+                        (call m.$.["relay_id"] ("identity" "") [])
+                        (call m.$.["peer_id"] ("${this.chatId}" "add") [id.$.["msg_id"] author msg reply_to])                            
                     )                        
                     (next m)
                 )                

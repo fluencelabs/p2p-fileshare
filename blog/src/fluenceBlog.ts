@@ -136,7 +136,7 @@ export class FluenceBlog {
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)                     
             (seq
-                (call "${relay}" ("identity" "") [] void[])
+                (call "${relay}" ("identity" "") [])
                 (call "${this.client.selfPeerIdStr}" ("${this.blogId}" "all_msgs") [messages.$.["messages"] members.$.["users"]])                            
             )
         )                                                                           
