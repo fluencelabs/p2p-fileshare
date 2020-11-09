@@ -1,13 +1,11 @@
 import Fluence from "fluence/dist/fluence";
 
-import {createBlog, currentBlog, joinBlog, publishBlueprint} from "./globalFunctions";
-
 // change these constants in different environment
-export const POSTS_HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";
-export const COMMENTS_HISTORY_BLUEPRINT = "514ab6a4-1663-476e-9970-200645002869";
-export const USER_LIST_BLUEPRINT = "c1a4da29-4ec2-4af0-b614-21f5098d33ff";
+export const POSTS_HISTORY_BLUEPRINT = "f6aef2ee-3908-4c57-a3d3-6913b33d65c3";
+export const COMMENTS_HISTORY_BLUEPRINT = "2502b284-206e-4aa1-8215-d7f5bb4500d3";
+export const USER_LIST_BLUEPRINT = "27ec1404-bad8-4dee-8062-42aa5532f44b";
 
-export const BLOG_ID = ""
+export const BLOG_ID = "o7xg8o"
 
 // parameters from `fluence-playground` local network
 export let relays = [
@@ -41,7 +39,8 @@ export let relays = [
     }
 ]
 
-export const BLOG_PEER_ID = relays[1].peerId;
+export const BLOG_PEER = relays[1]
+export const BLOG_PEER_ID = BLOG_PEER.peerId;
 
 Fluence.setLogLevel('error')
 

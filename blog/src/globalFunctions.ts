@@ -4,7 +4,7 @@ import {peerIdToSeed, seedToPeerId} from "fluence/dist/seed";
 import {SQLITE_BS64} from "../../artifacts/sqliteBs64";
 import {HISTORY_BS64} from "../../artifacts/historyBs64";
 import {USER_LIST_BS64} from "../../artifacts/userListBs64";
-import {BLOG_PEER_ID, COMMENTS_HISTORY_BLUEPRINT, relays, USER_LIST_BLUEPRINT} from "./main";
+import {BLOG_PEER, BLOG_PEER_ID, COMMENTS_HISTORY_BLUEPRINT, relays, USER_LIST_BLUEPRINT} from "./main";
 import Fluence from "fluence";
 
 export let currentBlog: FluenceBlog | undefined = undefined;
@@ -26,18 +26,23 @@ function getRandomRelayAddr(): string {
 // New peer id will be generated with empty 'seed'. Random relay address will be used with empty 'relayAddress'
 export async function createBlog(name: string, seed?: string, relayAddress?: string): Promise<FluenceBlog> {
     checkCurrentBlog();
-    let clCreation = await connect(relays[1].multiaddr, false);
+    let clCreation = await connect(BLOG_PEER.multiaddr, false);
     let userListIdPr = clCreation.createService(USER_LIST_BLUEPRINT, undefined, 20000);
     let historyIdPr = clCreation.createService(COMMENTS_HISTORY_BLUEPRINT, undefined, 20000);
 
     let userListId = await userListIdPr;
     let historyId = await historyIdPr;
 
-    let blogId = Math.random().toString(36).substring(7);
-    await clCreation.addProvider(Buffer.from(chatIdToHistoryId(blogId), 'utf8'), relays[1].peerId, historyId);
-    await clCreation.addProvider(Buffer.from(chatIdToUserListId(blogId), 'utf8'), relays[1].peerId, userListId);
+    console.log("SERVICE USER LIST:")
+    console.log(userListId)
+    console.log("HISTORY USER LIST:")
+    console.log(historyId)
 
-    console.log("CHAT ID: " + blogId);
+    let blogId = Math.random().toString(36).substring(7);
+    await clCreation.addProvider(Buffer.from(chatIdToHistoryId(blogId), 'utf8'), BLOG_PEER.peerId, historyId);
+    await clCreation.addProvider(Buffer.from(chatIdToUserListId(blogId), 'utf8'), BLOG_PEER.peerId, userListId);
+
+    console.log("BLOG ID: " + blogId);
 
     if (!relayAddress) {
         relayAddress = getRandomRelayAddr()
@@ -55,11 +60,12 @@ export async function createBlog(name: string, seed?: string, relayAddress?: str
 }
 
 // Get an info about chat providers from Kademlia network.
-export async function getInfo(chatId: string): Promise<{ historyId: string; userListId: string }> {
-    let clInfo = await connect(relays[1].multiaddr, false);
+export async function getInfo(blogId: string): Promise<{ historyId: string; userListId: string }> {
+    let clInfo = await connect(BLOG_PEER.multiaddr, false);
 
-    let historyId = (await clInfo.getProviders(Buffer.from(chatIdToHistoryId(chatId), 'utf8')))[0][0].service_id;
-    let userListId = (await clInfo.getProviders(Buffer.from(chatIdToUserListId(chatId), 'utf8')))[0][0].service_id;
+    let userListId = (await clInfo.getProviders(Buffer.from(chatIdToUserListId(blogId), 'utf8')))[0][0].service_id;
+    let res = (await clInfo.getProviders(Buffer.from(chatIdToHistoryId(blogId), 'utf8')))
+    let historyId = res[0][0].service_id;
 
     return { historyId, userListId }
 }
@@ -113,7 +119,7 @@ export async function connect(relayAddress: string, printPid: boolean, seed?: st
 // Publishes a blueprint for chat application and shows its id
 export async function publishBlueprint() {
     let pid = await Fluence.generatePeerId();
-    let cl = await Fluence.connect(relays[1].multiaddr, pid);
+    let cl = await Fluence.connect(BLOG_PEER.multiaddr, pid);
 
     await cl.addModule("sqlite3", SQLITE_BS64, undefined, 20000);
     await cl.addModule(HISTORY_NAME, HISTORY_BS64, undefined, 20000);

@@ -17,7 +17,6 @@ limitations under the License.
 -}
 
 import Blog.Port
-import Conn.Port
 import Model exposing (Model)
 import Msg exposing (Msg(..))
 import Screen.Subscriptions
@@ -26,7 +25,6 @@ import Screen.Subscriptions
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Conn.Port.subscriptions model.connectivity |> Sub.map ConnMsg
-        , Blog.Port.subscriptions model.blog |> Sub.map BlogMsg
+        [ Blog.Port.subscriptions model.blog |> Sub.map BlogMsg
         , Screen.Subscriptions.subscriptions |> Sub.map ScreenMsg
         ]

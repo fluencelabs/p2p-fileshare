@@ -31,18 +31,20 @@ export class FluenceBlog {
     relay: string
     blogPeerId: string
 
-    constructor(client: FluenceClient, chatId: string, commentsHistoryId: string, userListId: string, peerId: string, name: string, relay: string) {
+    constructor(client: FluenceClient, chatId: string, commentsHistoryId: string, userListId: string, blogPeerId: string, name: string, relay: string) {
         this.client = client;
         this.name = name;
         this.historyId = commentsHistoryId;
         this.userListId = userListId;
         this.relay = relay;
-        this.blogPeerId = peerId;
+        this.blogPeerId = blogPeerId;
         this.blogId = chatId;
 
         // register service with function that will handle incoming messages from a chat
         let service = new Service(this.blogId)
         service.registerFunction("all_msgs", (args: any[]) => {
+            console.log("ALL MSGS")
+            console.log(args)
             let messages: Message[] = args[0]
             let members: Member[] = args[1]
             let names = new Map<string, string>()
@@ -53,7 +55,7 @@ export class FluenceBlog {
             messages.forEach((msg) => {
 
                 if (msg.reply_to === 0) {
-                    FluenceBlog.notifyNewPost(msg.body)
+                    FluenceBlog.notifyNewPost(msg.id, msg.body)
                 } else {
                     FluenceBlog.notifyNewComment(names.get(msg.author), msg.body, msg.reply_to)
                 }
@@ -70,7 +72,7 @@ export class FluenceBlog {
         })
 
         service.registerFunction("add_post", (args: any[]) => {
-            FluenceBlog.notifyNewPost(args[0])
+            FluenceBlog.notifyNewPost(args[0], args[1])
 
             return {}
         })
@@ -82,7 +84,14 @@ export class FluenceBlog {
      * Call 'join' service and send notifications to all members.
      */
     async join() {
-        let script = this.genScript(this.userListId, "join", ["user"])
+        let chatPeerId = BLOG_PEER_ID
+        let relay = this.client.connection.nodePeerId.toB58String();
+        let script = `
+(seq
+    (call "${relay}" ("identity" "") [])    
+    (call "${chatPeerId}" ("${this.userListId}" "join") [user])            
+)
+                `
 
         let data = new Map()
         let user = {
@@ -107,8 +116,8 @@ export class FluenceBlog {
         await this.join();
     }
 
-    private static notifyNewPost(msg: string) {
-        sendEventPost(decodeURIComponent(msg))
+    private static notifyNewPost(id: number, msg: string) {
+        sendEventPost(id, msg)
     }
 
     private static notifyNewComment(name: string, msg: string, id: number) {
@@ -121,14 +130,14 @@ export class FluenceBlog {
 
         return `
 (seq
-    (call "${relay}" ("identity" "") [] void1[])
+    (call "${relay}" ("identity" "") [])
     (seq
         (call "${chatPeerId}" ("${this.historyId}" "get_all") [] messages)  
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)                     
             (seq
                 (call "${relay}" ("identity" "") [] void[])
-                (call "${this.client.selfPeerIdStr}" ("${this.blogId}" "all_msgs") [messages, members] void3[])                            
+                (call "${this.client.selfPeerIdStr}" ("${this.blogId}" "all_msgs") [messages.$.["messages"] members.$.["users"]])                            
             )
         )                                                                           
     )
@@ -156,9 +165,9 @@ export class FluenceBlog {
         let script =
 `
 (seq
-    (call "${relay}" ("identity" "") [] void1[])
+    (call "${relay}" ("identity" "") [])
     (seq
-        (call "${chatPeerId}" ("${this.historyId}" "add") [author, msg, reply_to] void2[])
+        (call "${chatPeerId}" ("${this.historyId}" "add") [author msg reply_to] id)
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_user") [author] user)
             (seq
@@ -166,8 +175,8 @@ export class FluenceBlog {
                 (fold members.$.["users"] m
                     (par 
                         (seq 
-                            (call m.$.["relay_id"] ("identity" "") [] void[])
-                            (call m.$.["peer_id"] ("${this.blogId}" "add_comment") [user.$.["name"], msg, reply_to] void3[])                            
+                            (call m.$.["relay_id"] ("identity" "") [])
+                            (call m.$.["peer_id"] ("${this.blogId}" "add_comment") [user.$.[0]["name"] msg reply_to])                            
                         )                        
                         (next m)
                     )                
@@ -178,7 +187,7 @@ export class FluenceBlog {
 )
 `
         let data = new Map()
-        data.set("msg", encodeURIComponent(msg))
+        data.set("msg", msg)
         data.set("author", this.client.selfPeerIdStr)
         data.set("reply_to", replyTo)
 
@@ -192,16 +201,16 @@ export class FluenceBlog {
         let script =
             `
 (seq
-    (call "${relay}" ("identity" "") [] void1[])
+    (call "${relay}" ("identity" "") [])
     (seq
-        (call "${chatPeerId}" ("${this.historyId}" "add") [author, msg, zero] void2[])       
+        (call "${chatPeerId}" ("${this.historyId}" "add") [author msg zero] id)       
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
             (fold members.$.["users"] m
                 (par 
                     (seq 
-                        (call m.$.["relay_id"] ("identity" "") [] void[])
-                        (call m.$.["peer_id"] ("${this.blogId}" "add_post") [msg] void3[])     
+                        (call m.$.["relay_id"] ("identity" "") [])
+                        (call m.$.["peer_id"] ("${this.blogId}" "add_post") [id.$.["msg_id"] msg])     
                     )                        
                     (next m)
                 )                
@@ -211,43 +220,11 @@ export class FluenceBlog {
 )
 `
         let data = new Map()
-        data.set("msg", encodeURIComponent(msg))
+        data.set("msg", msg)
         data.set("author", this.client.selfPeerIdStr)
         data.set("zero", 0)
 
         let particle = await build(this.client.selfPeerId, script, data, 600000)
         await this.client.sendParticle(particle)
-    }
-
-    /**
-     * Generate a script that will pass arguments to remote service and will send notifications to all chat members.
-     * @param serviceId service to send
-     * @param funcName function to call
-     * @param args
-     */
-    private genScript(serviceId: string, funcName: string, args: string[]): string {
-        let argsStr = args.join(" ")
-        let chatPeerId = BLOG_PEER_ID
-        let relay = this.client.connection.nodePeerId.toB58String();
-        return `
-(seq
-    (call "${relay}" ("identity" "") [] void1[])
-    (seq
-        (call "${chatPeerId}" ("${serviceId}" "${funcName}") [${argsStr}] void2[])
-        (seq
-            (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
-            (fold members.$.["users"] m
-                (par 
-                    (seq 
-                        (call m.$.["relay_id"] ("identity" "") [] void[])
-                        (call m.$.["peer_id"] ("${this.blogId}" "${funcName}") [${argsStr}] void3[])                            
-                    )                        
-                    (next m)
-                )                
-            )
-        )
-    )
-)
-                `
     }
 }

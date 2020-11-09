@@ -3,6 +3,7 @@ module Blog.Update exposing (..)
 import Blog.Model exposing (Model, Post)
 import Blog.Msg exposing (Msg(..))
 import Blog.Port
+import Dict
 
 
 updatePost : Int -> String -> String -> Post -> Post
@@ -51,10 +52,17 @@ update msg model =
             )
 
         SendComment id ->
-            ( { model | currentText = "", currentName = "" }
+            let
+                text =
+                    model.currentCommentsText |> Dict.get id
+
+                newComments =
+                    model.currentCommentsText |> Dict.insert id ""
+            in
+            ( { model | currentCommentsText = newComments, currentName = "" }
             , Blog.Port.blogRequest
                 { command = "send_comment"
-                , text = Just model.currentText
+                , text = text
                 , id = Just id
                 , name = Just model.currentName
                 }
@@ -65,6 +73,13 @@ update msg model =
 
         UpdateText text ->
             ( { model | currentText = text }, Cmd.none )
+
+        UpdateCommentsText postId text ->
+            let
+                newComments =
+                    Dict.insert postId text model.currentCommentsText
+            in
+            ( { model | currentCommentsText = newComments }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )

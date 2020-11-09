@@ -10,4 +10,5 @@ type Msg
     | SendComment Int
     | UpdateName String
     | UpdateText String
+    | UpdateCommentsText Int String
     | NoOp

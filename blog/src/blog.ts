@@ -5,7 +5,7 @@ import {BLOG_ID} from "./main";
 
 let blog: FluenceBlog | undefined = undefined;
 
-function setBlog(newChat: FluenceBlog) {
+export function setBlog(newChat: FluenceBlog) {
     blog = newChat
 }
 
@@ -33,8 +33,8 @@ function createEvent(event: string, text?: string, name?: string, id?: number): 
     }
 }
 
-export function sendEventPost(text: string) {
-    sendBlogEvent(createEvent("new_post", text))
+export function sendEventPost(id: number, text: string) {
+    sendBlogEvent(createEvent("new_post", text, undefined, id))
 }
 
 export function sendEventComment(text: string, name: string, replyTo: number) {
@@ -71,7 +71,8 @@ export function chatHandler(app: any) {
                 break;
 
             case "join":
-                await joinBlog(name, BLOG_ID)
+                setBlog(await joinBlog(name, BLOG_ID))
+                sendBlogEvent(createEvent("joined"))
         }
 
     }

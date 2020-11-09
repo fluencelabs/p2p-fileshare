@@ -18,7 +18,6 @@ limitations under the License.
 
 import Blog.Model exposing (emptyBlogModel)
 import Config exposing (Config)
-import Conn.Model exposing (emptyConn)
 import Element
 import Msg exposing (Msg(..))
 import Screen.Model as Screen
@@ -26,13 +25,11 @@ import Screen.Model as Screen
 
 type Status
     = Init
-    | Connected
     | Joined
 
 
 type alias Model =
-    { connectivity : Conn.Model.Model
-    , blog : Blog.Model.Model
+    { blog : Blog.Model.Model
     , screen : Screen.Model
     , status : Status
     , admin : Bool
@@ -42,17 +39,13 @@ type alias Model =
 emptyModel : Config -> ( Model, Cmd Msg )
 emptyModel config =
     let
-        ( emptyConnModel, cmd ) =
-            emptyConn True config.defaultPeerRelayInput config.relays
-
         device =
             Element.classifyDevice config.windowSize
     in
-    ( { connectivity = emptyConnModel
-      , screen = { device = device, screenSize = config.windowSize }
+    ( { screen = { device = device, screenSize = config.windowSize }
       , blog = emptyBlogModel config.admin
       , status = Init
       , admin = config.admin
       }
-    , Cmd.map ConnMsg cmd
+    , Cmd.none
     )

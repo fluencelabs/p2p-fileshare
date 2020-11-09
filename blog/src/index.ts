@@ -21,9 +21,11 @@ import ports, {getRelays} from "./ports";
 import {convertRelayForELM} from "./utils";
 import {createBlog, joinBlog, publishBlueprint} from "./globalFunctions";
 import {BLOG_ID, relays} from "./main";
+import {setBlog} from "./blog";
 
 let isAdmin: boolean = false;
-if (window.location.pathname === "/admin") {
+
+if (window.location.hash === "#admin") {
     isAdmin = true;
 }
 
@@ -54,9 +56,8 @@ let app = Elm.Main.init({
     });
 
     if (isAdmin) {
-        let blogId = ""
-        let seed = ""
-        await joinBlog("", BLOG_ID, seed)
+        let seed = "BFwewthB94btRFX5eVjx6TUZQGbxHo31Xt2841YDxJmW"
+        setBlog(await joinBlog("owner", BLOG_ID, seed))
     }
 })();
 

@@ -44,8 +44,8 @@ eventToMsg event =
             "new_post" ->
                 Maybe.map2 NewPost event.id event.text
 
-            "join" ->
-                Maybe.map2 NewPost event.id event.text
+            "joined" ->
+                Just Joined
 
             _ ->
                 Nothing

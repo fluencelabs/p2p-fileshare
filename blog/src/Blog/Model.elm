@@ -1,5 +1,7 @@
 module Blog.Model exposing (..)
 
+import Dict exposing (Dict)
+
 
 type alias Comment =
     { msg : String
@@ -18,10 +20,11 @@ type alias Model =
     { posts : List Post
     , currentName : String
     , currentText : String
+    , currentCommentsText : Dict Int String
     , isOwner : Bool
     }
 
 
 emptyBlogModel : Bool -> Model
 emptyBlogModel owner =
-    { posts = [], currentName = "", currentText = "", isOwner = owner }
+    { posts = [], currentName = "", currentText = "", isOwner = owner, currentCommentsText = Dict.empty }

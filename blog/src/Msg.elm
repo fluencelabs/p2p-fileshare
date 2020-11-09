@@ -17,12 +17,10 @@ limitations under the License.
 -}
 
 import Blog.Msg
-import Conn.Msg
 import Screen.Msg
 
 
 type Msg
     = NoOp
-    | ConnMsg Conn.Msg.Msg
     | BlogMsg Blog.Msg.Msg
     | ScreenMsg Screen.Msg.Msg

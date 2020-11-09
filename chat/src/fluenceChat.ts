@@ -310,16 +310,16 @@ export class FluenceChat {
         let relay = this.client.connection.nodePeerId.toB58String();
         return `
 (seq
-    (call "${relay}" ("identity" "") [] void1[])
+    (call "${relay}" ("identity" "") [])
     (seq
-        (call "${chatPeerId}" ("${serviceId}" "${funcName}") [${argsStr}] void2[])
+        (call "${chatPeerId}" ("${serviceId}" "${funcName}") [${argsStr}])
         (seq
             (call "${chatPeerId}" ("${this.userListId}" "get_users") [] members)
             (fold members.$.["users"] m
                 (par 
                     (seq 
-                        (call m.$.["relay_id"] ("identity" "") [] void[])
-                        (call m.$.["peer_id"] ("${this.chatId}" "${funcName}") [${argsStr}] void3[])                            
+                        (call m.$.["relay_id"] ("identity" "") [])
+                        (call m.$.["peer_id"] ("${this.chatId}" "${funcName}") [${argsStr}])                            
                     )                        
                     (next m)
                 )                
