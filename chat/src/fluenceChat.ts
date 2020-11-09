@@ -275,7 +275,7 @@ export class FluenceChat {
                 (par 
                     (seq 
                         (call m.$.["relay_id"] ("identity" "") [] void[])
-                        (call m.$.["peer_id"] ("${this.chatId}" "add") [id author msg reply_to] void3[])                            
+                        (call m.$.["peer_id"] ("${this.chatId}" "add") [id.$.["msg_id"] author msg reply_to] void3[])                            
                     )                        
                     (next m)
                 )                
