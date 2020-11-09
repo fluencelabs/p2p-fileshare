@@ -24,6 +24,7 @@ import {relays} from "./main";
 
 let flags: any = {
     peerId: null,
+    admin: false,
     defaultPeerRelayInput: {
         host: "134.209.186.43",
         pport: "9001",
