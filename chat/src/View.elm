@@ -18,7 +18,6 @@ limitations under the License.
 
 import Browser exposing (Document)
 import Chat.View
-import Conn.View
 import Element
     exposing
         ( Element
@@ -62,9 +61,6 @@ mainmView : Model -> List (Element Msg)
 mainmView model =
     case model.status of
         Model.Init ->
-            [ connectivity model ]
-
-        Model.Connected ->
             [ chatConn model ]
 
         Model.JoinedToChat ->
@@ -130,11 +126,6 @@ header screenI =
         , el [ height <| Element.px <| S.baseRem 0.5 ] Element.none
         ]
     ]
-
-
-connectivity : Model -> Element Msg
-connectivity model =
-    liftView .connectivity ConnMsg (Conn.View.view model.screen) <| model
 
 
 chatConn : Model -> Element Msg

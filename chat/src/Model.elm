@@ -18,7 +18,6 @@ limitations under the License.
 
 import Chat.Model exposing (emptyChatModel)
 import Config exposing (Config)
-import Conn.Model exposing (emptyConn)
 import Element
 import Msg exposing (Msg(..))
 import Screen.Model as Screen
@@ -26,13 +25,11 @@ import Screen.Model as Screen
 
 type Status
     = Init
-    | Connected
     | JoinedToChat
 
 
 type alias Model =
-    { connectivity : Conn.Model.Model
-    , chat : Chat.Model.Model
+    { chat : Chat.Model.Model
     , screen : Screen.Model
     , status : Status
     }
@@ -41,16 +38,12 @@ type alias Model =
 emptyModel : Config -> ( Model, Cmd Msg )
 emptyModel config =
     let
-        ( emptyConnModel, cmd ) =
-            emptyConn True config.defaultPeerRelayInput config.relays
-
         device =
             Element.classifyDevice config.windowSize
     in
-    ( { connectivity = emptyConnModel
-      , screen = { device = device, screenSize = config.windowSize }
+    ( { screen = { device = device, screenSize = config.windowSize }
       , chat = emptyChatModel
       , status = Init
       }
-    , Cmd.map ConnMsg cmd
+    , Cmd.none
     )

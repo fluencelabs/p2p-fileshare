@@ -18,7 +18,6 @@ limitations under the License.
 
 import Browser exposing (Document)
 import Config exposing (Flags)
-import Conn.Relay exposing (RelayInput)
 import Model exposing (Model, emptyModel)
 import Msg exposing (Msg(..))
 import Subscriptions exposing (subscriptions)
@@ -40,19 +39,5 @@ init flags =
     let
         ( em, initCmd ) =
             emptyModel flags
-
-        initConn =
-            em.connectivity
-
-        initPeerId =
-            flags.peerId
-
-        model =
-            case initPeerId of
-                Just peerId ->
-                    { em | connectivity = { initConn | peer = { id = peerId, privateKey = Nothing } } }
-
-                Nothing ->
-                    em
     in
-    ( model, initCmd )
+    ( em, initCmd )

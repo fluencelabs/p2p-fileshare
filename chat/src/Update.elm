@@ -18,8 +18,6 @@ limitations under the License.
 
 import Chat.Msg
 import Chat.Update
-import Conn.Msg
-import Conn.Update
 import Model exposing (Model, Status(..))
 import Msg exposing (..)
 import Screen.Update
@@ -50,10 +48,6 @@ updateScreen =
     liftUpdate .screen (\s -> \m -> { m | screen = s }) ScreenMsg Screen.Update.update
 
 
-updateConn =
-    liftUpdate .connectivity (\c -> \m -> { m | connectivity = c }) ConnMsg Conn.Update.update
-
-
 updateChat =
     liftUpdate .chat (\c -> \m -> { m | chat = c }) ChatMsg Chat.Update.update
 
@@ -63,18 +57,6 @@ update msg model =
     case msg of
         ScreenMsg m ->
             updateScreen m model
-
-        ConnMsg m ->
-            case m of
-                Conn.Msg.RelayConnected relay ->
-                    let
-                        ( mod, cmd ) =
-                            updateConn m model
-                    in
-                    ( { mod | status = Connected }, cmd )
-
-                _ ->
-                    updateConn m model
 
         ChatMsg m ->
             case m of

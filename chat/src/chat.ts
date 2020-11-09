@@ -1,8 +1,9 @@
-import {ElmMessage, FluenceChat, Message} from "./fluenceChat";
+import {ElmMessage, FluenceChat} from "./fluenceChat";
 import {createChat, joinChat} from "./globalFunctions";
-import {getPeerId, getRelayMultiaddr} from "./connection";
 import {peerIdToSeed} from "fluence/dist/seed";
 import {getApp} from "./ports";
+import {randomRelay} from "./main";
+import Fluence from "fluence";
 
 let chat: FluenceChat | undefined = undefined;
 
@@ -51,7 +52,10 @@ export function chatHandler(app: any) {
                     break;
                 }
 
-                setChat(await joinChat(name, chatId, peerIdToSeed(getPeerId()), getRelayMultiaddr()))
+                let relay = randomRelay()
+                let pid = await Fluence.generatePeerId()
+
+                setChat(await joinChat(name, chatId, peerIdToSeed(pid), relay.multiaddr))
                 sendChatEvent(emptyEvent("connected"))
                 break;
             case "create":
@@ -59,7 +63,8 @@ export function chatHandler(app: any) {
                     console.error("name should be specified on create command")
                     break;
                 }
-                setChat(await createChat(name, peerIdToSeed(getPeerId()), getRelayMultiaddr()))
+
+                setChat(await createChat(name, peerIdToSeed(await Fluence.generatePeerId()), randomRelay().multiaddr))
 
                 sendChatEvent(emptyEvent("connected"))
 

@@ -1,4 +1,3 @@
-import {connectionHandler} from "./connection";
 import {convertRelayForELM} from "./utils";
 import {chatHandler} from "./chat";
 
@@ -77,11 +76,6 @@ export function getApp(): any {
 export default async function ports(app: any) {
 
     setApp(app)
-
-    /**
-     * Handle connection commands
-     */
-    app.ports.connRequest.subscribe(connectionHandler);
 
     app.ports.chatRequest.subscribe(chatHandler(app))
 }

@@ -17,12 +17,10 @@ limitations under the License.
 -}
 
 import Chat.Msg
-import Conn.Msg
 import Screen.Msg
 
 
 type Msg
     = NoOp
-    | ConnMsg Conn.Msg.Msg
     | ChatMsg Chat.Msg.Msg
     | ScreenMsg Screen.Msg.Msg

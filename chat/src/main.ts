@@ -1,13 +1,16 @@
 import Fluence from "fluence/dist/fluence";
 
-import {createChat, currentChat, joinChat, publishBlueprint} from "./globalFunctions";
-
 // change these constants in different environment
 export const HISTORY_BLUEPRINT = "f6aef2ee-3908-4c57-a3d3-6913b33d65c3";
 export const USER_LIST_BLUEPRINT = "cb831b39-aea4-4913-a877-a992e448f018";
 
+export function randomRelay(): { peerId: string; multiaddr: string } {
+    const random = Math.floor(Math.random() * relays.length);
+    return relays[random]
+}
+
 // parameters from `fluence-playground` local network
-export let relays = [
+export let relays: { peerId: string; multiaddr: string }[] = [
     {
         multiaddr: "/ip4/134.209.186.43/tcp/9001/ws/p2p/12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9",
         peerId: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9"
