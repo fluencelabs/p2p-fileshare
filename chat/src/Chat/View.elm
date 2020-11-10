@@ -74,12 +74,12 @@ connectionView screen model =
 
 talkView : Screen.Model -> Model -> Element Msg
 talkView screen model =
-    column [] ([messageSender model] ++ messagesView model)
+    column [] (messagesView model ++ [messageSender model])
 
 
 messagesView : Model -> List (Element Msg)
 messagesView model =
-    model.messages |> List.map (messageView model)
+    List.reverse model.messages |> List.map (messageView model)
 
 
 replyView : List Message -> Int -> Element Msg
@@ -136,18 +136,21 @@ messageView model message =
 
 messageSender : Model -> Element Msg
 messageSender model =
-    column [  ]
-        [ row [ fillWidth, centerX ]
-            [ el [ width (fillPortion 2), letterSpacing, F.gray ] <| Element.text "MESSAGE"
-            , Input.text [ width (fillPortion 5) ]
-                { onChange = SetCurrentMessage
-                , text = model.currentMsg
-                , placeholder = Maybe.map (Input.placeholder []) Nothing
-                , label = Input.labelHidden "MESSAGE"
-                }
-            , Input.button (accentButton ++ [ width (fillPortion 3), paddingXY 0 (S.baseRem 0.5), Font.center ])
-                { onPress = Just <| SendMessage
-                , label = text "Send Message"
-                }
+    column [ fillWidth ]
+    [ row [ width (fillPortion 2), spacing 10, padding 10 ]
+        [ row [ fillWidth, centerX, spacing 10, padding 10 ]
+            [ Input.text [ width (fillPortion 5), spacing 10, padding 10 ]
+              { onChange = SetCurrentMessage
+              , text = model.currentMsg
+              , placeholder = Just (Input.placeholder [] (Element.text "Enter a message"))
+              , label = Input.labelHidden "MESSAGE"
+              }
+            , Input.button (accentButton ++ [ width (fillPortion 3), paddingXY 0 (S.baseRem 0.5), Font.center, spacing 10, padding 10 ])
+              { onPress = Just <| SendMessage
+              , label = text "Send Message"
+              }
             ]
         ]
+    , el [ width (fillPortion 3) ] none
+    ]
+
