@@ -68,8 +68,6 @@ export class FluenceChat {
 
         service.registerFunction("all_msgs", (args: any[]) => {
             args[0].forEach((v: Message) => {
-                console.log("all msgs:")
-                console.log(v)
                 let name;
                 if (v.author === this.client.selfPeerIdStr) {
                     name = "Me"
@@ -90,15 +88,7 @@ export class FluenceChat {
             return {}
         })
 
-        service.registerFunction("user_deleted", (args: any[]) => {
-            console.log("Member deleted: " + args[0])
-            this.deleteMember(args[0]);
-            return {}
-        })
-
         service.registerFunction("add", (args: any[]) => {
-            console.log("msg:")
-            console.log(args)
             let [id, pid, msg, replyTo] = args
             let m = this.members.find(m => m.clientId === pid)
 

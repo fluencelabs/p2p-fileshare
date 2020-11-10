@@ -12,7 +12,7 @@ update msg model =
             ( { model | currentChatId = chatId }, Cmd.none )
 
         SetCreateName name ->
-            ( { model | name = name }, Cmd.none )
+            ( { model | createName = name }, Cmd.none )
 
         SetJoinName name ->
             ( { model | joinName = name }, Cmd.none )
@@ -36,7 +36,7 @@ update msg model =
             , Chat.Port.chatRequest
                 { command = "create"
                 , chatId = Nothing
-                , name = Just model.name
+                , name = Just model.createName
                 , msg = Nothing
                 , replyTo = Nothing
                 }
@@ -47,7 +47,7 @@ update msg model =
             , Chat.Port.chatRequest
                 { command = "send_message"
                 , chatId = Nothing
-                , name = Just model.name
+                , name = Just model.createName
                 , msg = Just model.currentMsg
                 , replyTo = model.replyTo
                 }

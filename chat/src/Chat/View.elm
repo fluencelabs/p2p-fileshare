@@ -24,7 +24,7 @@ connectionView screen model =
                     [ el [ width (fillPortion 1), letterSpacing, F.gray ] <| Element.text "NAME"
                     , Input.text [ width (fillPortion 5) ]
                         { onChange = SetCreateName
-                        , text = model.name
+                        , text = model.createName
                         , placeholder = Maybe.map (Input.placeholder []) Nothing
                         , label = Input.labelHidden "NAME"
                         }

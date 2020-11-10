@@ -8,10 +8,10 @@ type alias Message =
     , replyTo : Maybe Int
     }
 
-
+ --TODO 3 models: chat with messages view, join chat view, create chat view
 type alias Model =
     { currentChatId : String
-    , name : String
+    , createName : String
     , joinName : String
     , messages : List Message
     , currentMsg : String
@@ -22,4 +22,4 @@ type alias Model =
 
 emptyChatModel : Model
 emptyChatModel =
-    { currentChatId = "", name = "", joinName = "", messages = [], currentMsg = "", replyTo = Nothing, chatId = "" }
+    { currentChatId = "", createName = "", joinName = "", messages = [], currentMsg = "", replyTo = Nothing, chatId = "" }
