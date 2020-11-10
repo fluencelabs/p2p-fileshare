@@ -48,7 +48,7 @@ view model =
 
 title : Model -> String
 title _ =
-    "Fluence p2p filesharing demo app"
+    "Fluence chat demo app"
 
 
 body : Model -> Html Msg
@@ -96,13 +96,6 @@ liftView getModel liftMsg subView =
         Element.map liftMsg res
 
 
-longDescriptionText =
-    "Files are served via IPFS protocol, but actual file uploading is done lazily. "
-        ++ "First, you upload your file into browser and make it discoverable via Fluence network. "
-        ++ "Then your peers may discover your device as a holder of the file and ask it to provide the file to a publicly accessible IPFS node. "
-        ++ "The device uploads the file and then replies with an IPFS multiaddress of the node holding the file."
-
-
 header : Screen.Model -> List (Element Msg)
 header screenI =
     [ column (layoutBlock screenI ++ [ spacing (S.baseRem 1.125) ])
@@ -112,9 +105,9 @@ header screenI =
         , row
             [ fillWidth ]
             [ paragraph [ Font.italic, F.gray, pSpacing ] <|
-                [ text "P2P file-sharing application over IPFS via Fluence relay" ]
+                [ text "P2P chat application via Fluence relay" ]
             ]
-        , row
+{-        , row
             [ fillWidth ]
             [ textColumn
                 [ fillWidth, spacing <| S.baseRem 1 ]
@@ -122,7 +115,7 @@ header screenI =
                 , paragraph [ pSpacing ] [ text "First, choose your local file and make it discoverable via Fluence network. Other peers may discover your device as a holder of the file and ask it to provide the file to a publicly accessible IPFS node. Your device will upload the file to the IPFS node and then share its multiaddress with the requesting peer." ]
                 , row [ spacing (S.baseRem 1) ] [ newTabLink "https://fluence.network" "More about Fluence", newTabLink "https://fluence.network" "Documentation" ]
                 ]
-            ]
+            ]-}
         , el [ height <| Element.px <| S.baseRem 0.5 ] Element.none
         ]
     ]

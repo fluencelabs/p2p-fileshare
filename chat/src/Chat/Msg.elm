@@ -5,7 +5,8 @@ import Chat.Model exposing (Message)
 
 type Msg
     = SetChatId String
-    | SetName String
+    | SetCreateName String
+    | SetJoinName String
     | SetCurrentMessage String
     | JoinChat
     | SendMessage

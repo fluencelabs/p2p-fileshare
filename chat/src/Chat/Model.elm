@@ -12,6 +12,7 @@ type alias Message =
 type alias Model =
     { chatId : String
     , name : String
+    , joinName : String
     , messages : List Message
     , currentMsg : String
     , replyTo : Maybe Int
@@ -20,4 +21,4 @@ type alias Model =
 
 emptyChatModel : Model
 emptyChatModel =
-    { chatId = "", name = "", messages = [], currentMsg = "", replyTo = Nothing }
+    { chatId = "", name = "", joinName = "", messages = [], currentMsg = "", replyTo = Nothing }

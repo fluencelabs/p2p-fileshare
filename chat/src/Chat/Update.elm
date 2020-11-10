@@ -11,8 +11,11 @@ update msg model =
         SetChatId chatId ->
             ( { model | chatId = chatId }, Cmd.none )
 
-        SetName name ->
+        SetCreateName name ->
             ( { model | name = name }, Cmd.none )
+
+        SetJoinName name ->
+            ( { model | joinName = name }, Cmd.none )
 
         SetCurrentMessage message ->
             ( { model | currentMsg = message }, Cmd.none )
@@ -22,7 +25,7 @@ update msg model =
             , Chat.Port.chatRequest
                 { command = "join"
                 , chatId = Just model.chatId
-                , name = Just model.name
+                , name = Just model.joinName
                 , msg = Nothing
                 , replyTo = Nothing
                 }
