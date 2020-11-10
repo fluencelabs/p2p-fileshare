@@ -60,7 +60,7 @@ update msg model =
 
         ChatMsg m ->
             case m of
-                Chat.Msg.ConnectedToChat ->
+                Chat.Msg.ConnectedToChat id ->
                     let
                         ( mod, cmd ) =
                             updateChat m model

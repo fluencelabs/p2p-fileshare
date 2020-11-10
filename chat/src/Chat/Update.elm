@@ -9,7 +9,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SetChatId chatId ->
-            ( { model | chatId = chatId }, Cmd.none )
+            ( { model | currentChatId = chatId }, Cmd.none )
 
         SetCreateName name ->
             ( { model | name = name }, Cmd.none )
@@ -24,7 +24,7 @@ update msg model =
             ( model
             , Chat.Port.chatRequest
                 { command = "join"
-                , chatId = Just model.chatId
+                , chatId = Just model.currentChatId
                 , name = Just model.joinName
                 , msg = Nothing
                 , replyTo = Nothing
@@ -53,8 +53,8 @@ update msg model =
                 }
             )
 
-        ConnectedToChat ->
-            ( model, Cmd.none )
+        ConnectedToChat chatId ->
+            ( { model | chatId = chatId }, Cmd.none )
 
         NewMsg m ->
             ( { model | messages = m :: model.messages }, Cmd.none )

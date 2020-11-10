@@ -11,7 +11,7 @@ type Msg
     | JoinChat
     | SendMessage
     | CreateChat
-    | ConnectedToChat
+    | ConnectedToChat String
     | NewMsg Message
     | SetReplyTo (Maybe Int)
     | NoOp

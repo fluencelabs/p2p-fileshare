@@ -25,7 +25,7 @@ type alias Command =
 
 
 type alias Event =
-    { event : String, msg : Maybe Message }
+    { event : String, msg : Maybe Message, id: Maybe String }
 
 
 port chatRequest : Command -> Cmd msg
@@ -39,7 +39,7 @@ eventToMsg event =
     Maybe.withDefault NoOp <|
         case event.event of
             "connected" ->
-                Just ConnectedToChat
+                Maybe.map ConnectedToChat event.id
 
             "new_msg" ->
                 Maybe.map NewMsg event.msg

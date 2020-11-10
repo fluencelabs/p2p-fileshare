@@ -43,7 +43,7 @@ connectionView screen model =
                       [ el [ width (fillPortion 1), letterSpacing, F.gray ] <| Element.text "CHAT ID"
                       , Input.text [ width (fillPortion 5) ]
                           { onChange = SetChatId
-                          , text = model.chatId
+                          , text = model.currentChatId
                           , placeholder = Maybe.map (Input.placeholder []) Nothing
                           , label = Input.labelHidden "CHAT ID"
                           }
@@ -74,7 +74,11 @@ connectionView screen model =
 
 talkView : Screen.Model -> Model -> Element Msg
 talkView screen model =
-    column [] (messagesView model ++ [messageSender model])
+    column [] ([] ++ messagesView model ++ [messageSender model])
+
+chatIdView : String -> Element Msg
+chatIdView chatId =
+    Element.text chatId
 
 
 messagesView : Model -> List (Element Msg)

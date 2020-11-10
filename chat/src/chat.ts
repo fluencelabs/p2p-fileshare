@@ -11,21 +11,28 @@ function setChat(newChat: FluenceChat) {
     chat = newChat
 }
 
+function getChat() {
+    return chat
+}
+
 export interface ChatEvent {
     event: string,
-    msg: ElmMessage | null
+    msg: ElmMessage | null,
+    id: string | null
 }
 
 function emptyEvent(event: string): ChatEvent {
-    return {event, msg: null}
+    return {event, msg: null, id: null}
 }
 
-function createEvent(event: string, msg?: ElmMessage): ChatEvent {
+function createEvent(event: string, msg?: ElmMessage, id?: string): ChatEvent {
     if (msg === undefined) { msg = null }
+    if (id === undefined) { id = null }
 
     return {
         event,
-        msg
+        msg,
+        id
     }
 }
 
@@ -54,9 +61,10 @@ export function chatHandler(app: any) {
 
                 let relay = randomRelay()
                 let pid = await Fluence.generatePeerId()
+                let chat = await joinChat(name, chatId, peerIdToSeed(pid), relay.multiaddr)
 
-                setChat(await joinChat(name, chatId, peerIdToSeed(pid), relay.multiaddr))
-                sendChatEvent(emptyEvent("connected"))
+                setChat(chat)
+                sendChatEvent(createEvent("connected", undefined, chat.chatId))
                 break;
             case "create":
                 if (!name) {
@@ -64,9 +72,10 @@ export function chatHandler(app: any) {
                     break;
                 }
 
-                setChat(await createChat(name, peerIdToSeed(await Fluence.generatePeerId()), randomRelay().multiaddr))
+                let chat1 = await createChat(name, peerIdToSeed(await Fluence.generatePeerId()), randomRelay().multiaddr)
+                setChat(chat1)
 
-                sendChatEvent(emptyEvent("connected"))
+                sendChatEvent(createEvent("connected", undefined, chat1.chatId))
 
                 break;
             case "send_message":
@@ -79,7 +88,7 @@ export function chatHandler(app: any) {
                     replyTo = 0
                 }
 
-                await chat.sendMessage(msg, replyTo);
+                await getChat().sendMessage(msg, replyTo);
                 break;
         }
 

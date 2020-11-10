@@ -1,8 +1,8 @@
 import Fluence from "fluence/dist/fluence";
 
 // change these constants in different environment
-export const HISTORY_BLUEPRINT = "f6aef2ee-3908-4c57-a3d3-6913b33d65c3";
-export const USER_LIST_BLUEPRINT = "cb831b39-aea4-4913-a877-a992e448f018";
+export const HISTORY_BLUEPRINT = "bf2d2497-14bf-48ba-a72c-39336e3231bc";
+export const USER_LIST_BLUEPRINT = "b7829080-d7c1-4231-8049-f594a5ffe6a6";
 
 export function randomRelay(): { peerId: string; multiaddr: string } {
     const random = Math.floor(Math.random() * relays.length);
