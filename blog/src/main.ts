@@ -1,9 +1,9 @@
 import Fluence from "fluence/dist/fluence";
 
 // change these constants in different environment
-export const POSTS_HISTORY_BLUEPRINT = "f6aef2ee-3908-4c57-a3d3-6913b33d65c3";
-export const COMMENTS_HISTORY_BLUEPRINT = "2502b284-206e-4aa1-8215-d7f5bb4500d3";
-export const USER_LIST_BLUEPRINT = "27ec1404-bad8-4dee-8062-42aa5532f44b";
+export const POSTS_HISTORY_BLUEPRINT = "132958e3-ff1e-477d-9e0d-8f67971f3c9f";
+export const COMMENTS_HISTORY_BLUEPRINT = "41396f3b-c60d-497c-89ed-0e3da225f2b6";
+export const USER_LIST_BLUEPRINT = "cda29ea8-3153-4812-9542-9c3303fa34e6";
 
 export const BLOG_ID = "o7xg8o"
 
