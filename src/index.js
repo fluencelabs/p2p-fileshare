@@ -27,7 +27,7 @@ let flags = {
     isAdmin: false,
     peerId: null,
     defaultPeerRelayInput: {
-        host: "relay02.fluence.dev",
+        host: "relay01.fluence.dev",
         pport: "19001",
         peerId: "12D3KooWEXNUbCXooUwHrHBbrmjsrpHXoEphPwbjQXEGyzbqKnE9",
         privateKey: ""
